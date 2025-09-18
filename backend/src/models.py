@@ -1,0 +1,1 @@
+from src.core.base_model import Base
