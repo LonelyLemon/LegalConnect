@@ -12,7 +12,7 @@ class Settings(BaseSettings):
         env_file=BASE_DIR / ".env", env_ignore_empty=True, extra="ignore"
     )
 
-    APP_KEY: str = "cee57c02d12442eb3d59f972f2441a5c"
+    APP_KEY: str
     ENVIRONMENT: Environment = Environment.LOCAL
 
     POSTGRES_DB: str
@@ -22,21 +22,32 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     SQLALCHEMY_DATABASE_URL: str
 
+    MAIL_SERVER: str = "smtp.sendgrid.net"
+    MAIL_PORT: int = 2525
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_TLS: bool = True
+    FRONTEND_URL: str
+
+    REDIS_HOST: str = "127.0.0.1"
+    REDIS_PORT: int = 6379
+
     DATABASE_POOL_SIZE: int = 16
     DATABASE_POOL_TTL: int = 60 * 20    #20 minutes
     DATABASE_POOL_PRE_PING: bool = True
 
     TRUST_COOKIE: str
     TRUST_AUD: str
-    TRUST_TTL_SEC: int = 30 * 24 * 3600     #30 days
+    TRUST_TTL_SEC: int = 30 * 24 * 3600 # 30 days
 
     CORS_ORIGIN: list[str] = ["*"]
     CORS_ORIGIN_REGEX: str | None = None
     CORS_HEADERS: list[str] = ["*"]
 
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRES: int = 86400
-    REFRESH_TOKEN_EXPIRES: int = 30
+    ACCESS_TOKEN_EXPIRES: int = 86400   #seconds
+    REFRESH_TOKEN_EXPIRES: int = 30     #days
 
     @computed_field
     @property
