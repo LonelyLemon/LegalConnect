@@ -9,6 +9,8 @@ from arq.connections import create_pool, RedisSettings
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
+from src.auth.router import auth_route
+from src.user.router import user_route
 
 
 THIS_DIR = Path(__file__).parent
@@ -30,3 +32,6 @@ app.add_middleware(
     allow_methods=("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"),
     allow_headers=settings.CORS_HEADERS,
 )
+
+app.include_router(auth_route)
+app.include_router(user_route)

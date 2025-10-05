@@ -58,7 +58,8 @@ async def register(user: UserCreate,
             await redis.setex(f"verify: {token}", 24 * 3600, str(existed_user.id))
             if hasattr(existed_user, "email_verification_sent_at"):
                 existed_user.email_verification_sent_at = datetime.now(timezone.utc)
-                await db.commit(existed_user)
+                await db.commit()
+                await db.refresh(existed_user)
             verfication_link = f"{settings.FRONTEND_URL}/verify-email?token={token}"
             await redis.enqueue_job("send_verification_email", existed_user.email, verfication_link)
 
@@ -88,7 +89,7 @@ async def register(user: UserCreate,
 
 #      VERIFY USER ROUTE      #
 
-@user_route.post('/verify-email')
+@user_route.post('/verify')
 async def verify_email(db: SessionDep,
                        token: str):
 
@@ -119,7 +120,7 @@ async def verify_email(db: SessionDep,
     return {"message": "Email verified successfully"}
 
 
-@user_route.post('resend-verification')
+@user_route.post('/verify/resend-verification')
 async def resend_verification(db: SessionDep, 
                               email: str = Body(..., embed=True)):
     email_norm = email.strip().lower()
@@ -162,7 +163,7 @@ async def get_user(current_user: UserResponse = Depends(get_current_user)):
     return current_user
 
 
-@user_route.put('/user')
+@user_route.put('/update')
 async def update_user(db: SessionDep, 
                       update_request: UserUpdate, 
                       current_user: UserResponse = Depends(get_current_user)):
@@ -189,7 +190,7 @@ async def update_user(db: SessionDep,
 
 #      FORGET PASSWORD ROUTE      #
 
-@user_route.post('/password/forget')
+@user_route.post('/forget-password')
 async def forget_password(db: SessionDep,
                           payload: ForgetPasswordRequest):
     
@@ -205,7 +206,7 @@ async def forget_password(db: SessionDep,
     return {"message": "Reset email sent"}
 
 
-@user_route.post('/password/reset')
+@user_route.post('/reset-password')
 async def reset_password(db: SessionDep, 
                          token: str, 
                          new_password: str = Body(...), 

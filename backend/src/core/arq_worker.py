@@ -6,7 +6,7 @@ from src.core.config import settings
 
 
 class WorkerSettings:
-    function = {
+    functions = {
         send_reset_email,
         send_login_otp_email,
         send_verification_email
