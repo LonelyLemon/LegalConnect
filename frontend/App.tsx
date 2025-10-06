@@ -4,35 +4,40 @@
  *
  * @format
  */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
+if (__DEV__) {
+  require('./ReactotronConfig');
+}
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { store } from './src/redux/store';
+import React from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
+import ThemeProvider from './src/theme/theme.provider';
+import AppNavigator from './src/navigation/AppNavigator';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <ThemeProvider>
+        <ReduxProvider store={store}>
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          <AppContent />
+        </ReduxProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
 function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
+    <NavigationContainer>
+      <View style={styles.container}>
+        <AppNavigator />
+      </View>
+    </NavigationContainer>
   );
 }
 
