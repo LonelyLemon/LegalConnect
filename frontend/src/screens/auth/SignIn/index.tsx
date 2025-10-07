@@ -16,21 +16,23 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hook';
 import {
   selectError,
   selectIsLoading,
-  signInWithUsernamePassword,
+  signInWithEmailPassword,
 } from '../../../stores/user.slices';
 import { FormLogin } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
 import * as styles from './styles';
 import ControllerForm from '../../../common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
+import { useNavigation } from '@react-navigation/native';
+import Icon from '@react-native-vector-icons/ionicons';
+import { verticalScale } from 'react-native-size-matters';
 
 export default function SignInScreen() {
   const dispatch = useAppDispatch();
-  // const [rememberMe, setRememberMe] = useState<boolean>(false);
-  //   const navigation = useNavigation<any>();
-  const { themed } = useAppTheme();
+  const navigation = useNavigation<any>();
+  const { themed, theme } = useAppTheme();
   const control = useForm<FormLogin>({
-    defaultValues: { username: '', password: '' },
+    defaultValues: { email: '', password: '' },
   });
 
   const {
@@ -43,15 +45,19 @@ export default function SignInScreen() {
 
   const fields = [
     {
-      id: 'username',
-      name: 'username',
-      label: 'Username',
+      id: 'email',
+      name: 'email',
+      label: 'Email',
       type: 'input',
-      placeholder: 'Enter you username',
+      placeholder: 'Enter you email',
       icon: 'person-outline',
-      error: errors?.username?.message,
+      error: errors?.email?.message,
       rules: {
-        required: { value: true, message: 'Username is required' },
+        required: { value: true, message: 'email is required' },
+        pattern: {
+          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+          message: 'Email is invalid',
+        },
       },
     },
     {
@@ -75,8 +81,8 @@ export default function SignInScreen() {
 
   const handleSignIn = (data: FormLogin) => {
     dispatch(
-      signInWithUsernamePassword({
-        username: data.username,
+      signInWithEmailPassword({
+        email: data.email,
         password: data.password,
         captchaValue: 'test',
       }),
@@ -84,15 +90,21 @@ export default function SignInScreen() {
   };
 
   const handleForgotPassword = () => {
-    //     navigation.navigate('ForgotPassword');
+    navigation.navigate('ForgotPassword');
   };
 
   const handleNavigateToSignUp = () => {
-    //     navigation.navigate('SignUp');
+    navigation.navigate('SignUp');
   };
 
   return (
     <SafeAreaView style={themed(styles.container)}>
+      <TouchableOpacity
+        style={themed(styles.backButton)}
+        onPress={() => navigation.goBack()}
+      >
+        <Icon name="chevron-back" size={theme.fontSizes.xl} />
+      </TouchableOpacity>
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
@@ -110,7 +122,12 @@ export default function SignInScreen() {
           {/* Tiêu đề như ảnh */}
           <Text style={themed(styles.welcomeTitle)}>{'Welcome back'}</Text>
 
-          <View style={{ marginBottom: 16 }}>
+          <View
+            style={{
+              marginBottom: verticalScale(theme.spacing.lg),
+              marginTop: verticalScale(theme.spacing.lg),
+            }}
+          >
             <ControllerForm fields={fields} control={control} />
           </View>
 
@@ -129,7 +146,7 @@ export default function SignInScreen() {
           <TouchableOpacity
             style={themed(styles.signInButton)}
             onPress={handleSubmit(handleSignIn)}
-            disabled={!!errors.username || !!errors.password}
+            disabled={!!errors.email || !!errors.password}
           >
             <Text style={themed(styles.signInButtonText)}>{'Log in'}</Text>
           </TouchableOpacity>

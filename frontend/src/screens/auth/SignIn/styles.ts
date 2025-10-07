@@ -9,7 +9,7 @@ export const container: ThemedStyle<ViewStyle> = ({ colors }) => ({
 
 export const scrollContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexGrow: 1,
-  justifyContent: 'flex-start',
+  justifyContent: 'center',
   paddingHorizontal: scale(spacing.md),
   paddingTop: verticalScale(spacing.lg),
   paddingBottom: verticalScale(spacing.xl),
@@ -29,7 +29,7 @@ export const welcomeTitle: ThemedStyle<TextStyle> = ({
   marginBottom: verticalScale(spacing.md),
 });
 
-export const appTitleContainer: ThemedStyle<ViewStyle> = ({}) => ({
+export const appTitleContainer: ThemedStyle<ViewStyle> = () => ({
   alignItems: 'center',
 });
 export const logo: ThemedStyle<ImageStyle> = ({ spacing }) => ({
@@ -114,4 +114,13 @@ export const loadingContainer: ThemedStyle<ViewStyle> = () => ({
   bottom: 0,
   justifyContent: 'center',
   alignItems: 'center',
+});
+
+export const backButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  position: 'absolute',
+  top: verticalScale(spacing.xl),
+  left: scale(spacing.sm),
+  paddingVertical: verticalScale(spacing.xxs),
+  paddingHorizontal: scale(spacing.xs),
+  zIndex: 10,
 });

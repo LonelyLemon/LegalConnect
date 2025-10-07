@@ -12,12 +12,12 @@ export const centerContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   paddingHorizontal: scale(spacing.lg),
+  paddingVertical: verticalScale(spacing.lg),
 });
 
-export const logo: ThemedStyle<ImageStyle> = () => ({
-  width: scale(120),
-  height: verticalScale(120),
-  marginBottom: verticalScale(16),
+export const logo: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  width: scale(spacing.xxxxxxxxxxl * 2),
+  marginBottom: verticalScale(spacing.md),
 });
 
 export const appName: ThemedStyle<TextStyle> = ({ colors, fontSizes }) => ({

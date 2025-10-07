@@ -1,5 +1,5 @@
 export type FormLogin = {
-  username: string;
+  email: string;
   password: string;
   captchaValue: string;
 };

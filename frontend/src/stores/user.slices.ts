@@ -1,5 +1,5 @@
-import { signIn } from '../services/auth';
-import { FormLogin } from '../types/auth';
+import { signIn, signUp } from '../services/auth';
+import { FormLogin, FormSignUp } from '../types/auth';
 import { User } from '../types/user';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserState } from '../types/user.types';
@@ -7,10 +7,9 @@ import { AxiosError } from 'axios';
 const initialState: UserState = {
   user: {
     id: '',
-    username: '',
+    email: '',
     avatar: '',
     name: '',
-    email: '',
   },
   permissions: [],
   token: '',
@@ -19,8 +18,8 @@ const initialState: UserState = {
   error: null,
 };
 
-export const signInWithUsernamePassword = createAsyncThunk(
-  'user/signInWithUsernamePassword',
+export const signInWithEmailPassword = createAsyncThunk(
+  'user/signInWithEmailPassword',
   async (data: FormLogin, thunkApi) => {
     try {
       const response = await signIn(data);
@@ -34,6 +33,25 @@ export const signInWithUsernamePassword = createAsyncThunk(
         return thunkApi.rejectWithValue(error.response?.data.message);
       }
       return thunkApi.rejectWithValue(error.message || 'Login failed');
+    }
+  },
+);
+
+export const signUpWithEmailPassword = createAsyncThunk(
+  'user/signUpWithEmailPassword',
+  async (data: FormSignUp, thunkApi) => {
+    try {
+      const response = await signUp(data);
+      return {
+        user: response.user as User,
+        token: response.accessToken as string,
+        permissions: response.permissions as string[],
+      };
+    } catch (error: any) {
+      if (error instanceof AxiosError) {
+        return thunkApi.rejectWithValue(error.response?.data.message);
+      }
+      return thunkApi.rejectWithValue(error.message || 'Sign up failed');
     }
   },
 );
@@ -61,10 +79,9 @@ export const userSlice = createSlice({
       state.isLoggedIn = false;
       state.user = {
         id: '',
-        username: '',
+        email: '',
         avatar: '',
         name: '',
-        email: '',
       };
     },
     setUser: (state: UserState, action: PayloadAction<User>) => {
@@ -76,18 +93,33 @@ export const userSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      .addCase(signInWithUsernamePassword.pending, state => {
+      .addCase(signInWithEmailPassword.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(signInWithUsernamePassword.fulfilled, (state, action) => {
+      .addCase(signInWithEmailPassword.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isLoggedIn = true;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.permissions = action.payload.permissions;
       })
-      .addCase(signInWithUsernamePassword.rejected, (state, action) => {
+      .addCase(signInWithEmailPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(signUpWithEmailPassword.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signUpWithEmailPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isLoggedIn = true;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.permissions = action.payload.permissions;
+      })
+      .addCase(signUpWithEmailPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })
@@ -100,10 +132,9 @@ export const userSlice = createSlice({
         state.isLoggedIn = false;
         state.user = {
           id: '',
-          username: '',
+          email: '',
           avatar: '',
           name: '',
-          email: '',
         };
         state.token = '';
         state.permissions = [];
