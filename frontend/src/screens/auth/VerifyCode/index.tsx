@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
   ActivityIndicator,
@@ -9,13 +8,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/ionicons';
 import { useForm } from 'react-hook-form';
 import { verticalScale } from 'react-native-size-matters';
 
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
-import ControllerForm from '../../../common/controllerForm';
+import ControllerForm from '../../../components/common/controllerForm';
+import Header from '../../../components/layout/header';
 
 type FormCode = { code: string };
 
@@ -32,12 +31,19 @@ export default function VerifyCodeScreen() {
     {
       id: 'code',
       name: 'code',
-      label: 'Enter 4-digit code',
+      label: 'Enter 6-digit code',
       type: 'input',
-      placeholder: '____',
+      placeholder: 'Enter the verification code sent to your email',
       icon: 'keypad-outline',
       error: errors?.code?.message,
-      rules: { required: { value: true, message: 'Code is required' } },
+      rules: {
+        required: { value: true, message: 'Code is required' },
+        pattern: {
+          value: /^[0-9]{6}$/,
+          message: 'Code must be 6 digits',
+        },
+      },
+      keyboardType: 'numeric',
     },
   ];
 
@@ -47,19 +53,13 @@ export default function VerifyCodeScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <TouchableOpacity
-        style={themed(styles.backButton)}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="chevron-back" size={theme.fontSizes.xl} />
-      </TouchableOpacity>
+      <Header title="Verify Code" />
+
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
       >
         <View style={themed(styles.formContainer)}>
-          <Text style={themed(styles.welcomeTitle)}>{'Check your email'}</Text>
-
           <View
             style={{
               marginBottom: verticalScale(theme.spacing.lg),

@@ -21,11 +21,12 @@ import {
 import { FormLogin } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
 import * as styles from './styles';
-import ControllerForm from '../../../common/controllerForm';
+import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { useNavigation } from '@react-navigation/native';
 import Icon from '@react-native-vector-icons/ionicons';
 import { verticalScale } from 'react-native-size-matters';
+import Header from '../../../components/layout/header';
 
 export default function SignInScreen() {
   const dispatch = useAppDispatch();
@@ -53,7 +54,7 @@ export default function SignInScreen() {
       icon: 'person-outline',
       error: errors?.email?.message,
       rules: {
-        required: { value: true, message: 'email is required' },
+        required: { value: true, message: 'Email is required' },
         pattern: {
           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
           message: 'Email is invalid',
@@ -99,18 +100,12 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <TouchableOpacity
-        style={themed(styles.backButton)}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="chevron-back" size={theme.fontSizes.xl} />
-      </TouchableOpacity>
+      <Header navigation="Welcome" />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
       >
         <View style={themed(styles.formContainer)}>
-          {/* Logo có thể ẩn nếu không muốn giống ảnh */}
           <View style={themed(styles.appTitleContainer)}>
             <Image
               source={Logo}

@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -10,12 +9,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/ionicons';
 import { verticalScale } from 'react-native-size-matters';
 
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
-import ControllerForm from '../../../common/controllerForm';
+import ControllerForm from '../../../components/common/controllerForm';
+import Header from '../../../components/layout/header';
 
 type FormForgot = { email: string };
 
@@ -54,19 +53,13 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <TouchableOpacity
-        style={themed(styles.backButton)}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="chevron-back" size={theme.fontSizes.xl} />
-      </TouchableOpacity>
+      <Header title="Forgot password" navigation="Welcome" />
+
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
       >
         <View style={themed(styles.formContainer)}>
-          <Text style={themed(styles.welcomeTitle)}>{'Forgot password'}</Text>
-
           <View
             style={{
               marginBottom: verticalScale(theme.spacing.lg),

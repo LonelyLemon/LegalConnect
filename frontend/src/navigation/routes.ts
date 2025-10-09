@@ -5,6 +5,7 @@ import ForgotPasswordScreen from '../screens/auth/ForgotPassword';
 import VerifyCodeScreen from '../screens/auth/VerifyCode';
 import ResetSuccessScreen from '../screens/auth/ResetSuccess';
 import SetNewPasswordScreen from '../screens/auth/SetNewPassword';
+import CompleteProfileScreen from '../screens/auth/CompleteProfile';
 import HomeScreen from '../screens/main/Home';
 import SettingsScreen from '../screens/main/Settings';
 
@@ -22,6 +23,7 @@ export const AuthStackNames = {
   VerifyCode: 'VerifyCode',
   ResetSuccess: 'ResetSuccess',
   SetNewPassword: 'SetNewPassword',
+  CompleteProfile: 'CompleteProfile',
 };
 
 export const MainStackNames = {};
@@ -67,6 +69,11 @@ export const AuthStackRoutes: StackScreenRoute[] = [
   {
     name: AuthStackNames.SetNewPassword,
     component: SetNewPasswordScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: AuthStackNames.CompleteProfile,
+    component: CompleteProfileScreen,
     options: { headerShown: false },
   },
 ];

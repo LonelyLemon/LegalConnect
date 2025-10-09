@@ -9,13 +9,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/ionicons';
 import { useForm } from 'react-hook-form';
 import { verticalScale } from 'react-native-size-matters';
 
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
-import ControllerForm from '../../../common/controllerForm';
+import ControllerForm from '../../../components/common/controllerForm';
+import Header from '../../../components/layout/header';
 
 type FormNewPass = { password: string; repassword: string };
 
@@ -69,21 +69,12 @@ export default function SetNewPasswordScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <TouchableOpacity
-        style={themed(styles.backButton)}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="chevron-back" size={theme.fontSizes.xl} />
-      </TouchableOpacity>
+      <Header title="Set a new password" />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
       >
         <View style={themed(styles.formContainer)}>
-          <Text style={themed(styles.welcomeTitle)}>
-            {'Set a new password'}
-          </Text>
-
           <View
             style={{
               marginBottom: verticalScale(theme.spacing.lg),

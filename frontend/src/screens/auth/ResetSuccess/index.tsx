@@ -9,27 +9,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/ionicons';
 
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
+import Header from '../../../components/layout/header';
 
 export default function ResetSuccessScreen() {
   const navigation = useNavigation<any>();
-  const { themed, theme } = useAppTheme();
+  const { themed } = useAppTheme();
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <TouchableOpacity
-        style={themed(styles.backButton)}
-        onPress={() => navigation.goBack()}
-      >
-        <Icon name="chevron-back" size={theme.fontSizes.xl} />
-      </TouchableOpacity>
+      <Header title="Password reset" />
       <ScrollView contentContainerStyle={themed(styles.scrollContainer)}>
         <View style={themed(styles.formContainer)}>
-          <Text style={themed(styles.welcomeTitle)}>{'Password reset'}</Text>
-
           <TouchableOpacity
             style={themed(styles.primaryButton)}
             onPress={() => navigation.navigate('SetNewPassword')}

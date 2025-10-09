@@ -2,6 +2,8 @@ import React from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { StyleSheet, Switch, View } from 'react-native';
 import Input from '../input';
+import RadioGroup from '../radio';
+import DatePicker from '../datePicker';
 
 export default function ControllerForm({
   fields,
@@ -43,14 +45,14 @@ export default function ControllerForm({
                 //       onSelect={onChange}
                 //     />
                 //   );
-                // case 'radio':
-                //   return (
-                //     <Radio
-                //       {...restProps}
-                //       selected={value}
-                //       onChange={onChange}
-                //     />
-                //   );
+                case 'radio':
+                  return (
+                    <RadioGroup
+                      {...restProps}
+                      selected={value}
+                      onChange={onChange}
+                    />
+                  );
                 // case 'checkbox':
                 //   return (
                 //     <Checkbox
@@ -67,14 +69,14 @@ export default function ControllerForm({
                 //       onChange={onChange}
                 //     />
                 //   );
-                // case 'date':
-                //   return (
-                //     <DatePicker
-                //       {...restProps}
-                //       value={value}
-                //       onChange={onChange}
-                //     />
-                //   );
+                case 'date':
+                  return (
+                    <DatePicker
+                      {...restProps}
+                      value={value}
+                      onChange={onChange}
+                    />
+                  );
                 // case 'time':
                 //   return (
                 //     <DatePicker
