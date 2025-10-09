@@ -6,8 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.16.5",
+    "arq>=0.26.3",
     "asyncpg>=0.30.0",
-    "fastapi>=0.116.1",
+    "fastapi[standard]>=0.116.1",
     "passlib[bcrypt]>=1.7.4",
     "psycopg[binary]>=3.2.10",
     "pydantic>=2.11.9",
