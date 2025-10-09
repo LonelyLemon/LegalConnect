@@ -8,7 +8,7 @@ from src.core.config import settings
 
 def _send_email(to_email: str, subject: str, body: str):
     msg = MIMEMultipart()
-    msg["From"] = f"LegalConnect Support <settings.MAIL_FROM>"
+    msg["From"] = f"LegalConnect Support <{settings.MAIL_FROM}>"
     msg["To"] = to_email
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "html"))

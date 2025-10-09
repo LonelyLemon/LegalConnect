@@ -1,23 +1,42 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 
 class VerificationEmailExpired(HTTPException):
-    STATUS_CODE = status.HTTP_400_BAD_REQUEST
-    DETAIL = "Invalid or expired verification token !"
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Invalid or expired verification token !"
+        )
+
 
 class UserNotFound(HTTPException):
-    STATUS_CODE = status.HTTP_404_NOT_FOUND
-    DETAIL = "User not found !"
+    def __init__(self):
+        super().__init__(
+            status_code=404,
+            detail="User not found !"
+        )
+
 
 class UserEmailExist(HTTPException):
-    STATUS_CODE = status.HTTP_409_CONFLICT
-    DETAIL = "User email exist !"
+    def __init__(self):
+        super().__init__(
+            status_code=409,
+            detail="User email exist !"
+        )
+
 
 class TooManyVerificationResend(HTTPException):
-    STATUS_CODE = status.HTTP_429_TOO_MANY_REQUESTS
-    DETAIL = "Too many verification resend !"
+    def __init__(self):
+        super().__init__(
+            status_code=429,
+            detail="Too many verification resend !"
+        )
+
 
 class InvalidPasswordMatch(HTTPException):
-    STATUS_CODE = status.HTTP_400_BAD_REQUEST
-    DETAIL = "Password confirm does not match !"
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Password confirm does not match !"
+        )
     

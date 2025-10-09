@@ -52,21 +52,25 @@ async def register(user: UserCreate,
             raise UserEmailExist()
         redis = await create_pool(RedisSettings(host= settings.REDIS_HOST, port=settings.REDIS_PORT))
         throttle_key = f"verify_resend_throttle: {existed_user.id}"
-        if not await redis.get(throttle_key):
-            await redis.setex(throttle_key, 60, "1")
-            token = str(uuid.uuid4())
-            await redis.setex(f"verify: {token}", 24 * 3600, str(existed_user.id))
-            if hasattr(existed_user, "email_verification_sent_at"):
-                existed_user.email_verification_sent_at = datetime.now(timezone.utc)
-                await db.commit()
-                await db.refresh(existed_user)
-            verfication_link = f"{settings.FRONTEND_URL}/verify-email?token={token}"
-            await redis.enqueue_job("send_verification_email", existed_user.email, verfication_link)
+        if await redis.get(throttle_key):
+            raise TooManyVerificationResend()
+        await redis.setex(throttle_key, 60, "1")
+        token = str(uuid.uuid4())
+        await redis.setex(f"verify: {token}", 24 * 3600, str(existed_user.id))
+
+        existed_user.email_verification_sent_at = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(existed_user)
+        
+        verfication_link = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+        await redis.enqueue_job("send_verification_email", existed_user.email, verfication_link)
+
+        return {"message": "Verification email resent to existing unverified account"}
 
     hashed_pw = hash_password(user.password)
     new_user = User(
         username = user.username,
-        email = user.email,
+        email = email_norm,
         hashed_password = hashed_pw,
         is_email_verified = False,
         email_verification_sent_at = datetime.now(timezone.utc)
@@ -78,8 +82,10 @@ async def register(user: UserCreate,
 
     redis = await create_pool(RedisSettings(host= settings.REDIS_HOST, port=settings.REDIS_PORT))
     token = str(uuid.uuid4())
+    await redis.setex(f"verify: {token}", 24 * 3600, str(new_user.id))
+
     verfication_link = f"{settings.FRONTEND_URL}/verify-email?token={token}"
-    await redis.enqueue_job("send_verification_email", existed_user.email, verfication_link)
+    await redis.enqueue_job("send_verification_email", new_user.email, verfication_link)
 
     return new_user
 
@@ -95,7 +101,7 @@ async def verify_email(db: SessionDep,
 
     redis = await create_pool(RedisSettings(host= settings.REDIS_HOST, port=settings.REDIS_PORT))
 
-    user_id = await redis.get(f"verify:{token}")
+    user_id = await redis.get(f"verify: {token}")
     if not user_id:
         raise VerificationEmailExpired()
     
@@ -105,7 +111,7 @@ async def verify_email(db: SessionDep,
     except ValueError:
         raise VerificationEmailExpired()
     
-    await redis.delete(f"verify:{token}")
+    await redis.delete(f"verify: {token}")
 
     result = await db.execute(select(User).where(User.id == user_uuid))
     user = result.scalar_one_or_none()

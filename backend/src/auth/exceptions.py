@@ -1,26 +1,42 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 
 class LoginCodeExpired(HTTPException):
-    STATUS_CODE = status.HTTP_400_BAD_REQUEST
-    DETAIL = "Invalid or expired login code !"
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Invalid or expired login code !"
+        )
+
 
 class InvalidToken(HTTPException):
-    STATUS_CODE = status.HTTP_401_UNAUTHORIZED
-    DETAIL = "Invalid Token !"
-    
+    def __init__(self):
+        super().__init__(
+            status_code=401,
+            detail="Invalid token !"
+        )
+
     
 class InvalidPassword(HTTPException):
-    STATUS_CODE = status.HTTP_401_UNAUTHORIZED
-    DETAIL = "Invalid Password !" 
+    def __init__(self):
+        super().__init__(
+            status_code=401,
+            detail="Invalid password !"
+        )
 
 
 class InvalidLoginCode(HTTPException):
-    STATUS_CODE = status.HTTP_401_UNAUTHORIZED
-    DETAIL = "Invalid login code !"
+    def __init__(self):
+        super().__init__(
+            status_code=401,
+            detail="Invalid login code !"
+        )
 
 
 class EmailNotVerified(HTTPException):
-    STATUS_CODE = status.HTTP_403_FORBIDDEN
-    DETAIL = "Email unverified. Please verify your email first !"
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            detail="Email unverified. Please verify your email first !"
+        )
 
