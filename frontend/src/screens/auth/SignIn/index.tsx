@@ -24,7 +24,6 @@ import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { useNavigation } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/ionicons';
 import { verticalScale } from 'react-native-size-matters';
 import Header from '../../../components/layout/header';
 

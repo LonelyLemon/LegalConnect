@@ -23,7 +23,8 @@ function AuthStack() {
 }
 
 export default function AppNavigator() {
-  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  // const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const isLoggedIn = true;
 
   return (
     <AppStack.Navigator

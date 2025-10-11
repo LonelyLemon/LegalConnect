@@ -8,6 +8,7 @@ import SetNewPasswordScreen from '../screens/auth/SetNewPassword';
 import CompleteProfileScreen from '../screens/auth/CompleteProfile';
 import HomeScreen from '../screens/main/Home';
 import SettingsScreen from '../screens/main/Settings';
+import TabNavigator from './TabNavigator';
 
 export type StackScreenRoute = {
   name: string;
@@ -26,7 +27,9 @@ export const AuthStackNames = {
   CompleteProfile: 'CompleteProfile',
 };
 
-export const MainStackNames = {};
+export const MainStackNames = {
+  HomeTabs: 'HomeTabs',
+};
 
 export const HomeTabsNames = {
   Home: 'Home',
@@ -78,7 +81,13 @@ export const AuthStackRoutes: StackScreenRoute[] = [
   },
 ];
 
-export const MainStackRoutes: StackScreenRoute[] = [];
+export const MainStackRoutes: StackScreenRoute[] = [
+  {
+    name: MainStackNames.HomeTabs,
+    component: TabNavigator,
+    options: { headerShown: false },
+  },
+];
 
 export const HomeTabsRoutes: StackScreenRoute[] = [
   {
