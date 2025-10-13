@@ -1,0 +1,77 @@
+services:
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    networks: [app]
+
+  db:
+    image: postgres:16.9
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [app]
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - 8000
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks: [app]
+
+  arq-worker:
+    build: ./backend
+    restart: unless-stopped
+    command: ["uv", "run", "arq", "src.core.arq_worker.WorkerSettings"]
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+    env_file:
+      - .env
+    networks: [app]
+    volumes:
+      - ./backend:/app
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   expose:
+  #     - 5173
+  #   volumes:
+  #     - ./frontend:/app/frontend
+  #   env_file:
+  #     - ./frontend/.env.production
+  #   stdin_open: true
+  #   tty: true
+  #   networks: [app]
+  
+networks:
+  app:
+
+volumes:
+  postgres_data:
+  redis-data:
