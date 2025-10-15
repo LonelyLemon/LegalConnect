@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     MAIL_TLS: bool = True
     FRONTEND_URL: str
 
-    REDIS_HOST: str = "127.0.0.1"
-    REDIS_PORT: int = 6379
+    REDIS_HOST: str
+    REDIS_PORT: int
 
     DATABASE_POOL_SIZE: int = 16
     DATABASE_POOL_TTL: int = 60 * 20    #20 minutes

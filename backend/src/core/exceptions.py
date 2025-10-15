@@ -28,9 +28,15 @@ class NotAuthenticated(HTTPException):
 
 
 class BadRequestException(HTTPException):
-    STATUS_CODE = status.HTTP_400_BAD_REQUEST
-    DETAIL = "Bad Request."
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Bad Request."
+        )
 
 class NotFoundException(HTTPException):
-    STATUS_CODE = status.HTTP_404_NOT_FOUND
-    DETAIL = "Not Found."
+    def __init__(self):
+        super().__init__(
+            status_code=404,
+            detail="Not Found."
+        )

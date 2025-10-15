@@ -1,3 +1,7 @@
 # Ignore virtual environments
 .venv
 .env
+.env.docker
+
+# Local error log file
+error_log.txt

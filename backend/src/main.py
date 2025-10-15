@@ -18,7 +18,13 @@ THIS_DIR = Path(__file__).parent
 
 @asynccontextmanager
 async def lifespan(_app: fastapi.FastAPI):
-    _app.state.arq_pool = await create_pool(RedisSettings())
+    _app.state.arq_pool = await create_pool(
+        RedisSettings(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            database=0
+        )
+    )
     yield
     await _app.state.arq_pool.close()
 
