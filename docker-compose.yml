@@ -10,10 +10,12 @@ services:
   db:
     image: postgres:16.9
     restart: unless-stopped
+    ports:
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env
+      - .env.docker
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -26,12 +28,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    expose:
-      - 8000
+    ports:
+      - "8000:8000"
     volumes:
       - ./backend:/app
     env_file:
-      - .env
+      - .env.docker
     depends_on:
       db:
         condition: service_healthy
@@ -50,24 +52,10 @@ services:
       - REDIS_PORT=6379
       - REDIS_DB=0
     env_file:
-      - .env
+      - .env.docker
     networks: [app]
     volumes:
       - ./backend:/app
-
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   expose:
-  #     - 5173
-  #   volumes:
-  #     - ./frontend:/app/frontend
-  #   env_file:
-  #     - ./frontend/.env.production
-  #   stdin_open: true
-  #   tty: true
-  #   networks: [app]
   
 networks:
   app:

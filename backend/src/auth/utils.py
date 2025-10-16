@@ -36,26 +36,6 @@ async def send_reset_email(ctx, to_email: str, reset_token: str):
     """
     return _send_email(to_email, subject, body)
 
-async def send_verification_email(ctx, to_email: str, verification_link: str):
-    subject = "Verify your email"
-    body = f"""
-    <h2>Verify your email</h2>
-    <p>Click the link below to verify your email address:</p>
-    <a href="{verification_link}">{verification_link}</a>
-    <p>This link expires in 24 hours.</p>
-    """
-    return _send_email(to_email, subject, body)
-
-async def send_login_otp_email(ctx, to_email: str, code: str):
-    subject = "Your login verification code"
-    body = f"""
-    <h2>Login verification</h2>
-    <p>Use this 6-digit code to continue logging in:</p>
-    <h3 style="letter-spacing:3px">{code}</h3>
-    <p>This code expires in 5 minutes.</p>
-    """
-    return _send_email(to_email, subject, body)
-
 
 def generate_2fa_secret():
     key = pyotp.random_base32()
