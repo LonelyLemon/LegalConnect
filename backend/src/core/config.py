@@ -37,10 +37,6 @@ class Settings(BaseSettings):
     DATABASE_POOL_TTL: int = 60 * 20    #20 minutes
     DATABASE_POOL_PRE_PING: bool = True
 
-    TRUST_COOKIE: str
-    TRUST_AUD: str
-    TRUST_TTL_SEC: int = 30 * 24 * 3600 # 30 days
-
     CORS_ORIGIN: list[str] = ["*"]
     CORS_ORIGIN_REGEX: str | None = None
     CORS_HEADERS: list[str] = ["*"]
@@ -48,6 +44,10 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRES: int = 86400   #seconds
     REFRESH_TOKEN_EXPIRES: int = 30     #days
+
+    ADMIN_EMAIL: str = "fallfree498@gmail.com"
+    ADMIN_USERNAME: str = "Admin"
+    ADMIN_PASSWORD: str = "Admin123!"
 
     @computed_field
     @property

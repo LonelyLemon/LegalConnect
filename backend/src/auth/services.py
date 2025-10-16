@@ -1,4 +1,4 @@
-import hashlib, time
+import hashlib
 
 from datetime import timezone, datetime, timedelta
 from passlib.context import CryptContext
@@ -68,17 +68,6 @@ def verify_reset_token(token: str) -> str:
     
 def _ua_fingerprint(user_agent: str) -> str:
     return hashlib.sha256(user_agent.encode("utf-8")).hexdigest()
-
-def create_trust_token(user_id: str, user_agent: str) -> str:
-    now = int(time.time())
-    payload = {
-        "sub": user_id,
-        "aud": settings.TRUST_AUD,
-        "iat": now,
-        "exp": now + settings.TRUST_TTL_SEC,
-        "fp": _ua_fingerprint(user_agent),
-    }
-    return jwt.encode(payload, settings.APP_KEY, algorithm=settings.JWT_ALGORITHM)
 
 def verify_trust_token(token: str, user_id: str, user_agent: str) -> bool:
     try:
