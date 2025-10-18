@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 import asyncio
+
+from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Iterable
 from uuid import UUID
@@ -21,13 +21,13 @@ from src.auth.dependencies import get_current_user
 from src.core.database import SessionDep
 from src.lawyer.constants import LawyerVerificationStatus
 from src.lawyer.exceptions import (
-    LawyerVerificationRequestAlreadyExists,
-    LawyerVerificationRequestAlreadyReviewed,
-    LawyerVerificationRequestDocumentUnavailable,
-    LawyerVerificationRequestForbidden,
-    LawyerVerificationRequestNotFound,
-    LawyerVerificationRequestRoleForbidden,
-    LawyerVerificationRequestUploadFailed,
+    RequestAlreadyExists,
+    RequestAlreadyReviewed,
+    RequestDocumentUnavailable,
+    RequestForbidden,
+    RequestNotFound,
+    RequestRoleForbidden,
+    RequestUploadFailed,
 )
 from src.lawyer.models import LawyerVerificationRequest
 from src.lawyer.schemas import (
@@ -74,7 +74,7 @@ async def _generate_document_urls(
     for column, task in tasks.items():
         url = await task
         if not url:
-            raise LawyerVerificationRequestDocumentUnavailable()
+            raise RequestDocumentUnavailable()
         results[column] = url
     return results
 
@@ -115,7 +115,7 @@ async def _cleanup_uploaded_documents(keys: Iterable[str]) -> None:
 
 def _ensure_admin(user: User) -> None:
     if user.role != UserRole.ADMIN.value:
-        raise LawyerVerificationRequestForbidden()
+        raise RequestForbidden()
 
 
 @lawyer_route.post(
@@ -135,7 +135,7 @@ async def create_lawyer_verification_request(
     current_user: User = Depends(get_current_user),
 ) -> LawyerVerificationRequestDetailResponse:
     if current_user.role != UserRole.CLIENT.value:
-        raise LawyerVerificationRequestRoleForbidden()
+        raise RequestRoleForbidden()
 
     if years_of_experience < 0:
         raise HTTPException(
@@ -160,7 +160,7 @@ async def create_lawyer_verification_request(
     existing_request = existing_request_result.scalar_one_or_none()
 
     if existing_request:
-        raise LawyerVerificationRequestAlreadyExists()
+        raise RequestAlreadyExists()
 
     documents = {
         "identity_card_front_url": identity_card_front,
@@ -186,14 +186,14 @@ async def create_lawyer_verification_request(
                 upload.content_type or "application/octet-stream",
             )
             if not stored_key:
-                raise LawyerVerificationRequestUploadFailed()
+                raise RequestUploadFailed()
             uploaded_keys[column] = stored_key
-    except LawyerVerificationRequestUploadFailed:
+    except RequestUploadFailed:
         await _cleanup_uploaded_documents(uploaded_keys.values())
         raise
     except Exception as exc:
         await _cleanup_uploaded_documents(uploaded_keys.values())
-        raise LawyerVerificationRequestUploadFailed() from exc
+        raise RequestUploadFailed() from exc
 
     new_request = LawyerVerificationRequest(
         user_id=current_user.id,
@@ -209,7 +209,7 @@ async def create_lawyer_verification_request(
     except Exception as exc:
         await db.rollback()
         await _cleanup_uploaded_documents(uploaded_keys.values())
-        raise LawyerVerificationRequestUploadFailed() from exc
+        raise RequestUploadFailed() from exc
 
     await db.refresh(new_request)
 
@@ -268,10 +268,10 @@ async def get_lawyer_verification_request(
 ) -> LawyerVerificationRequestDetailResponse:
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise LawyerVerificationRequestNotFound()
+        raise RequestNotFound()
 
     if current_user.role != UserRole.ADMIN.value and request.user_id != current_user.id:
-        raise LawyerVerificationRequestForbidden()
+        raise RequestForbidden()
 
     return await _build_detail_response(request)
 
@@ -289,10 +289,10 @@ async def approve_lawyer_verification_request(
 
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise LawyerVerificationRequestNotFound()
+        raise RequestNotFound()
 
     if request.status != LawyerVerificationStatus.PENDING.value:
-        raise LawyerVerificationRequestAlreadyReviewed()
+        raise RequestAlreadyReviewed()
 
     request.status = LawyerVerificationStatus.APPROVED.value
     request.rejection_reason = None
@@ -323,10 +323,10 @@ async def reject_lawyer_verification_request(
 
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise LawyerVerificationRequestNotFound()
+        raise RequestNotFound()
 
     if request.status != LawyerVerificationStatus.PENDING.value:
-        raise LawyerVerificationRequestAlreadyReviewed()
+        raise RequestAlreadyReviewed()
 
     request.status = LawyerVerificationStatus.REJECTED.value
     request.rejection_reason = payload.rejection_reason

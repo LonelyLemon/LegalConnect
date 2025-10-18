@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 
-class LawyerVerificationRequestAlreadyExists(HTTPException):
+class RequestAlreadyExists(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=409,
@@ -9,7 +9,7 @@ class LawyerVerificationRequestAlreadyExists(HTTPException):
         )
 
 
-class LawyerVerificationRequestRoleForbidden(HTTPException):
+class RequestRoleForbidden(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=403,
@@ -17,7 +17,7 @@ class LawyerVerificationRequestRoleForbidden(HTTPException):
         )
 
 
-class LawyerVerificationRequestUploadFailed(HTTPException):
+class RequestUploadFailed(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=500,
@@ -25,7 +25,7 @@ class LawyerVerificationRequestUploadFailed(HTTPException):
         )
 
 
-class LawyerVerificationRequestNotFound(HTTPException):
+class RequestNotFound(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=404,
@@ -33,7 +33,7 @@ class LawyerVerificationRequestNotFound(HTTPException):
         )
 
 
-class LawyerVerificationRequestForbidden(HTTPException):
+class RequestForbidden(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=403,
@@ -41,7 +41,7 @@ class LawyerVerificationRequestForbidden(HTTPException):
         )
 
 
-class LawyerVerificationRequestAlreadyReviewed(HTTPException):
+class RequestAlreadyReviewed(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=409,
@@ -49,7 +49,7 @@ class LawyerVerificationRequestAlreadyReviewed(HTTPException):
         )
 
 
-class LawyerVerificationRequestDocumentUnavailable(HTTPException):
+class RequestDocumentUnavailable(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=500,
