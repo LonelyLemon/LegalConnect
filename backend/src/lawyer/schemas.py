@@ -1,9 +1,17 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
-from src.lawyer.constants import LawyerVerificationStatus
+from src.lawyer.constants import (
+    LawyerVerificationStatus,
+    MAX_DISPLAY_NAME_LENGTH,
+    MAX_EDUCATION_LENGTH,
+    MAX_OFFICE_ADDRESS_LENGTH,
+    MAX_PHONE_NUMBER_LENGTH,
+    MAX_WEBSITE_LENGTH,
+    MAX_REVOCATION_REASON_LENGTH,
+)
 
 
 class LawyerVerificationRequestSummaryResponse(BaseModel):
@@ -29,3 +37,74 @@ class LawyerVerificationRequestDetailResponse(LawyerVerificationRequestSummaryRe
 
 class LawyerVerificationRequestRejectPayload(BaseModel):
     rejection_reason: str = Field(..., max_length=500)
+
+
+class LawyerProfileResponse(BaseModel):
+    id: UUID
+    user_id: UUID
+    display_name: str
+    email: EmailStr
+    phone_number: str | None
+    website_url: str | None
+    office_address: str | None
+    speaking_languages: list[str]
+    education: str | None
+    current_level: str | None
+    years_of_experience: int
+    create_at: datetime
+    updated_at: datetime
+
+
+class LawyerProfileUpdatePayload(BaseModel):
+    display_name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_DISPLAY_NAME_LENGTH,
+    )
+    phone_number: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_PHONE_NUMBER_LENGTH,
+    )
+    website_url: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_WEBSITE_LENGTH,
+    )
+    office_address: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_OFFICE_ADDRESS_LENGTH,
+    )
+    speaking_languages: list[str] | None = Field(default=None, min_length=1)
+    education: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=MAX_EDUCATION_LENGTH,
+    )
+
+    @field_validator("speaking_languages")
+    @classmethod
+    def validate_languages(
+        cls, value: list[str] | None
+    ) -> list[str] | None:
+        if value is None:
+            return None
+
+        cleaned = [language.strip() for language in value if language.strip()]
+        if not cleaned:
+            raise ValueError("speaking_languages must contain non-empty values")
+        return cleaned
+
+
+class LawyerRoleRevocationPayload(BaseModel):
+    reason: str = Field(..., min_length=1, max_length=MAX_REVOCATION_REASON_LENGTH)
+
+
+class LawyerRoleRevocationResponse(BaseModel):
+    id: UUID
+    user_id: UUID
+    revoked_by_admin_id: UUID | None
+    reason: str
+    create_at: datetime
+    updated_at: datetime

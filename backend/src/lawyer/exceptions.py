@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 
-class RequestAlreadyExists(HTTPException):
+class LawyerVerificationRequestAlreadyExists(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=409,
@@ -9,7 +9,7 @@ class RequestAlreadyExists(HTTPException):
         )
 
 
-class RequestRoleForbidden(HTTPException):
+class LawyerVerificationRequestRoleForbidden(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=403,
@@ -17,7 +17,7 @@ class RequestRoleForbidden(HTTPException):
         )
 
 
-class RequestUploadFailed(HTTPException):
+class LawyerVerificationRequestUploadFailed(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=500,
@@ -25,7 +25,7 @@ class RequestUploadFailed(HTTPException):
         )
 
 
-class RequestNotFound(HTTPException):
+class LawyerVerificationRequestNotFound(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=404,
@@ -33,7 +33,7 @@ class RequestNotFound(HTTPException):
         )
 
 
-class RequestForbidden(HTTPException):
+class LawyerVerificationRequestForbidden(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=403,
@@ -41,7 +41,7 @@ class RequestForbidden(HTTPException):
         )
 
 
-class RequestAlreadyReviewed(HTTPException):
+class LawyerVerificationRequestAlreadyReviewed(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=409,
@@ -49,9 +49,81 @@ class RequestAlreadyReviewed(HTTPException):
         )
 
 
-class RequestDocumentUnavailable(HTTPException):
+class LawyerVerificationRequestDocumentUnavailable(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=500,
             detail="Unable to access verification documents. Please try again later.",
+        )
+
+
+class LawyerVerificationRequestInvalidExperience(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=422,
+            detail="Years of experience must be zero or greater.",
+        )
+
+
+class LawyerVerificationRequestInvalidJobPosition(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=422,
+            detail="Current job position must be 255 characters or fewer.",
+        )
+
+
+class LawyerProfileForbidden(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=403,
+            detail="You do not have permission to modify this lawyer profile.",
+        )
+
+
+class LawyerProfileNotFound(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=404,
+            detail="Lawyer profile not found.",
+        )
+
+
+class LawyerProfileInvalidLanguages(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=422,
+            detail="Speaking languages must contain at least one non-empty value.",
+        )
+
+
+class LawyerProfileInvalidField(HTTPException):
+    def __init__(self, detail: str) -> None:
+        super().__init__(
+            status_code=422,
+            detail=detail,
+        )
+
+
+class LawyerRoleRevocationTargetNotFound(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=404,
+            detail="Lawyer not found.",
+        )
+
+
+class LawyerRoleRevocationInvalidReason(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=422,
+            detail="Revocation reason must not be empty.",
+        )
+
+
+class LawyerRoleRevocationInvalidRole(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=409,
+            detail="User does not currently hold the lawyer role.",
         )

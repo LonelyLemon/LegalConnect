@@ -5,16 +5,24 @@ Overview
 --------
 1. Clients upload their verification documents via `POST /lawyer/verification-requests`. All files are streamed to Amazon S3 using async uploads and the request is stored as `pending` until an admin reviews it.
 2. Clients can review every submission they have made through `GET /lawyer/verification-requests/me`.
-3. Admins list submitted requests with `GET /lawyer/verification-requests` (optionally filtered by `?status=pending|approved|rejected`).
+3. Admins list submitted requests with `GET /lawyer/verification-requests` (optionally filtered by `?status=pending|approved|rejected|revoked`).
 4. Admins inspect the details and expiring document links via `GET /lawyer/verification-requests/{request_id}`.
-5. Admins approve a request with `PATCH /lawyer/verification-requests/{request_id}/approve`. The request is marked `approved` and the associated user's role changes to `lawyer`.
+5. Admins approve a request with `PATCH /lawyer/verification-requests/{request_id}/approve`. The request is marked `approved`, the associated user's role changes to `lawyer`, and a `LawyerProfile` record is created or synchronised with the verified years of experience and current level.
 6. Admins reject a request with `PATCH /lawyer/verification-requests/{request_id}/reject` while providing a rejection reason. The request is marked `rejected` and the message is stored for client-facing notifications.
+7. Admins can later revoke a lawyer's status with `POST /lawyer/lawyers/{lawyer_id}/revoke`. The user's role falls back to `client`, their verification requests are marked `revoked`, stored documents are deleted from S3, and the revocation reason is logged for future reference.
+
+Lawyer profile management
+-------------------------
+* Each approved lawyer receives a private profile stored in the `lawyer_profile` table. It mirrors immutable verification data (years of experience and current level) and also holds editable fields such as display name, phone number, website, office address, education, and speaking languages.
+* Lawyers can review their own profile through `GET /lawyer/profile/me` and update the editable attributes with `PATCH /lawyer/profile/me`. Attempts to blank out mandatory values (display name, languages) are rejected.
+* Anyone can retrieve a lawyer's public-facing profile via `GET /lawyer/profiles/{lawyer_id}`. The response is ready for the frontend sections that render the description tab of a public profile page.
 
 S3 document handling
 --------------------
 * Every uploaded document is stored under `lawyer_verifications/<user_id>/<document>-<uuid>.<ext>`.
 * Database columns keep the S3 object keys. Whenever a request is fetched, expiring presigned URLs are generated so reviewers can open the protected files without exposing the bucket publicly.
 * If an upload or database write fails, any partially uploaded files are cleaned up from S3 to avoid orphaned objects.
+* When an admin revokes a lawyer, every archived verification document belonging to that user is purged from S3 after the database changes succeed.
 
 Testing the API
 ---------------
@@ -41,7 +49,7 @@ The examples below assume you already have valid bearer tokens for a client and 
      http://localhost:8000/lawyer/verification-requests/me
    ```
 
-3. Admin lists pending requests:
+3. Admin lists pending requests (swap `pending` with `approved`, `rejected`, or `revoked` as needed):
 
    ```bash
    curl -H "Authorization: Bearer ADMIN_TOKEN" \
@@ -69,4 +77,39 @@ The examples below assume you already have valid bearer tokens for a client and 
      -H "Content-Type: application/json" \
      -d '{"rejection_reason": "Missing certification details."}' \
      http://localhost:8000/lawyer/verification-requests/REQUEST_ID/reject
+   ```
+
+7. Lawyer inspects their profile (after approval):
+
+   ```bash
+   curl -H "Authorization: Bearer LAWYER_TOKEN" \
+     http://localhost:8000/lawyer/profile/me
+   ```
+
+8. Lawyer updates editable information (for example, website and languages):
+
+   ```bash
+   curl -X PATCH -H "Authorization: Bearer LAWYER_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "website_url": "https://examplechambers.com",
+       "speaking_languages": ["Vietnamese", "English"],
+       "education": "LL.B - Ho Chi Minh City University of Law"
+     }' \
+     http://localhost:8000/lawyer/profile/me
+   ```
+
+9. Retrieve the public profile for rendering:
+
+   ```bash
+   curl http://localhost:8000/lawyer/profiles/LAWYER_USER_ID
+   ```
+
+10. Admin revokes a lawyer (and provides the mandatory reason):
+
+   ```bash
+   curl -X POST -H "Authorization: Bearer ADMIN_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"reason": "License suspended by the bar."}' \
+     http://localhost:8000/lawyer/lawyers/LAWYER_USER_ID/revoke
    ```

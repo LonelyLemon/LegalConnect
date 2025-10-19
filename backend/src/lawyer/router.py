@@ -1,6 +1,6 @@
-import asyncio
-
 from __future__ import annotations
+
+import asyncio
 from datetime import datetime, timezone
 from typing import Iterable
 from uuid import UUID
@@ -10,7 +10,6 @@ from fastapi import (
     Depends,
     File,
     Form,
-    HTTPException,
     Query,
     UploadFile,
     status,
@@ -19,21 +18,41 @@ from sqlalchemy import select
 
 from src.auth.dependencies import get_current_user
 from src.core.database import SessionDep
-from src.lawyer.constants import LawyerVerificationStatus
-from src.lawyer.exceptions import (
-    RequestAlreadyExists,
-    RequestAlreadyReviewed,
-    RequestDocumentUnavailable,
-    RequestForbidden,
-    RequestNotFound,
-    RequestRoleForbidden,
-    RequestUploadFailed,
+from src.lawyer.constants import (
+    LawyerVerificationStatus,
+    MAX_JOB_POSITION_LENGTH,
 )
-from src.lawyer.models import LawyerVerificationRequest
+from src.lawyer.exceptions import (
+    LawyerVerificationRequestAlreadyExists,
+    LawyerVerificationRequestAlreadyReviewed,
+    LawyerVerificationRequestDocumentUnavailable,
+    LawyerVerificationRequestInvalidExperience,
+    LawyerVerificationRequestInvalidJobPosition,
+    LawyerVerificationRequestForbidden,
+    LawyerVerificationRequestNotFound,
+    LawyerVerificationRequestRoleForbidden,
+    LawyerVerificationRequestUploadFailed,
+    LawyerProfileForbidden,
+    LawyerProfileInvalidField,
+    LawyerProfileInvalidLanguages,
+    LawyerProfileNotFound,
+    LawyerRoleRevocationInvalidReason,
+    LawyerRoleRevocationInvalidRole,
+    LawyerRoleRevocationTargetNotFound,
+)
+from src.lawyer.models import (
+    LawyerProfile,
+    LawyerRoleRevocation,
+    LawyerVerificationRequest,
+)
 from src.lawyer.schemas import (
+    LawyerProfileResponse,
+    LawyerProfileUpdatePayload,
     LawyerVerificationRequestDetailResponse,
     LawyerVerificationRequestRejectPayload,
     LawyerVerificationRequestSummaryResponse,
+    LawyerRoleRevocationPayload,
+    LawyerRoleRevocationResponse,
 )
 from src.lawyer.utils import (
     build_verification_document_key,
@@ -74,7 +93,7 @@ async def _generate_document_urls(
     for column, task in tasks.items():
         url = await task
         if not url:
-            raise RequestDocumentUnavailable()
+            raise LawyerVerificationRequestDocumentUnavailable()
         results[column] = url
     return results
 
@@ -115,7 +134,38 @@ async def _cleanup_uploaded_documents(keys: Iterable[str]) -> None:
 
 def _ensure_admin(user: User) -> None:
     if user.role != UserRole.ADMIN.value:
-        raise RequestForbidden()
+        raise LawyerVerificationRequestForbidden()
+
+
+def _build_profile_response(
+    profile: LawyerProfile,
+    user: User,
+) -> LawyerProfileResponse:
+    return LawyerProfileResponse(
+        id=profile.id,
+        user_id=profile.user_id,
+        display_name=profile.display_name,
+        email=user.email,
+        phone_number=profile.phone_number,
+        website_url=profile.website_url,
+        office_address=profile.office_address,
+        speaking_languages=profile.speaking_languages,
+        education=profile.education,
+        current_level=profile.current_level,
+        years_of_experience=profile.years_of_experience,
+        create_at=profile.create_at,
+        updated_at=profile.updated_at,
+    )
+
+
+async def _get_lawyer_profile(
+    db: SessionDep,
+    user_id: UUID,
+) -> LawyerProfile | None:
+    result = await db.execute(
+        select(LawyerProfile).where(LawyerProfile.user_id == user_id)
+    )
+    return result.scalar_one_or_none()
 
 
 @lawyer_route.post(
@@ -135,20 +185,14 @@ async def create_lawyer_verification_request(
     current_user: User = Depends(get_current_user),
 ) -> LawyerVerificationRequestDetailResponse:
     if current_user.role != UserRole.CLIENT.value:
-        raise RequestRoleForbidden()
+        raise LawyerVerificationRequestRoleForbidden()
 
     if years_of_experience < 0:
-        raise HTTPException(
-            status_code=422,
-            detail="Years of experience must be zero or greater.",
-        )
+        raise LawyerVerificationRequestInvalidExperience()
 
     job_position_value = current_job_position.strip() if current_job_position else None
-    if job_position_value and len(job_position_value) > 255:
-        raise HTTPException(
-            status_code=422,
-            detail="Current job position must be 255 characters or fewer.",
-        )
+    if job_position_value and len(job_position_value) > MAX_JOB_POSITION_LENGTH:
+        raise LawyerVerificationRequestInvalidJobPosition()
     current_job_position = job_position_value
 
     existing_request_result = await db.execute(
@@ -160,7 +204,7 @@ async def create_lawyer_verification_request(
     existing_request = existing_request_result.scalar_one_or_none()
 
     if existing_request:
-        raise RequestAlreadyExists()
+        raise LawyerVerificationRequestAlreadyExists()
 
     documents = {
         "identity_card_front_url": identity_card_front,
@@ -186,14 +230,14 @@ async def create_lawyer_verification_request(
                 upload.content_type or "application/octet-stream",
             )
             if not stored_key:
-                raise RequestUploadFailed()
+                raise LawyerVerificationRequestUploadFailed()
             uploaded_keys[column] = stored_key
-    except RequestUploadFailed:
+    except LawyerVerificationRequestUploadFailed:
         await _cleanup_uploaded_documents(uploaded_keys.values())
         raise
-    except Exception as exc:
+    except Exception as exc:  # pragma: no cover - defensive branch
         await _cleanup_uploaded_documents(uploaded_keys.values())
-        raise RequestUploadFailed() from exc
+        raise LawyerVerificationRequestUploadFailed() from exc
 
     new_request = LawyerVerificationRequest(
         user_id=current_user.id,
@@ -206,10 +250,10 @@ async def create_lawyer_verification_request(
     db.add(new_request)
     try:
         await db.commit()
-    except Exception as exc:
+    except Exception as exc:  # pragma: no cover - database failure
         await db.rollback()
         await _cleanup_uploaded_documents(uploaded_keys.values())
-        raise RequestUploadFailed() from exc
+        raise LawyerVerificationRequestUploadFailed() from exc
 
     await db.refresh(new_request)
 
@@ -268,10 +312,10 @@ async def get_lawyer_verification_request(
 ) -> LawyerVerificationRequestDetailResponse:
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise RequestNotFound()
+        raise LawyerVerificationRequestNotFound()
 
     if current_user.role != UserRole.ADMIN.value and request.user_id != current_user.id:
-        raise RequestForbidden()
+        raise LawyerVerificationRequestForbidden()
 
     return await _build_detail_response(request)
 
@@ -289,10 +333,10 @@ async def approve_lawyer_verification_request(
 
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise RequestNotFound()
+        raise LawyerVerificationRequestNotFound()
 
     if request.status != LawyerVerificationStatus.PENDING.value:
-        raise RequestAlreadyReviewed()
+        raise LawyerVerificationRequestAlreadyReviewed()
 
     request.status = LawyerVerificationStatus.APPROVED.value
     request.rejection_reason = None
@@ -302,6 +346,22 @@ async def approve_lawyer_verification_request(
     user = await db.get(User, request.user_id)
     if user:
         user.role = UserRole.LAWYER.value
+
+    profile = await _get_lawyer_profile(db, request.user_id)
+    if not profile:
+        display_name = (user.username if user else "Lawyer").strip() or "Lawyer"
+        profile = LawyerProfile(
+            user_id=request.user_id,
+            display_name=display_name,
+            phone_number=user.phone_number if user else None,
+            office_address=user.address if user else None,
+            current_level=request.current_job_position,
+            years_of_experience=request.years_of_experience,
+        )
+        db.add(profile)
+    else:
+        profile.current_level = request.current_job_position
+        profile.years_of_experience = request.years_of_experience
 
     await db.commit()
     await db.refresh(request)
@@ -323,10 +383,10 @@ async def reject_lawyer_verification_request(
 
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise RequestNotFound()
+        raise LawyerVerificationRequestNotFound()
 
     if request.status != LawyerVerificationStatus.PENDING.value:
-        raise RequestAlreadyReviewed()
+        raise LawyerVerificationRequestAlreadyReviewed()
 
     request.status = LawyerVerificationStatus.REJECTED.value
     request.rejection_reason = payload.rejection_reason
@@ -337,3 +397,188 @@ async def reject_lawyer_verification_request(
     await db.refresh(request)
 
     return await _build_detail_response(request)
+
+
+@lawyer_route.post(
+    "/lawyers/{lawyer_id}/revoke",
+    response_model=LawyerRoleRevocationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def revoke_lawyer_role(
+    lawyer_id: UUID,
+    payload: LawyerRoleRevocationPayload,
+    db: SessionDep,
+    current_user: User = Depends(get_current_user),
+) -> LawyerRoleRevocationResponse:
+    _ensure_admin(current_user)
+
+    user = await db.get(User, lawyer_id)
+    if not user:
+        raise LawyerRoleRevocationTargetNotFound()
+    if user.role != UserRole.LAWYER.value:
+        raise LawyerRoleRevocationInvalidRole()
+
+    reason = payload.reason.strip()
+    if not reason:
+        raise LawyerRoleRevocationInvalidReason()
+
+    result = await db.execute(
+        select(LawyerVerificationRequest).where(
+            LawyerVerificationRequest.user_id == lawyer_id
+        )
+    )
+    requests = result.scalars().all()
+
+    document_keys = {
+        getattr(request, column)
+        for request in requests
+        for column in DOCUMENT_COLUMN_NAMES
+        if getattr(request, column, None)
+    }
+
+    reviewable_statuses = {
+        LawyerVerificationStatus.APPROVED.value,
+        LawyerVerificationStatus.PENDING.value,
+    }
+    now = datetime.now(timezone.utc)
+    for request in requests:
+        if request.status in reviewable_statuses:
+            request.status = LawyerVerificationStatus.REVOKED.value
+            request.rejection_reason = reason
+            request.reviewed_by_admin_id = current_user.id
+            request.reviewed_at = now
+
+    profile = await _get_lawyer_profile(db, lawyer_id)
+    if profile:
+        await db.delete(profile)
+
+    user.role = UserRole.CLIENT.value
+
+    revocation = LawyerRoleRevocation(
+        user_id=lawyer_id,
+        revoked_by_admin_id=current_user.id,
+        reason=reason,
+    )
+    db.add(revocation)
+
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise
+
+    await db.refresh(revocation)
+
+    if document_keys:
+        await _cleanup_uploaded_documents(document_keys)
+
+    return LawyerRoleRevocationResponse(
+        id=revocation.id,
+        user_id=revocation.user_id,
+        revoked_by_admin_id=revocation.revoked_by_admin_id,
+        reason=revocation.reason,
+        create_at=revocation.create_at,
+        updated_at=revocation.updated_at,
+    )
+
+
+@lawyer_route.get(
+    "/profiles/{lawyer_id}",
+    response_model=LawyerProfileResponse,
+)
+async def get_public_lawyer_profile(
+    lawyer_id: UUID,
+    db: SessionDep,
+) -> LawyerProfileResponse:
+    profile = await _get_lawyer_profile(db, lawyer_id)
+    if not profile:
+        raise LawyerProfileNotFound()
+
+    user = await db.get(User, lawyer_id)
+    if not user or user.role != UserRole.LAWYER.value:
+        raise LawyerProfileNotFound()
+
+    return _build_profile_response(profile, user)
+
+
+@lawyer_route.get(
+    "/profile/me",
+    response_model=LawyerProfileResponse,
+)
+async def get_my_lawyer_profile(
+    db: SessionDep,
+    current_user: User = Depends(get_current_user),
+) -> LawyerProfileResponse:
+    if current_user.role != UserRole.LAWYER.value:
+        raise LawyerProfileForbidden()
+
+    profile = await _get_lawyer_profile(db, current_user.id)
+    if not profile:
+        raise LawyerProfileNotFound()
+
+    user = await db.get(User, current_user.id) or current_user
+    return _build_profile_response(profile, user)
+
+
+@lawyer_route.patch(
+    "/profile/me",
+    response_model=LawyerProfileResponse,
+)
+async def update_my_lawyer_profile(
+    payload: LawyerProfileUpdatePayload,
+    db: SessionDep,
+    current_user: User = Depends(get_current_user),
+) -> LawyerProfileResponse:
+    if current_user.role != UserRole.LAWYER.value:
+        raise LawyerProfileForbidden()
+
+    profile = await _get_lawyer_profile(db, current_user.id)
+    if not profile:
+        raise LawyerProfileNotFound()
+
+    update_data = payload.model_dump(exclude_unset=True)
+
+    if "speaking_languages" in update_data:
+        languages = update_data["speaking_languages"]
+        sanitized_languages = [
+            language.strip()
+            for language in languages
+            if isinstance(language, str) and language.strip()
+        ]
+        if not sanitized_languages:
+            raise LawyerProfileInvalidLanguages()
+        profile.speaking_languages = sanitized_languages
+
+    def _normalize(value: str, field_label: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise LawyerProfileInvalidField(f"{field_label} cannot be empty.")
+        return normalized
+
+    str_mappings = {
+        "display_name": "Display name",
+        "phone_number": "Phone number",
+        "website_url": "Website URL",
+        "office_address": "Office address",
+        "education": "Education",
+    }
+
+    for field, label in str_mappings.items():
+        if field not in update_data:
+            continue
+
+        value = update_data[field]
+        if value is None:
+            if field == "display_name":
+                raise LawyerProfileInvalidField("Display name is required.")
+            setattr(profile, field, None)
+            continue
+
+        normalized = _normalize(value, label)
+        setattr(profile, field, normalized)
+
+    await db.commit()
+    await db.refresh(profile)
+
+    user = await db.get(User, current_user.id) or current_user
+    return _build_profile_response(profile, user)
