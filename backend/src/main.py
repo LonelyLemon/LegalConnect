@@ -17,6 +17,7 @@ from src.auth.services import hash_password
 from src.user.constants import UserRole
 from src.user.models import User
 from src.user.router import user_route
+from src.lawyer.router import lawyer_route
 
 
 THIS_DIR = Path(__file__).parent
@@ -94,3 +95,4 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 app.include_router(auth_route)
 app.include_router(user_route)
+app.include_router(lawyer_route)
