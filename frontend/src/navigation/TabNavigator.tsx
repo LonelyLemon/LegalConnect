@@ -5,12 +5,14 @@ import { ThemedStyle } from '../theme';
 import React, { useState } from 'react';
 import { ViewStyle, TextStyle, Platform, Animated } from 'react-native';
 import { verticalScale, moderateScale } from 'react-native-size-matters';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeTabsNames, HomeTabsRoutes, StackScreenRoute } from './routes';
 import { useAppTheme } from '../theme/theme.provider';
 
 export default function TabNavigator() {
   const [tick] = useState(0); // Dummy state to force re-render
   const { themed } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const Tab = createBottomTabNavigator();
   return (
@@ -18,7 +20,7 @@ export default function TabNavigator() {
       key={tick}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: themed($tabBar),
+        tabBarStyle: themed($tabBar(insets)),
         tabBarActiveTintColor: themed($tabBarActiveColor),
         tabBarInactiveTintColor: themed($tabBarInactiveColor),
         tabBarLabelStyle: themed($tabBarLabel),
@@ -97,6 +99,12 @@ function AnimatedTabIcon({
 
   if (route.name === HomeTabsNames.Home) {
     iconName = focused ? 'home' : 'home-outline';
+  } else if (route.name === HomeTabsNames.Cases) {
+    iconName = focused ? 'document-text' : 'document-text-outline';
+  } else if (route.name === HomeTabsNames.Messages) {
+    iconName = focused ? 'chatbubble' : 'chatbubble-outline';
+  } else if (route.name === HomeTabsNames.Documents) {
+    iconName = focused ? 'book' : 'book-outline';
   } else if (route.name === HomeTabsNames.Setting) {
     iconName = focused ? 'settings' : 'settings-outline';
   }
@@ -117,6 +125,12 @@ function getTabLabel(routeName: string): string {
   switch (routeName) {
     case HomeTabsNames.Home:
       return 'Trang chủ';
+    case HomeTabsNames.Cases:
+      return 'Vụ án';
+    case HomeTabsNames.Messages:
+      return 'Tin nhắn';
+    case HomeTabsNames.Documents:
+      return 'Tài liệu';
     case HomeTabsNames.Setting:
       return 'Cài đặt';
     default:
@@ -128,6 +142,12 @@ function getTabAccessibilityLabel(routeName: string): string {
   switch (routeName) {
     case HomeTabsNames.Home:
       return 'Navigate to Home screen';
+    case HomeTabsNames.Cases:
+      return 'Navigate to Cases screen';
+    case HomeTabsNames.Messages:
+      return 'Navigate to Messages screen';
+    case HomeTabsNames.Documents:
+      return 'Navigate to Documents screen';
     case HomeTabsNames.Setting:
       return 'Navigate to Settings screen';
     default:
@@ -136,38 +156,37 @@ function getTabAccessibilityLabel(routeName: string): string {
 }
 
 // Modern Tab Bar Styling
-const $tabBar: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
-  backgroundColor: colors.surfaceContainerLowest || '#FFFFFF',
-  borderTopWidth: 0,
-  borderTopLeftRadius: moderateScale(20),
-  borderTopRightRadius: moderateScale(20),
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  height: verticalScale(spacing.xxxxxl), // 56px
-  paddingBottom:
-    Platform.OS === 'ios'
-      ? verticalScale(spacing.xs)
-      : verticalScale(spacing.xxxs), // 8px : 2px
-  paddingTop:
-    Platform.OS === 'ios'
-      ? verticalScale(spacing.xs)
-      : verticalScale(spacing.xxxs), // 8px : 2px - cân đối với bottom
-  paddingHorizontal: moderateScale(spacing.sm), // 12px
-  justifyContent: 'center',
-  alignItems: 'center',
+const $tabBar =
+  (insets: any): ThemedStyle<ViewStyle> =>
+  ({ colors, spacing }) => ({
+    backgroundColor: colors.surfaceContainerLowest || '#FFFFFF',
+    borderTopWidth: 0,
+    borderTopLeftRadius: moderateScale(20),
+    borderTopRightRadius: moderateScale(20),
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: verticalScale(spacing.xxxxxl) + insets.bottom, // 56px + safe area
+    paddingBottom: Platform.OS === 'ios' ? insets.bottom : insets.bottom, // 8px : 2px + safe area
+    paddingTop:
+      Platform.OS === 'ios'
+        ? verticalScale(spacing.xs)
+        : verticalScale(spacing.xxxs), // 8px : 2px - cân đối với bottom
+    paddingHorizontal: moderateScale(spacing.sm), // 12px
+    justifyContent: 'center',
+    alignItems: 'center',
 
-  // Enhanced shadow for modern look
-  shadowColor: colors.shadow || '#000000',
-  shadowOffset: {
-    width: 0,
-    height: -8,
-  },
-  shadowOpacity: 0.15,
-  shadowRadius: 20,
-  elevation: 20,
-});
+    // Enhanced shadow for modern look
+    shadowColor: colors.shadow || '#000000',
+    shadowOffset: {
+      width: 0,
+      height: -8,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 20,
+  });
 
 const $tabBarBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,

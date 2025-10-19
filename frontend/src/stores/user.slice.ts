@@ -25,7 +25,7 @@ export const signInWithEmailPassword = createAsyncThunk(
       const response = await signIn(data);
       return {
         user: response.user as User,
-        token: response.accessToken as string,
+        token: response.access_token as string,
         permissions: response.permissions as string[],
       };
     } catch (error: any) {
@@ -44,7 +44,7 @@ export const signUpWithEmailPassword = createAsyncThunk(
       const response = await signUp(data);
       return {
         user: response.user as User,
-        token: response.accessToken as string,
+        token: response.access_token as string,
         permissions: response.permissions as string[],
       };
     } catch (error: any) {

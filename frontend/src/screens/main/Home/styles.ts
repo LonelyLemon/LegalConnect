@@ -10,14 +10,18 @@ export const scrollView: ThemedStyle<any> = () => ({
   flex: 1,
 });
 
+export const scrollContent: ThemedStyle<any> = ({ spacing }) => ({
+  paddingBottom: verticalScale(spacing.xxxxxl),
+});
+
 export const header: ThemedStyle<any> = ({ spacing }) => ({
   paddingHorizontal: moderateScale(spacing.md),
   paddingVertical: verticalScale(spacing.lg),
   alignItems: 'center',
 });
 
-export const title: ThemedStyle<any> = ({ colors, spacing }) => ({
-  fontSize: moderateScale(24),
+export const title: ThemedStyle<any> = ({ colors, spacing, fontSizes }) => ({
+  fontSize: moderateScale(fontSizes.lg),
   fontWeight: 'bold',
   color: colors.onBackground,
   marginBottom: verticalScale(spacing.xs),

@@ -77,7 +77,6 @@ export default function CaseCard({
           </View>
         </View>
 
-        {/* Status Badge */}
         <View
           style={[
             themed(styles.statusBadge),
@@ -95,12 +94,10 @@ export default function CaseCard({
         </View>
       </View>
 
-      {/* Current Task */}
       <Text style={themed(styles.currentTaskText)} numberOfLines={1}>
         {currentTask}
       </Text>
 
-      {/* Progress Section */}
       <View style={themed(styles.progressSection)}>
         <View style={themed(styles.progressBarContainer)}>
           <View style={themed(styles.progressBarBackground)}>

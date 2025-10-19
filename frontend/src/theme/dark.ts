@@ -1,82 +1,92 @@
-import { paletteDark } from "./paletteDark";
-import { paletteLight } from "./paletteLight";
+import { paletteDark } from './paletteDark';
 
 export const colors = {
   palette: paletteDark,
-  transparent: "rgba(0, 0, 0, 0)",
-  buttonDisabled: "rgba(34, 85, 153, 0.1)",
-  buttonTextDisabled: "rgba(34, 85, 153, 0.38)",
-  indicator: "#E4E1EC",
+  transparent: 'rgba(0, 0, 0, 0)',
+  buttonDisabled: 'rgba(27, 27, 34, 0.1)',
+  buttonTextDisabled: 'rgba(27, 27, 34, 0.38)',
+  indicator: '#E3E2E9',
+
   processStatus: {
     approved: {
-      badgeColor: "#059669",
-      textColor: "#D1FAE5",
+      badgeColor: '#334478', // primaryContainer
+      textColor: '#B4C5FF', // primary
     },
     pending: {
-      badgeColor: "#D97706",
-      textColor: "#FEF3C7",
+      badgeColor: '#414659', // secondaryContainer
+      textColor: '#C1C5DD', // secondary
     },
     rejected: {
-      badgeColor: "#DC2626",
-      textColor: "#FEE2E2",
+      badgeColor: '#93000A', // errorContainer
+      textColor: '#FFB4AB', // error
     },
     new: {
-      badgeColor: "#4F46E5",
-      textColor: "#E0E7FF",
+      badgeColor: '#5B3D58', // tertiaryContainer
+      textColor: '#E2BBDB', // tertiary
     },
     undefined: {
-      badgeColor: "#6B7280",
-      textColor: "#F3F4F6",
+      badgeColor: '#1E1F25', // surfaceContainer
+      textColor: '#8F909A', // outline
     },
   },
 
-  primary: "#C0C1FF",
-  surfaceTint: "#C0C1FF",
-  onPrimary: "#18139A",
-  primaryContainer: "#5558D1",
-  onPrimaryContainer: "#E5E4FF",
-  secondary: "#C1C2F8",
-  onSecondary: "#2A2C58",
-  secondaryContainer: "#414270",
-  onSecondaryContainer: "#B0B1E5",
-  tertiary: "#FFAAF5",
-  onTertiary: "#5B005C",
-  tertiaryContainer: "#A03F9D",
-  onTertiaryContainer: "#FFDCF6",
-  error: "#FFB4AB",
-  onError: "#690005",
-  errorContainer: "#93000A",
-  onErrorContainer: "#FFDAD6",
-  background: "#13131A",
-  onBackground: "#E4E1EC",
-  surface: "#13131A",
-  onSurface: "#E4E1EC",
-  surfaceVariant: "#464553",
-  onSurfaceVariant: "#C7C5D6",
-  outline: "#908F9F",
-  outlineVariant: "#464553",
-  shadow: "#ffffff",
-  scrim: "#000000",
-  inverseSurface: "#E4E1EC",
-  inverseOnSurface: "#303038",
-  inversePrimary: "#4C4FC8",
-  primaryFixed: "#E1E0FF",
-  onPrimaryFixed: "#06006C",
-  primaryFixedDim: "#C0C1FF",
-  onPrimaryFixedVariant: "#3334AF",
-  secondaryFixed: "#E1E0FF",
-  onSecondaryFixed: "#151642",
-  secondaryFixedDim: "#C1C2F8",
-  onSecondaryFixedVariant: "#414270",
-  tertiaryFixed: "#FFD7F6",
-  onTertiaryFixed: "#380039",
-  tertiaryFixedDim: "#FFAAF5",
-  onTertiaryFixedVariant: "#7A197A",
-  surfaceDim: "#13131A",
-  surfaceBright: "#393841",
-  surfaceContainerLowest: "#0D0E15",
-  surfaceContainerLow: "#1B1B22",
-  surfaceContainer: "#1F1F26",
-  surfaceContainerHigh: "#292931",
-  surfaceContainerHighest: "#34343C",
+  primary: '#B4C5FF',
+  surfaceTint: '#B4C5FF',
+  onPrimary: '#1A2D60',
+  primaryContainer: '#334478',
+  onPrimaryContainer: '#DBE1FF',
+
+  secondary: '#C1C5DD',
+  onSecondary: '#2B3042',
+  secondaryContainer: '#414659',
+  onSecondaryContainer: '#DDE1F9',
+
+  tertiary: '#E2BBDB',
+  onTertiary: '#422740',
+  tertiaryContainer: '#5B3D58',
+  onTertiaryContainer: '#FFD6F8',
+
+  error: '#FFB4AB',
+  onError: '#690005',
+  errorContainer: '#93000A',
+  onErrorContainer: '#FFDAD6',
+
+  background: '#121318',
+  onBackground: '#E3E2E9',
+  surface: '#121318',
+  onSurface: '#E3E2E9',
+
+  surfaceVariant: '#45464F',
+  onSurfaceVariant: '#C5C6D0',
+  outline: '#8F909A',
+  outlineVariant: '#45464F',
+  shadow: '#000000',
+  scrim: '#000000',
+
+  inverseSurface: '#E3E2E9',
+  inverseOnSurface: '#2F3036',
+  inversePrimary: '#4B5C92',
+
+  primaryFixed: '#DBE1FF',
+  onPrimaryFixed: '#00174B',
+  primaryFixedDim: '#B4C5FF',
+  onPrimaryFixedVariant: '#334478',
+
+  secondaryFixed: '#DDE1F9',
+  onSecondaryFixed: '#161B2C',
+  secondaryFixedDim: '#C1C5DD',
+  onSecondaryFixedVariant: '#414659',
+
+  tertiaryFixed: '#FFD6F8',
+  onTertiaryFixed: '#2B122B',
+  tertiaryFixedDim: '#E2BBDB',
+  onTertiaryFixedVariant: '#5B3D58',
+
+  surfaceDim: '#121318',
+  surfaceBright: '#38393F',
+  surfaceContainerLowest: '#0D0E13',
+  surfaceContainerLow: '#1A1B21',
+  surfaceContainer: '#1E1F25',
+  surfaceContainerHigh: '#292A2F',
+  surfaceContainerHighest: '#34343A',
 } as const;

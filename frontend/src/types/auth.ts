@@ -1,7 +1,6 @@
 export type FormLogin = {
   email: string;
   password: string;
-  captchaValue: string;
 };
 
 export type FormSignUp = {

@@ -7,7 +7,7 @@ import axios, {
 import envConfig from '../config/env';
 import { store } from '../redux/store';
 import { Alert } from 'react-native';
-import { userActions } from '../stores/user.slices';
+import { userActions } from '../stores/user.slice';
 
 let isRefreshToken = false;
 let requestsToRetry: any[] = [];
@@ -59,7 +59,7 @@ const setupAxiosInterceptors = () => {
             '/auth/refresh',
             {},
             {
-              baseURL: envConfig.authUrl,
+              baseURL: envConfig.baseUrl,
               headers: {
                 'Content-Type': 'application/json',
                 'User-Agent':
