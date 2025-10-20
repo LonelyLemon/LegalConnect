@@ -10,10 +10,10 @@ export const getPopularLawyers = async () => {
   }
 };
 
-export const getLawyerById = async (id: string) => {
+export const getLawyerById = async (id: number) => {
   try {
-    const response = await axios.get(`/api/lawyers_profiles/${id}`);
-    return response.data.data;
+    const response = await axios.get(`/api/lawyer_profiles/${id}`);
+    return response.data;
   } catch (error: any) {
     console.log('error: ', error);
     throw error;
@@ -34,7 +34,7 @@ export const getLawyerByCategory = async (category: string) => {
 
 export const getLawyerByPage = async (page: number) => {
   try {
-    const response = await axios.get(`/api/lawyers_profiles/page/${page}`);
+    const response = await axios.get(`/api/lawyer_profiles/page/${page}`);
     return response.data.data;
   } catch (error: any) {
     console.log('error: ', error);

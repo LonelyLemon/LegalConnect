@@ -7,24 +7,14 @@ export const container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background,
 });
 
-export const header: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+export const HeaderTitle: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flex: 1,
   backgroundColor: colors.primary,
-  paddingHorizontal: scale(spacing.lg),
-  paddingVertical: verticalScale(spacing.xl),
+  paddingVertical: scale(spacing.sm),
+  marginHorizontal: verticalScale(spacing.sm),
+  borderRadius: scale(spacing.xs),
   alignItems: 'center',
-});
-
-export const backButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  position: 'absolute',
-  top: verticalScale(spacing.lg),
-  left: scale(spacing.lg),
-  zIndex: 1,
-});
-
-export const backIcon: ThemedStyle<TextStyle> = ({ colors }) => ({
-  color: colors.onPrimary,
-  fontSize: moderateScale(24),
-  fontWeight: 'bold',
+  justifyContent: 'center',
 });
 
 export const avatar: ThemedStyle<ImageStyle> = ({ spacing }) => ({
@@ -40,9 +30,9 @@ export const name: ThemedStyle<TextStyle> = ({
   spacing,
 }) => ({
   color: colors.onPrimary,
-  fontSize: moderateScale(fontSizes.xxl),
+  fontSize: moderateScale(fontSizes.xl),
   fontWeight: 'bold',
-  marginTop: verticalScale(spacing.md),
+  marginTop: verticalScale(spacing.sm),
   textAlign: 'center',
 });
 
@@ -61,7 +51,7 @@ export const tagline: ThemedStyle<TextStyle> = ({
 export const statsContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: 'row',
   justifyContent: 'space-around',
-  marginTop: verticalScale(spacing.lg),
+  marginTop: verticalScale(spacing.sm),
   width: '100%',
 });
 
@@ -71,26 +61,33 @@ export const statItem: ThemedStyle<ViewStyle> = () => ({
 
 export const statValue: ThemedStyle<TextStyle> = ({ colors, fontSizes }) => ({
   color: colors.onPrimary,
-  fontSize: moderateScale(fontSizes.lg),
+  fontSize: moderateScale(fontSizes.md),
   fontWeight: 'bold',
 });
 
-export const statLabel: ThemedStyle<TextStyle> = ({ colors, fontSizes }) => ({
+export const statLabel: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+  spacing,
+}) => ({
   color: colors.onPrimary,
-  fontSize: moderateScale(fontSizes.xs),
-  marginTop: verticalScale(4),
+  fontSize: moderateScale(fontSizes.sm),
+  marginTop: verticalScale(spacing.xxs),
   textAlign: 'center',
   opacity: 0.9,
 });
 
 export const editButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.onPrimary,
-  paddingHorizontal: scale(spacing.lg),
+  paddingHorizontal: scale(spacing.sm),
   paddingVertical: verticalScale(spacing.sm),
-  borderRadius: scale(spacing.md),
+  borderRadius: scale(spacing.xs),
   flexDirection: 'row',
   alignItems: 'center',
-  marginTop: verticalScale(spacing.lg),
+  textAlign: 'center',
+  justifyContent: 'center',
+  marginTop: verticalScale(spacing.sm),
+  gap: scale(spacing.xs),
 });
 
 export const editButtonText: ThemedStyle<TextStyle> = ({
@@ -111,17 +108,15 @@ export const editIcon: ThemedStyle<TextStyle> = ({ colors }) => ({
 export const tabContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flexDirection: 'row',
   backgroundColor: colors.surface,
-  borderBottomWidth: 1,
-  borderBottomColor: colors.outline,
 });
 
 export const tab =
   (active: boolean): ThemedStyle<ViewStyle> =>
   ({ colors, spacing }) => ({
     flex: 1,
-    paddingVertical: verticalScale(spacing.md),
+    paddingVertical: verticalScale(spacing.sm),
     alignItems: 'center',
-    borderBottomWidth: active ? 2 : 0,
+    borderBottomWidth: active ? 1 : 0,
     borderBottomColor: active ? colors.primary : 'transparent',
   });
 
@@ -133,9 +128,13 @@ export const tabText =
     color: active ? colors.primary : colors.onSurfaceVariant,
   });
 
-export const scrollContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+export const scrollContainer: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+}) => ({
   flex: 1,
   backgroundColor: colors.surface,
+  marginVertical: verticalScale(spacing.sm),
 });
 
 export const content: ThemedStyle<ViewStyle> = ({ spacing }) => ({
