@@ -27,6 +27,7 @@ class ChatService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
+
     async def get_conversation(self, conversation_id: uuid.UUID) -> ChatConversation:
         result = await self.db.execute(
             select(ChatConversation).where(ChatConversation.id == conversation_id)
@@ -36,11 +37,11 @@ class ChatService:
             raise ConversationNotFound()
         return conversation
 
-    async def ensure_participant(
-        self,
-        conversation_id: uuid.UUID,
-        user_id: uuid.UUID,
-    ) -> ChatParticipant:
+
+    async def ensure_participant(self,
+                                 conversation_id: uuid.UUID,
+                                 user_id: uuid.UUID
+                                 ) -> ChatParticipant:
         stmt = select(ChatParticipant).where(
             ChatParticipant.conversation_id == conversation_id,
             ChatParticipant.user_id == user_id,
@@ -51,6 +52,7 @@ class ChatService:
             raise ConversationAccessForbidden()
         return participant
 
+
     async def get_participant_ids(self, conversation_id: uuid.UUID) -> list[uuid.UUID]:
         stmt = select(ChatParticipant.user_id).where(
             ChatParticipant.conversation_id == conversation_id
@@ -58,18 +60,18 @@ class ChatService:
         result = await self.db.execute(stmt)
         return [row[0] for row in result.all()]
 
-    async def create_message(
-        self,
-        conversation: ChatConversation,
-        sender_id: uuid.UUID,
-        *,
-        content: str | None,
-        attachment_name: str | None = None,
-        attachment_key: str | None = None,
-        attachment_content_type: str | None = None,
-        attachment_size: int | None = None,
-        recipient_ids: Iterable[uuid.UUID],
-    ) -> ChatMessage:
+
+    async def create_message(self,
+                             conversation: ChatConversation,
+                             sender_id: uuid.UUID,
+                             *,
+                             content: str | None,
+                             attachment_name: str | None = None,
+                             attachment_key: str | None = None,
+                             attachment_content_type: str | None = None,
+                             attachment_size: int | None = None,
+                             recipient_ids: Iterable[uuid.UUID]
+                             ) -> ChatMessage:
         message = ChatMessage(
             conversation_id=conversation.id,
             sender_id=sender_id,
@@ -85,11 +87,11 @@ class ChatService:
         await self._create_receipts(message, recipient_ids)
         return message
 
-    async def _create_receipts(
-        self,
-        message: ChatMessage,
-        recipient_ids: Iterable[uuid.UUID],
-    ) -> None:
+
+    async def _create_receipts(self,
+                               message: ChatMessage,
+                               recipient_ids: Iterable[uuid.UUID]
+                               ) -> None:
         for user_id in recipient_ids:
             if user_id == message.sender_id:
                 continue
@@ -100,12 +102,12 @@ class ChatService:
             self.db.add(receipt)
         await self.db.flush()
 
-    async def acknowledge_message(
-        self,
-        message_id: uuid.UUID,
-        user_id: uuid.UUID,
-        status: MessageDeliveryStatus,
-    ) -> ChatMessage:
+
+    async def acknowledge_message(self,
+                                  message_id: uuid.UUID,
+                                  user_id: uuid.UUID,
+                                  status: MessageDeliveryStatus
+                                  ) -> ChatMessage:
         stmt = (
             select(ChatMessageReceipt)
             .options(selectinload(ChatMessageReceipt.message).selectinload(ChatMessage.receipts))
@@ -133,18 +135,18 @@ class ChatService:
             )
             if not participant.last_read_at or participant.last_read_at < now:
                 participant.last_read_at = now
-        else:  # pragma: no cover - defensive
+        else:
             raise MessageNotFound()
 
         await self.db.flush()
         await self.db.refresh(receipt.message)
         return receipt.message
 
-    async def mark_messages_delivered(
-        self,
-        messages: Iterable[ChatMessage],
-        recipient_id: uuid.UUID,
-    ) -> list[uuid.UUID]:
+
+    async def mark_messages_delivered(self,
+                                      messages: Iterable[ChatMessage],
+                                      recipient_id: uuid.UUID
+                                      ) -> list[uuid.UUID]:
         now = time_now()
         updated: list[uuid.UUID] = []
         for message in messages:
@@ -155,6 +157,7 @@ class ChatService:
         if updated:
             await self.db.flush()
         return updated
+
 
     async def load_message(self, message_id: uuid.UUID) -> ChatMessage:
         stmt = (

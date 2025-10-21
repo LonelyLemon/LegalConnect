@@ -1,0 +1,236 @@
+# Testing Script for API Routes
+
+This document outlines the manual and automated testing scenarios for each available API route. For every endpoint we specify:
+- **Happy Path**: expected behavior under valid inputs.
+- **Failure Modes**: validation, authorization, and exceptional cases that must raise the programmed errors.
+- **Preconditions**: authentication requirements, existing fixtures, or external systems.
+
+Where OAuth2 access tokens are required, tests should obtain them through the authentication flow before executing the protected requests.
+
+---
+
+## Authentication Routes (`/auth`)
+
+### `POST /auth/login`
+- **Happy Path**
+  1. Submit valid `username` (email) and `password` via OAuth2 form encoding.
+  2. Expect `200 OK` with `access_token`, `refresh_token`, and `token_type="bearer"`.
+  3. Validate that both tokens decode to payload containing the user email and correct token types.
+- **Failure Modes**
+  - **Unknown Email**: use an email not present in the database → expect `404 UserNotFound` response.
+  - **Wrong Password**: use an incorrect password for a known email → expect `401 InvalidPassword` error.
+
+### `POST /auth/refresh`
+- **Precondition**: valid refresh token obtained from `/auth/login`.
+- **Happy Path**
+  1. Submit the refresh token in the JSON body (`{"refresh_token": "..."}`).
+  2. Expect `200 OK` with a new `access_token` and `token_type="bearer"`.
+- **Failure Modes**
+  - **Missing Subject**: tamper with token payload to remove `sub` → expect `401 InvalidToken`.
+  - **Wrong Token Type**: send an access token instead of refresh token → expect `401 InvalidToken`.
+  - **Malformed Token**: send random string → expect `401 NotAuthenticated`.
+
+---
+
+## User Routes (`/users`)
+
+### `POST /users/register`
+- **Happy Path**
+  1. Provide unique email, valid password, and username according to schema.
+  2. Expect `201 Created` with user payload (`role=client`, email verified flags set appropriately).
+- **Failure Modes**
+  - **Existing Email**: attempt registration with existing email → expect `409 UserEmailExist`.
+  - **Invalid Payload**: omit mandatory fields or provide invalid email → expect `422 Unprocessable Entity`.
+
+### `GET /users/me`
+- **Precondition**: valid access token.
+- **Happy Path**: authenticated request returns `200 OK` with the requester’s user data.
+- **Failure Modes**: missing or expired token → expect `401 NotAuthenticated`.
+
+### `PUT /users/update`
+- **Precondition**: valid access token.
+- **Happy Path**
+  1. Submit subset of updatable fields (e.g., `username`, `password`).
+  2. Expect `200 OK` with updated fields; ensure password changes result in hashed storage.
+- **Failure Modes**
+  - **Unauthenticated**: no token → `401 NotAuthenticated`.
+  - **User Missing**: delete user record before request → expect `404 UserNotFound`.
+
+### `PATCH /users/{user_id}/role`
+- **Preconditions**: authenticated as admin user, target user exists.
+- **Happy Path**
+  1. Admin sets `role` to `LAWYER` for a client user.
+  2. Expect `200 OK` with updated role.
+- **Failure Modes**
+  - **Non-admin Caller**: attempt as non-admin → `403 UnauthorizedRoleUpdate`.
+  - **Invalid Role Transition**: set to role other than `LAWYER`, or target user not client → `400 InvalidRoleTransition`.
+  - **Missing User**: invalid `user_id` → `404 UserNotFound`.
+
+### `POST /users/forget-password`
+- **Happy Path**: submit existing email → `200 OK` with message and ensure job enqueued to Redis.
+- **Failure Modes**: unknown email → `404 UserNotFound`.
+
+### `POST /users/reset-password`
+- **Preconditions**: valid reset token from `/forget-password`.
+- **Happy Path**: submit matching `new_password`/`confirm_password` and token → `200 OK`, password updated.
+- **Failure Modes**
+  - **Mismatched Passwords**: different values → `400 InvalidPasswordMatch`.
+  - **Expired/Invalid Token**: tampered or expired token → `401 InvalidToken`.
+  - **Unknown User**: delete user after token issue → `404 UserNotFound`.
+
+---
+
+## Lawyer Routes (`/lawyer`)
+
+### `POST /lawyer/verification-requests`
+- **Preconditions**: authenticated as `CLIENT`; prepare valid document files.
+- **Happy Path**: upload required files, valid `years_of_experience`, optional job position under limit → `201 Created` with detailed request data including presigned URLs.
+- **Failure Modes**
+  - **Wrong Role**: caller not `CLIENT` → `403 RequestRoleForbidden`.
+  - **Negative Experience**: `years_of_experience < 0` → `400 RequestInvalidExperience`.
+  - **Long Job Title**: exceed `MAX_JOB_POSITION_LENGTH` → `400 RequestInvalidJobPosition`.
+  - **Pending Request Exists**: duplicate pending request → `409 RequestAlreadyExists`.
+  - **Upload Issues**: simulate S3 failure → `500 RequestUploadFailed` and confirm cleanup.
+
+### `GET /lawyer/verification-requests/me`
+- **Preconditions**: authenticated user.
+- **Happy Path**: client retrieves list of their requests ordered newest-first.
+- **Failure Modes**: unauthenticated → `401 NotAuthenticated`.
+
+### `GET /lawyer/verification-requests`
+- **Preconditions**: admin access.
+- **Happy Path**: list all requests optionally filtered by `status` query parameter.
+- **Failure Modes**: non-admin caller → `403 RequestForbidden`.
+
+### `GET /lawyer/verification-requests/{request_id}`
+- **Preconditions**: admin or request owner.
+- **Happy Path**: return detailed request including document URLs.
+- **Failure Modes**
+  - **Unknown ID**: invalid UUID → `404 RequestNotFound`.
+  - **Forbidden Access**: other users → `403 RequestForbidden`.
+
+### `PATCH /lawyer/verification-requests/{request_id}/approve`
+- **Preconditions**: admin, pending request exists.
+- **Happy Path**: approve pending request, confirm response data and that user role becomes `LAWYER` and profile created/updated.
+- **Failure Modes**
+  - **Non-admin** → `403 RequestForbidden`.
+  - **Missing Request** → `404 RequestNotFound`.
+  - **Already Reviewed** → `409 RequestAlreadyReviewed`.
+
+### `PATCH /lawyer/verification-requests/{request_id}/reject`
+- **Happy Path**: admin rejects pending request with reason; expect rejection fields populated.
+- **Failure Modes**: same as approve (non-admin, missing request, already reviewed).
+
+### `POST /lawyer/lawyers/{lawyer_id}/revoke`
+- **Preconditions**: admin, target user has `LAWYER` role.
+- **Happy Path**: revoke role with reason → `201 Created`, verify target user role downgraded and related requests marked revoked.
+- **Failure Modes**
+  - **Non-admin** → `403 RequestForbidden`.
+  - **User Not Lawyer** → `400 InvalidCurrentRoleRevocation`.
+  - **Missing Reason** → `400 InvalidRevocationReason`.
+  - **Unknown Lawyer** → `404 LawyerProfileNotFound`.
+
+### `GET /lawyer/profiles/{lawyer_id}`
+- **Happy Path**: returns public profile when lawyer exists.
+- **Failure Modes**: unknown lawyer or user not in lawyer role → `404 LawyerProfileNotFound`.
+
+### `GET /lawyer/profile/me`
+- **Preconditions**: authenticated lawyer.
+- **Happy Path**: returns own profile.
+- **Failure Modes**
+  - **Non-lawyer** → `403 LawyerProfileForbidden`.
+  - **Profile Missing** → `404 LawyerProfileNotFound`.
+
+### `PATCH /lawyer/profile/me`
+- **Preconditions**: authenticated lawyer, existing profile.
+- **Happy Path**: update allowed fields, ensure trimming and validation of strings/languages.
+- **Failure Modes**
+  - **Non-lawyer** → `403 LawyerProfileForbidden`.
+  - **Profile Missing** → `404 LawyerProfileNotFound`.
+  - **Invalid Languages**: empty or non-string languages → `400 LawyerProfileInvalidLanguages`.
+  - **Invalid Fields**: blank display name or other strings → `400 LawyerProfileInvalidField`.
+
+---
+
+## Chat Routes (`/chat`)
+
+### `GET /chat/health`
+- **Happy Path**: returns `200 OK` with status and online user count.
+
+### `POST /chat/conversations`
+- **Preconditions**: authenticated user, recipient exists.
+- **Happy Path**: create conversation with another user → `201 Created` and conversation summary.
+- **Failure Modes**
+  - **Self Conversation** → `400 Cannot create a conversation with yourself.`
+  - **Missing Recipient** → `404 Recipient not found.`
+
+### `GET /chat/conversations`
+- **Preconditions**: authenticated user with conversations.
+- **Happy Path**: returns list of conversations sorted by activity.
+- **Failure Modes**: unauthenticated → `401 NotAuthenticated`.
+
+### `GET /chat/conversations/{conversation_id}/messages`
+- **Preconditions**: participant in conversation.
+- **Happy Path**: paginated list of messages; ensure delivery receipts broadcast when applicable.
+- **Failure Modes**
+  - **Limit > 100** → `400 Limit cannot exceed 100.`
+  - **Non-participant** → `403 ConversationAccessForbidden`.
+  - **Unknown Conversation** → `404` via service exception.
+
+### `POST /chat/conversations/{conversation_id}/messages`
+- **Happy Path**: send text message, verify message persisted, receipts created, broadcast triggered.
+- **Failure Modes**
+  - **Empty/Invalid Content** → `400` from moderation (`validate_message_content`).
+  - **Rate Limit**: exceed rate limiter to trigger throttle response.
+  - **Non-participant** → `403 ConversationAccessForbidden`.
+
+### `POST /chat/messages/{message_id}/ack`
+- **Happy Path**: acknowledge message status change (`DELIVERED`/`READ`) and verify broadcast.
+- **Failure Modes**
+  - **Non-participant** → `403 ConversationAccessForbidden`.
+  - **Invalid Message ID** → `404` service error.
+  - **Invalid Status** → `422` enum validation error.
+
+### `POST /chat/conversations/{conversation_id}/attachments`
+- **Preconditions**: participant, file ready.
+- **Happy Path**: upload allowed file type within size limit → `201 Created` message with attachment metadata.
+- **Failure Modes**
+  - **Empty File** → `400 Uploaded file is empty.`
+  - **Oversized File** → `413 AttachmentTooLarge` (verify configured max).
+  - **Unsupported MIME Type** → `400` from `validate_attachment_content_type`.
+  - **Upload Failure** → simulate S3 error → `500 AttachmentUploadFailed`.
+
+### `WebSocket /chat/ws`
+- **Handshake Happy Path**: connect with valid access token → expect `accept`, presence broadcast, ability to send events.
+- **Handshake Failures**
+  - **Missing Token** → connection closed with `4401`.
+  - **Invalid Token** or wrong type → closed `4403`.
+- **Runtime Events**
+  - **Message Event**: send valid `message` payload to existing conversation → expect server broadcast and ack.
+  - **Typing Event**: send `typing` payload, confirm broadcast to participants; invalid conversation triggers error message.
+  - **Ack Event**: send `ack` payload; invalid UUID or status triggers error response.
+  - **Unsupported Event**: send unknown `type` → expect error response.
+  - **Disconnect Handling**: close socket, verify presence broadcast with offline status.
+
+---
+
+## Legal AI Routes (`/legal-ai`)
+
+### `POST /legal-ai/query`
+- **Preconditions**: authenticated user, chatbot service mocked for deterministic responses.
+- **Happy Path**: submit query payload with `question`, optional `context`, `session_id` → expect `200 OK` with AI answer.
+- **Failure Modes**
+  - **Unauthenticated** → `401 NotAuthenticated`.
+  - **Service Error**: simulate backend failure in `LegalChatbotService` → assert propagated error handling/logging.
+
+### `GET /legal-ai/health`
+- **Happy Path**: returns `200 OK` with status, model info, dataset stats.
+- **Failure Modes**: simulate service misconfiguration (empty knowledge base) to verify `dataset_loaded` flag set to `False`.
+
+---
+
+## General Testing Notes
+- **Data Reset**: Ensure database transactions or fixtures reset between tests to avoid data coupling.
+- **External Services**: Use mocks/fakes for AWS S3, Redis, and ARQ job queue where applicable to cover success and failure flows.
+- **Logging Assertions**: Verify key audit logs emitted for lawyer and chat routes when appropriate.
+- **Security**: Validate that unauthorized requests consistently return `401` or `403` based on authentication vs. authorization failures.
