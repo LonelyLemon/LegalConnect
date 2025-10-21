@@ -5,6 +5,7 @@ class LawyerVerificationStatus(StrEnum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
+    REVOKED = "revoked"
 
 
 MAX_JOB_POSITION_LENGTH = 255

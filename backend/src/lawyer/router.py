@@ -1,6 +1,6 @@
 from __future__ import annotations
-
 import asyncio
+
 from datetime import datetime, timezone
 from typing import Iterable
 from uuid import UUID
@@ -23,22 +23,22 @@ from src.lawyer.constants import (
     MAX_JOB_POSITION_LENGTH,
 )
 from src.lawyer.exceptions import (
-    LawyerVerificationRequestAlreadyExists,
-    LawyerVerificationRequestAlreadyReviewed,
-    LawyerVerificationRequestDocumentUnavailable,
-    LawyerVerificationRequestInvalidExperience,
-    LawyerVerificationRequestInvalidJobPosition,
-    LawyerVerificationRequestForbidden,
-    LawyerVerificationRequestNotFound,
-    LawyerVerificationRequestRoleForbidden,
-    LawyerVerificationRequestUploadFailed,
+    RequestAlreadyExists,
+    RequestAlreadyReviewed,
+    RequestDocumentUnavailable,
+    RequestInvalidExperience,
+    RequestInvalidJobPosition,
+    RequestForbidden,
+    RequestNotFound,
+    RequestRoleForbidden,
+    RequestUploadFailed,
     LawyerProfileForbidden,
     LawyerProfileInvalidField,
     LawyerProfileInvalidLanguages,
     LawyerProfileNotFound,
-    LawyerRoleRevocationInvalidReason,
-    LawyerRoleRevocationInvalidRole,
-    LawyerRoleRevocationTargetNotFound,
+    InvalidRevocationReason,
+    InvalidCurrentRoleRevocation,
+    LawyerProfileNotFound,
 )
 from src.lawyer.models import (
     LawyerProfile,
@@ -48,9 +48,9 @@ from src.lawyer.models import (
 from src.lawyer.schemas import (
     LawyerProfileResponse,
     LawyerProfileUpdatePayload,
-    LawyerVerificationRequestDetailResponse,
-    LawyerVerificationRequestRejectPayload,
-    LawyerVerificationRequestSummaryResponse,
+    RequestDetailResponse,
+    RequestRejectPayload,
+    RequestSummaryResponse,
     LawyerRoleRevocationPayload,
     LawyerRoleRevocationResponse,
 )
@@ -79,9 +79,8 @@ lawyer_route = APIRouter(
 )
 
 
-async def _generate_document_urls(
-    request: LawyerVerificationRequest,
-) -> dict[str, str]:
+async def _generate_document_urls(request: LawyerVerificationRequest) -> dict[str, str]:
+
     tasks = {
         column: asyncio.create_task(
             generate_presigned_url(getattr(request, column))
@@ -93,40 +92,40 @@ async def _generate_document_urls(
     for column, task in tasks.items():
         url = await task
         if not url:
-            raise LawyerVerificationRequestDocumentUnavailable()
+            raise RequestDocumentUnavailable()
         results[column] = url
     return results
 
 
-def _build_summary_response(
-    request: LawyerVerificationRequest,
-) -> LawyerVerificationRequestSummaryResponse:
-    return LawyerVerificationRequestSummaryResponse(
-        id=request.id,
-        user_id=request.user_id,
-        status=LawyerVerificationStatus(request.status),
-        years_of_experience=request.years_of_experience,
-        current_job_position=request.current_job_position,
-        rejection_reason=request.rejection_reason,
-        reviewed_by_admin_id=request.reviewed_by_admin_id,
-        reviewed_at=request.reviewed_at,
-        create_at=request.create_at,
-        updated_at=request.updated_at,
+def _build_summary_response(request: LawyerVerificationRequest) -> RequestSummaryResponse:
+
+    return RequestSummaryResponse(
+        id = request.id,
+        user_id = request.user_id,
+        status = LawyerVerificationStatus(request.status),
+        years_of_experience = request.years_of_experience,
+        current_job_position = request.current_job_position,
+        rejection_reason = request.rejection_reason,
+        reviewed_by_admin_id = request.reviewed_by_admin_id,
+        reviewed_at = request.reviewed_at,
+        create_at = request.create_at,
+        updated_at = request.updated_at,
     )
 
 
-async def _build_detail_response(
-    request: LawyerVerificationRequest,
-) -> LawyerVerificationRequestDetailResponse:
+async def _build_detail_response(request: LawyerVerificationRequest) -> RequestDetailResponse:
+
     summary = _build_summary_response(request)
     document_urls = await _generate_document_urls(request)
-    return LawyerVerificationRequestDetailResponse(
-        **summary.model_dump(),
-        **document_urls,
+
+    return RequestDetailResponse(
+        **summary.model_dump(), 
+        **document_urls
     )
 
 
 async def _cleanup_uploaded_documents(keys: Iterable[str]) -> None:
+
     tasks = [asyncio.create_task(delete_file_from_s3(key)) for key in keys]
     if tasks:
         await asyncio.gather(*tasks, return_exceptions=True)
@@ -134,27 +133,26 @@ async def _cleanup_uploaded_documents(keys: Iterable[str]) -> None:
 
 def _ensure_admin(user: User) -> None:
     if user.role != UserRole.ADMIN.value:
-        raise LawyerVerificationRequestForbidden()
+        raise RequestForbidden()
 
 
-def _build_profile_response(
-    profile: LawyerProfile,
-    user: User,
-) -> LawyerProfileResponse:
+def _build_profile_response(profile: LawyerProfile, 
+                            user: User) -> LawyerProfileResponse:
+    
     return LawyerProfileResponse(
-        id=profile.id,
-        user_id=profile.user_id,
-        display_name=profile.display_name,
-        email=user.email,
-        phone_number=profile.phone_number,
-        website_url=profile.website_url,
-        office_address=profile.office_address,
-        speaking_languages=profile.speaking_languages,
-        education=profile.education,
-        current_level=profile.current_level,
-        years_of_experience=profile.years_of_experience,
-        create_at=profile.create_at,
-        updated_at=profile.updated_at,
+        id = profile.id,
+        user_id = profile.user_id,
+        display_name = profile.display_name,
+        email = user.email,
+        phone_number = profile.phone_number,
+        website_url = profile.website_url,
+        office_address = profile.office_address,
+        speaking_languages = profile.speaking_languages,
+        education = profile.education,
+        current_level = profile.current_level,
+        years_of_experience = profile.years_of_experience,
+        create_at = profile.create_at,
+        updated_at = profile.updated_at,
     )
 
 
@@ -168,31 +166,28 @@ async def _get_lawyer_profile(
     return result.scalar_one_or_none()
 
 
-@lawyer_route.post(
-    "/verification-requests",
-    response_model=LawyerVerificationRequestDetailResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_lawyer_verification_request(
-    db: SessionDep,
-    identity_card_front: UploadFile = File(...),
-    identity_card_back: UploadFile = File(...),
-    portrait: UploadFile = File(...),
-    law_certificate: UploadFile = File(...),
-    bachelor_degree: UploadFile = File(...),
-    years_of_experience: int = Form(...),
-    current_job_position: str | None = Form(default=None),
-    current_user: User = Depends(get_current_user),
-) -> LawyerVerificationRequestDetailResponse:
+@lawyer_route.post("/verification-requests", 
+                   response_model=RequestDetailResponse, 
+                   status_code=status.HTTP_201_CREATED)
+async def create_lawyer_verification_request(db: SessionDep, 
+                                             identity_card_front: UploadFile = File(...),
+                                             identity_card_back: UploadFile = File(...),
+                                             portrait: UploadFile = File(...),
+                                             law_certificate: UploadFile = File(...),
+                                             bachelor_degree: UploadFile = File(...),
+                                             years_of_experience: int = Form(...),
+                                             current_job_position: str | None = Form(default=None),
+                                             current_user: User = Depends(get_current_user)) -> RequestDetailResponse:
+    
     if current_user.role != UserRole.CLIENT.value:
-        raise LawyerVerificationRequestRoleForbidden()
+        raise RequestRoleForbidden()
 
     if years_of_experience < 0:
-        raise LawyerVerificationRequestInvalidExperience()
+        raise RequestInvalidExperience()
 
     job_position_value = current_job_position.strip() if current_job_position else None
     if job_position_value and len(job_position_value) > MAX_JOB_POSITION_LENGTH:
-        raise LawyerVerificationRequestInvalidJobPosition()
+        raise RequestInvalidJobPosition()
     current_job_position = job_position_value
 
     existing_request_result = await db.execute(
@@ -204,7 +199,7 @@ async def create_lawyer_verification_request(
     existing_request = existing_request_result.scalar_one_or_none()
 
     if existing_request:
-        raise LawyerVerificationRequestAlreadyExists()
+        raise RequestAlreadyExists()
 
     documents = {
         "identity_card_front_url": identity_card_front,
@@ -229,45 +224,46 @@ async def create_lawyer_verification_request(
                 s3_key,
                 upload.content_type or "application/octet-stream",
             )
+
             if not stored_key:
-                raise LawyerVerificationRequestUploadFailed()
+                raise RequestUploadFailed()
             uploaded_keys[column] = stored_key
-    except LawyerVerificationRequestUploadFailed:
+
+    except RequestUploadFailed:
         await _cleanup_uploaded_documents(uploaded_keys.values())
         raise
-    except Exception as exc:  # pragma: no cover - defensive branch
+
+    except Exception as exc:
         await _cleanup_uploaded_documents(uploaded_keys.values())
-        raise LawyerVerificationRequestUploadFailed() from exc
+        raise RequestUploadFailed() from exc
 
     new_request = LawyerVerificationRequest(
-        user_id=current_user.id,
-        years_of_experience=years_of_experience,
-        current_job_position=current_job_position,
-        status=LawyerVerificationStatus.PENDING.value,
+        user_id = current_user.id,
+        years_of_experience = years_of_experience,
+        current_job_position = current_job_position,
+        status = LawyerVerificationStatus.PENDING.value,
         **uploaded_keys,
     )
 
     db.add(new_request)
     try:
         await db.commit()
-    except Exception as exc:  # pragma: no cover - database failure
+    except Exception as exc:
         await db.rollback()
         await _cleanup_uploaded_documents(uploaded_keys.values())
-        raise LawyerVerificationRequestUploadFailed() from exc
+        raise RequestUploadFailed() from exc
 
     await db.refresh(new_request)
 
     return await _build_detail_response(new_request)
 
 
-@lawyer_route.get(
-    "/verification-requests/me",
-    response_model=list[LawyerVerificationRequestSummaryResponse],
-)
-async def list_my_lawyer_verification_requests(
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> list[LawyerVerificationRequestSummaryResponse]:
+@lawyer_route.get("/verification-requests/me",
+                  response_model=list[RequestSummaryResponse])
+async def list_my_lawyer_verification_requests(db: SessionDep,
+                                               current_user: User = Depends(get_current_user)
+                                               ) -> list[RequestSummaryResponse]:
+    
     result = await db.execute(
         select(LawyerVerificationRequest)
         .where(LawyerVerificationRequest.user_id == current_user.id)
@@ -275,18 +271,17 @@ async def list_my_lawyer_verification_requests(
     )
 
     requests = result.scalars().all()
+
     return [_build_summary_response(request) for request in requests]
 
 
-@lawyer_route.get(
-    "/verification-requests",
-    response_model=list[LawyerVerificationRequestSummaryResponse],
-)
-async def list_lawyer_verification_requests(
-    db: SessionDep,
-    status_filter: LawyerVerificationStatus | None = Query(default=None, alias="status"),
-    current_user: User = Depends(get_current_user),
-) -> list[LawyerVerificationRequestSummaryResponse]:
+@lawyer_route.get("/verification-requests", 
+                  response_model=list[RequestSummaryResponse])
+async def list_lawyer_verification_requests(db: SessionDep,
+                                            status_filter: LawyerVerificationStatus | None = Query(default=None, alias="status"),
+                                            current_user: User = Depends(get_current_user)
+                                            ) -> list[RequestSummaryResponse]:
+    
     _ensure_admin(current_user)
 
     stmt = select(LawyerVerificationRequest)
@@ -301,42 +296,38 @@ async def list_lawyer_verification_requests(
     return [_build_summary_response(request) for request in requests]
 
 
-@lawyer_route.get(
-    "/verification-requests/{request_id}",
-    response_model=LawyerVerificationRequestDetailResponse,
-)
-async def get_lawyer_verification_request(
-    request_id: UUID,
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> LawyerVerificationRequestDetailResponse:
+@lawyer_route.get("/verification-requests/{request_id}",
+                  response_model=RequestDetailResponse)
+async def get_lawyer_verification_request(request_id: UUID,
+                                          db: SessionDep,
+                                          current_user: User = Depends(get_current_user)
+                                          ) -> RequestDetailResponse:
+    
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise LawyerVerificationRequestNotFound()
+        raise RequestNotFound()
 
     if current_user.role != UserRole.ADMIN.value and request.user_id != current_user.id:
-        raise LawyerVerificationRequestForbidden()
+        raise RequestForbidden()
 
     return await _build_detail_response(request)
 
 
-@lawyer_route.patch(
-    "/verification-requests/{request_id}/approve",
-    response_model=LawyerVerificationRequestDetailResponse,
-)
-async def approve_lawyer_verification_request(
-    request_id: UUID,
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> LawyerVerificationRequestDetailResponse:
+@lawyer_route.patch("/verification-requests/{request_id}/approve",
+                    response_model=RequestDetailResponse)
+async def approve_lawyer_verification_request(request_id: UUID,
+                                              db: SessionDep,
+                                              current_user: User = Depends(get_current_user)
+                                              ) -> RequestDetailResponse:
+    
     _ensure_admin(current_user)
 
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise LawyerVerificationRequestNotFound()
+        raise RequestNotFound()
 
     if request.status != LawyerVerificationStatus.PENDING.value:
-        raise LawyerVerificationRequestAlreadyReviewed()
+        raise RequestAlreadyReviewed()
 
     request.status = LawyerVerificationStatus.APPROVED.value
     request.rejection_reason = None
@@ -369,24 +360,22 @@ async def approve_lawyer_verification_request(
     return await _build_detail_response(request)
 
 
-@lawyer_route.patch(
-    "/verification-requests/{request_id}/reject",
-    response_model=LawyerVerificationRequestDetailResponse,
-)
-async def reject_lawyer_verification_request(
-    request_id: UUID,
-    payload: LawyerVerificationRequestRejectPayload,
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> LawyerVerificationRequestDetailResponse:
+@lawyer_route.patch("/verification-requests/{request_id}/reject",
+                    response_model=RequestDetailResponse)
+async def reject_lawyer_verification_request(request_id: UUID,
+                                             payload: RequestRejectPayload,
+                                             db: SessionDep,
+                                             current_user: User = Depends(get_current_user)
+                                             ) -> RequestDetailResponse:
+    
     _ensure_admin(current_user)
 
     request = await db.get(LawyerVerificationRequest, request_id)
     if not request:
-        raise LawyerVerificationRequestNotFound()
+        raise RequestNotFound()
 
     if request.status != LawyerVerificationStatus.PENDING.value:
-        raise LawyerVerificationRequestAlreadyReviewed()
+        raise RequestAlreadyReviewed()
 
     request.status = LawyerVerificationStatus.REJECTED.value
     request.rejection_reason = payload.rejection_reason
@@ -399,28 +388,26 @@ async def reject_lawyer_verification_request(
     return await _build_detail_response(request)
 
 
-@lawyer_route.post(
-    "/lawyers/{lawyer_id}/revoke",
-    response_model=LawyerRoleRevocationResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def revoke_lawyer_role(
-    lawyer_id: UUID,
-    payload: LawyerRoleRevocationPayload,
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> LawyerRoleRevocationResponse:
+@lawyer_route.post("/lawyers/{lawyer_id}/revoke",
+                   response_model=LawyerRoleRevocationResponse,
+                   status_code=status.HTTP_201_CREATED)
+async def revoke_lawyer_role(lawyer_id: UUID,
+                             payload: LawyerRoleRevocationPayload,
+                             db: SessionDep,
+                             current_user: User = Depends(get_current_user)
+                             ) -> LawyerRoleRevocationResponse:
+    
     _ensure_admin(current_user)
 
     user = await db.get(User, lawyer_id)
     if not user:
-        raise LawyerRoleRevocationTargetNotFound()
+        raise LawyerProfileNotFound()
     if user.role != UserRole.LAWYER.value:
-        raise LawyerRoleRevocationInvalidRole()
+        raise InvalidCurrentRoleRevocation()
 
     reason = payload.reason.strip()
     if not reason:
-        raise LawyerRoleRevocationInvalidReason()
+        raise InvalidRevocationReason()
 
     result = await db.execute(
         select(LawyerVerificationRequest).where(
@@ -482,14 +469,12 @@ async def revoke_lawyer_role(
     )
 
 
-@lawyer_route.get(
-    "/profiles/{lawyer_id}",
-    response_model=LawyerProfileResponse,
-)
-async def get_public_lawyer_profile(
-    lawyer_id: UUID,
-    db: SessionDep,
-) -> LawyerProfileResponse:
+@lawyer_route.get("/profiles/{lawyer_id}",
+                  response_model=LawyerProfileResponse)
+async def get_public_lawyer_profile(lawyer_id: UUID,
+                                    db: SessionDep
+                                    ) -> LawyerProfileResponse:
+    
     profile = await _get_lawyer_profile(db, lawyer_id)
     if not profile:
         raise LawyerProfileNotFound()
@@ -501,14 +486,12 @@ async def get_public_lawyer_profile(
     return _build_profile_response(profile, user)
 
 
-@lawyer_route.get(
-    "/profile/me",
-    response_model=LawyerProfileResponse,
-)
-async def get_my_lawyer_profile(
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> LawyerProfileResponse:
+@lawyer_route.get("/profile/me",
+                  response_model=LawyerProfileResponse)
+async def get_my_lawyer_profile(db: SessionDep,
+                                current_user: User = Depends(get_current_user)
+                                ) -> LawyerProfileResponse:
+    
     if current_user.role != UserRole.LAWYER.value:
         raise LawyerProfileForbidden()
 
@@ -520,15 +503,13 @@ async def get_my_lawyer_profile(
     return _build_profile_response(profile, user)
 
 
-@lawyer_route.patch(
-    "/profile/me",
-    response_model=LawyerProfileResponse,
-)
-async def update_my_lawyer_profile(
-    payload: LawyerProfileUpdatePayload,
-    db: SessionDep,
-    current_user: User = Depends(get_current_user),
-) -> LawyerProfileResponse:
+@lawyer_route.patch("/profile/me",
+                    response_model=LawyerProfileResponse)
+async def update_my_lawyer_profile(payload: LawyerProfileUpdatePayload,
+                                   db: SessionDep,
+                                   current_user: User = Depends(get_current_user)
+                                   ) -> LawyerProfileResponse:
+    
     if current_user.role != UserRole.LAWYER.value:
         raise LawyerProfileForbidden()
 

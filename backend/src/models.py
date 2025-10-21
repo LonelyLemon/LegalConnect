@@ -5,3 +5,9 @@ from src.lawyer.models import (
     LawyerVerificationRequest,
     LawyerRoleRevocation,
 )
+from src.chat.models import  (
+    ChatConversation,
+    ChatParticipant,
+    ChatMessage,
+    ChatMessageReceipt,
+)

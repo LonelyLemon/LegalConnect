@@ -14,11 +14,10 @@ DOCUMENT_ROOT_FOLDER = "lawyer_verifications"
 DEFAULT_CONTENT_TYPE = "application/octet-stream"
 
 
-def build_verification_document_key(
-    user_id: UUID,
-    document_name: str,
-    original_filename: str | None,
-) -> str:
+def build_verification_document_key(user_id: UUID,
+                                    document_name: str,
+                                    original_filename: str | None
+                                    ) -> str:
 
     sanitized_document = (
         document_name.strip().lower().replace(" ", "-").replace("_", "-")

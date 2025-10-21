@@ -14,6 +14,8 @@ from src.user.constants import UserRole
 from src.user.models import User
 from src.user.router import user_route
 from src.lawyer.router import lawyer_route
+from src.chat.router import chat_route
+from src.legal_ai.router import legal_ai_route
 
 THIS_DIR = Path(__file__).parent
 
@@ -69,3 +71,5 @@ app.add_middleware(
 app.include_router(auth_route)
 app.include_router(user_route)
 app.include_router(lawyer_route)
+app.include_router(chat_route)
+app.include_router(legal_ai_route)

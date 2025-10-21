@@ -14,7 +14,7 @@ from src.lawyer.constants import (
 )
 
 
-class LawyerVerificationRequestSummaryResponse(BaseModel):
+class RequestSummaryResponse(BaseModel):
     id: UUID
     user_id: UUID
     status: LawyerVerificationStatus
@@ -27,7 +27,7 @@ class LawyerVerificationRequestSummaryResponse(BaseModel):
     updated_at: datetime
 
 
-class LawyerVerificationRequestDetailResponse(LawyerVerificationRequestSummaryResponse):
+class RequestDetailResponse(RequestSummaryResponse):
     identity_card_front_url: str
     identity_card_back_url: str
     portrait_url: str
@@ -35,7 +35,7 @@ class LawyerVerificationRequestDetailResponse(LawyerVerificationRequestSummaryRe
     bachelor_degree_url: str
 
 
-class LawyerVerificationRequestRejectPayload(BaseModel):
+class RequestRejectPayload(BaseModel):
     rejection_reason: str = Field(..., max_length=500)
 
 
