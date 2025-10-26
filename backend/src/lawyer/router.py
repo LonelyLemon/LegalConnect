@@ -60,6 +60,7 @@ from src.lawyer.utils import (
     generate_presigned_url,
     upload_file_to_s3,
 )
+from src.booking.utils import calculate_lawyer_rating
 from src.user.constants import UserRole
 from src.user.models import User
 
@@ -136,9 +137,13 @@ def _ensure_admin(user: User) -> None:
         raise RequestForbidden()
 
 
-def _build_profile_response(profile: LawyerProfile, 
-                            user: User) -> LawyerProfileResponse:
+async def _build_profile_response(db: SessionDep,
+                                  profile: LawyerProfile, 
+                                  user: User
+                                  ) -> LawyerProfileResponse:
     
+    rating = await calculate_lawyer_rating(db, profile.user_id)
+
     return LawyerProfileResponse(
         id = profile.id,
         user_id = profile.user_id,
@@ -151,6 +156,7 @@ def _build_profile_response(profile: LawyerProfile,
         education = profile.education,
         current_level = profile.current_level,
         years_of_experience = profile.years_of_experience,
+        average_rating = rating,
         create_at = profile.create_at,
         updated_at = profile.updated_at,
     )
@@ -177,7 +183,8 @@ async def create_lawyer_verification_request(db: SessionDep,
                                              bachelor_degree: UploadFile = File(...),
                                              years_of_experience: int = Form(...),
                                              current_job_position: str | None = Form(default=None),
-                                             current_user: User = Depends(get_current_user)) -> RequestDetailResponse:
+                                             current_user: User = Depends(get_current_user)
+                                             ) -> RequestDetailResponse:
     
     if current_user.role != UserRole.CLIENT.value:
         raise RequestRoleForbidden()
@@ -483,7 +490,7 @@ async def get_public_lawyer_profile(lawyer_id: UUID,
     if not user or user.role != UserRole.LAWYER.value:
         raise LawyerProfileNotFound()
 
-    return _build_profile_response(profile, user)
+    return await _build_profile_response(db, profile, user)
 
 
 @lawyer_route.get("/profile/me",
@@ -500,7 +507,7 @@ async def get_my_lawyer_profile(db: SessionDep,
         raise LawyerProfileNotFound()
 
     user = await db.get(User, current_user.id) or current_user
-    return _build_profile_response(profile, user)
+    return await _build_profile_response(db, profile, user)
 
 
 @lawyer_route.patch("/profile/me",
@@ -562,4 +569,4 @@ async def update_my_lawyer_profile(payload: LawyerProfileUpdatePayload,
     await db.refresh(profile)
 
     user = await db.get(User, current_user.id) or current_user
-    return _build_profile_response(profile, user)
+    return await _build_profile_response(db, profile, user)

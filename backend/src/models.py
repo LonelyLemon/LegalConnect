@@ -11,3 +11,10 @@ from src.chat.models import  (
     ChatMessage,
     ChatMessageReceipt,
 )
+from src.documentation.models import LawDocumentation
+from src.booking.models import (
+    LawyerScheduleSlot,
+    LawyerRating,
+    BookingRequest,
+    CaseHistory
+)

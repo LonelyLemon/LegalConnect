@@ -1,6 +1,5 @@
 from datetime import datetime
 from uuid import UUID
-
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from src.lawyer.constants import (
@@ -51,6 +50,7 @@ class LawyerProfileResponse(BaseModel):
     education: str | None
     current_level: str | None
     years_of_experience: int
+    average_rating: float | None = Field(default=None)
     create_at: datetime
     updated_at: datetime
 
