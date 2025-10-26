@@ -26,6 +26,5 @@ ENV ALEMBIC_CONFIG=/app/alembic.ini
 # Place executables in the environment at the front of the path
 EXPOSE 8000
 # Run the FastAPI application by default
-# Uses `fastapi dev` to enable hot-reloading when the `watch` sync occurs
-# Uses `--host 0.0.0.0` to allow access from outside the container
-CMD ["sh", "-lc", "uv run alembic upgrade head && uv run uvicorn src.main:app"]
+# Uses `uvicorn` bound to 0.0.0.0 so the service is reachable from outside the container
+CMD ["sh", "-lc", "uv run alembic upgrade head && uv run uvicorn src.main:app --host 0.0.0.0 --port 8000"]
