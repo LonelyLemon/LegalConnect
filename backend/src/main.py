@@ -1,11 +1,7 @@
 import fastapi
-import logging
 
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import Request, status
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 from arq.connections import create_pool, RedisSettings
 from sqlalchemy.future import select
 from starlette.middleware.cors import CORSMiddleware
@@ -17,7 +13,11 @@ from src.auth.services import hash_password
 from src.user.constants import UserRole
 from src.user.models import User
 from src.user.router import user_route
-
+from src.lawyer.router import lawyer_route
+from src.chat.router import chat_route
+from src.legal_ai.router import legal_ai_route
+from src.documentation.router import documentation_route
+from src.booking.router import booking_route
 
 THIS_DIR = Path(__file__).parent
 
@@ -70,27 +70,10 @@ app.add_middleware(
     allow_headers=settings.CORS_HEADERS,
 )
 
-# Exception handlers
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "detail": "Validation error",
-            "errors": exc.errors()
-        }
-    )
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-    logging.error(f"Unhandled exception: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "detail": "Internal server error",
-            "message": "An unexpected error occurred"
-        }
-    )
-
 app.include_router(auth_route)
 app.include_router(user_route)
+app.include_router(lawyer_route)
+app.include_router(chat_route)
+app.include_router(legal_ai_route)
+app.include_router(booking_route)
+app.include_router(documentation_route)

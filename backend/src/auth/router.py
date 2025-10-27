@@ -31,6 +31,7 @@ auth_route = APIRouter(
 @auth_route.post('/login')
 async def login(db: SessionDep,
                 login_request: OAuth2PasswordRequestForm = Depends()):
+    
     email = login_request.username.strip().lower()
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -57,6 +58,7 @@ async def login(db: SessionDep,
 
 @auth_route.post('/refresh')
 async def refresh_token(refresh_token: str):
+    
     try:
         payload = decode_token(refresh_token)
         email: str = payload.get("sub")

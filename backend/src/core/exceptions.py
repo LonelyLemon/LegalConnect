@@ -24,7 +24,6 @@ class NotAuthenticated(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=self.STATUS_CODE,
-            detail=self.DETAIL,
             headers={"WWW-Authenticate": "Bearer"}
         )
 
