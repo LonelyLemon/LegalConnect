@@ -1,8 +1,8 @@
 import { useAppSelector } from '../redux/hook';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AuthStackRoutes } from './routes';
-import { selectIsLoggedIn } from '../stores/user.slices';
+import { selectIsLoggedIn } from '../stores/user.slice';
 import MainStack from './MainStack';
 
 const AppStack = createNativeStackNavigator();
@@ -23,8 +23,11 @@ function AuthStack() {
 }
 
 export default function AppNavigator() {
-  // const isLoggedIn = useAppSelector(selectIsLoggedIn);
-  const isLoggedIn = true;
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  // const isLoggedIn = true;
+  useEffect(() => {
+    console.log('isLoggedIn: ', isLoggedIn);
+  }, [isLoggedIn]);
 
   return (
     <AppStack.Navigator

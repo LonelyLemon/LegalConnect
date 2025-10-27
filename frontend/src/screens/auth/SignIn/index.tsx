@@ -17,7 +17,7 @@ import {
   selectError,
   selectIsLoading,
   signInWithEmailPassword,
-} from '../../../stores/user.slices';
+} from '../../../stores/user.slice';
 import { FormLogin } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
 import * as styles from './styles';
@@ -32,7 +32,7 @@ export default function SignInScreen() {
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
   const control = useForm<FormLogin>({
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: 'admin@example.com', password: 'admin123456' },
   });
 
   const {
@@ -84,7 +84,6 @@ export default function SignInScreen() {
       signInWithEmailPassword({
         email: data.email,
         password: data.password,
-        captchaValue: 'test',
       }),
     );
   };

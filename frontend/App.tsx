@@ -10,9 +10,10 @@ if (__DEV__) {
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-import { store } from './src/redux/store';
+import { store, persistor } from './src/redux/store';
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import ThemeProvider from './src/theme/theme.provider';
 import AppNavigator from './src/navigation/AppNavigator';
 
@@ -23,8 +24,12 @@ function App() {
     <SafeAreaProvider>
       <ThemeProvider>
         <ReduxProvider store={store}>
-          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-          <AppContent />
+          <PersistGate loading={null} persistor={persistor}>
+            <StatusBar
+              barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            />
+            <AppContent />
+          </PersistGate>
         </ReduxProvider>
       </ThemeProvider>
     </SafeAreaProvider>

@@ -5,7 +5,7 @@ import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/ionicons';
 import * as styles from './styles';
 interface LawyerCardProps {
-  id: string;
+  id: number;
   name: string;
   description: string;
   rating: number;
@@ -15,6 +15,7 @@ interface LawyerCardProps {
 }
 
 export default function LawyerCard({
+  id,
   name,
   description,
   rating,

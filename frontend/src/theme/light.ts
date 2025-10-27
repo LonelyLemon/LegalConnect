@@ -1,81 +1,92 @@
-import { paletteLight } from "./paletteLight";
+import { paletteLight } from './paletteLight';
 
 export const colors = {
   palette: paletteLight,
-  transparent: "rgba(0, 0, 0, 0)",
-  buttonDisabled: "rgba(27, 27, 34, 0.1)",
-  buttonTextDisabled: "rgba(27, 27, 34, 0.38)",
-  indicator: "#4a9eff",
+  transparent: 'rgba(0, 0, 0, 0)',
+  buttonDisabled: 'rgba(27, 27, 34, 0.1)',
+  buttonTextDisabled: 'rgba(27, 27, 34, 0.38)',
+  indicator: '#4B5C92',
+
   processStatus: {
     approved: {
-      badgeColor: "#D1FAE5",
-      textColor: "#059669",
+      badgeColor: '#DBE1FF', // primaryContainer
+      textColor: '#334478', // onPrimaryContainer
     },
     pending: {
-      badgeColor: "#FEF3C7",
-      textColor: "#D97706",
+      badgeColor: '#DDE1F9', // secondaryContainer
+      textColor: '#414659', // onSecondaryContainer
     },
     rejected: {
-      badgeColor: "#FEE2E2",
-      textColor: "#DC2626",
+      badgeColor: '#FFDAD6', // errorContainer
+      textColor: '#93000A', // onErrorContainer
     },
     new: {
-      badgeColor: "#E0E7FF",
-      textColor: "#4F46E5",
+      badgeColor: '#FAF8FF', // surface
+      textColor: '#4B5C92', // primary
     },
     undefined: {
-      badgeColor: "#F3F4F6",
-      textColor: "#6B7280",
+      badgeColor: '#EEEDF4', // surfaceContainer
+      textColor: '#757680', // outline
     },
   },
 
-  primary: "#3C3EB7",
-  surfaceTint: "#4C4FC8",
-  onPrimary: "#FFFFFF",
-  primaryContainer: "#5558D1",
-  onPrimaryContainer: "#E5E4FF",
-  secondary: "#595A89",
-  onSecondary: "#FFFFFF",
-  secondaryContainer: "#C7C7FD",
-  onSecondaryContainer: "#505280",
-  tertiary: "#832483",
-  onTertiary: "#FFFFFF",
-  tertiaryContainer: "#A03F9D",
-  onTertiaryContainer: "#FFDCF6",
-  error: "#BA1A1A",
-  onError: "#FFFFFF",
-  errorContainer: "#FFDAD6",
-  onErrorContainer: "#93000A",
-  background: "#FCF8FF",
-  onBackground: "#1B1B22",
-  surface: "#FCF8FF",
-  onSurface: "#1B1B22",
-  surfaceVariant: "#E3E0F2",
-  onSurfaceVariant: "#464553",
-  outline: "#767685",
-  outlineVariant: "#C7C5D6",
-  shadow: "#000000",
-  scrim: "#000000",
-  inverseSurface: "#303038",
-  inverseOnSurface: "#F2EFFA",
-  inversePrimary: "#C0C1FF",
-  primaryFixed: "#E1E0FF",
-  onPrimaryFixed: "#06006C",
-  primaryFixedDim: "#C0C1FF",
-  onPrimaryFixedVariant: "#3334AF",
-  secondaryFixed: "#E1E0FF",
-  onSecondaryFixed: "#151642",
-  secondaryFixedDim: "#C1C2F8",
-  onSecondaryFixedVariant: "#414270",
-  tertiaryFixed: "#FFD7F6",
-  onTertiaryFixed: "#380039",
-  tertiaryFixedDim: "#FFAAF5",
-  onTertiaryFixedVariant: "#7A197A",
-  surfaceDim: "#DBD8E3",
-  surfaceBright: "#FCF8FF",
-  surfaceContainerLowest: "#FFFFFF",
-  surfaceContainerLow: "#F5F2FD",
-  surfaceContainer: "#EFECF7",
-  surfaceContainerHigh: "#EAE7F1",
-  surfaceContainerHighest: "#E4E1EC",
+  primary: '#4B5C92',
+  surfaceTint: '#4B5C92',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#DBE1FF',
+  onPrimaryContainer: '#334478',
+
+  secondary: '#595E72',
+  onSecondary: '#FFFFFF',
+  secondaryContainer: '#DDE1F9',
+  onSecondaryContainer: '#414659',
+
+  tertiary: '#745470',
+  onTertiary: '#FFFFFF',
+  tertiaryContainer: '#FFD6F8',
+  onTertiaryContainer: '#5B3D58',
+
+  error: '#BA1A1A',
+  onError: '#FFFFFF',
+  errorContainer: '#FFDAD6',
+  onErrorContainer: '#93000A',
+
+  background: '#FAF8FF',
+  onBackground: '#1A1B21',
+  surface: '#FAF8FF',
+  onSurface: '#1A1B21',
+
+  surfaceVariant: '#E2E2EC',
+  onSurfaceVariant: '#45464F',
+  outline: '#757680',
+  outlineVariant: '#C5C6D0',
+  shadow: '#000000',
+  scrim: '#000000',
+
+  inverseSurface: '#2F3036',
+  inverseOnSurface: '#F1F0F7',
+  inversePrimary: '#B4C5FF',
+
+  primaryFixed: '#DBE1FF',
+  onPrimaryFixed: '#00174B',
+  primaryFixedDim: '#B4C5FF',
+  onPrimaryFixedVariant: '#334478',
+
+  secondaryFixed: '#DDE1F9',
+  onSecondaryFixed: '#161B2C',
+  secondaryFixedDim: '#C1C5DD',
+  onSecondaryFixedVariant: '#414659',
+
+  tertiaryFixed: '#FFD6F8',
+  onTertiaryFixed: '#2B122B',
+  tertiaryFixedDim: '#E2BBDB',
+  onTertiaryFixedVariant: '#5B3D58',
+
+  surfaceDim: '#DAD9E0',
+  surfaceBright: '#FAF8FF',
+  surfaceContainerLowest: '#FFFFFF',
+  surfaceContainerLow: '#F4F3FA',
+  surfaceContainer: '#EEEDF4',
+  surfaceContainerHigh: '#E8E7EF',
+  surfaceContainerHighest: '#E3E2E9',
 } as const;

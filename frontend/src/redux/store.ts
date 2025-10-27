@@ -1,10 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
-import userReducer from '../stores/user.slices';
+import userReducer from '../stores/user.slice';
+import { documentReducer } from '../stores/document.slice';
+import { lawyerReducer } from '../stores/lawyer.slices';
 
 const allReducers = {
   user: userReducer,
+  document: documentReducer,
+  lawyer: lawyerReducer,
 };
 
 export const rootReducer = combineReducers(allReducers);
