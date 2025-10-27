@@ -3,6 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { MainStackNames } from '../../../navigation/routes';
 
 type ChatItem = {
   id: string;
@@ -51,9 +53,19 @@ const mockChats: ChatItem[] = [
 
 export default function MessagesScreen() {
   const { themed } = useAppTheme();
+  const navigation = useNavigation<NavigationProp<any>>();
 
   const renderItem = ({ item }: { item: ChatItem }) => (
-    <TouchableOpacity style={themed(styles.card)}>
+    <TouchableOpacity
+      style={themed(styles.card)}
+      onPress={() =>
+        navigation.navigate(MainStackNames.ChatDetail, {
+          chatId: item.id,
+          name: item.name,
+          avatar: item.avatar,
+        })
+      }
+    >
       <View style={themed(styles.avatarWrapper)}>
         <Image source={{ uri: item.avatar }} style={themed(styles.avatar)} />
         {item.online ? <View style={themed(styles.onlineDot)} /> : null}

@@ -13,6 +13,8 @@ import MessagesScreen from '../screens/main/Messages';
 import DocumentsScreen from '../screens/main/Documents';
 import TabNavigator from './TabNavigator';
 import LawyerProfileScreen from '../screens/main/LawyerProfile';
+import ChatDetailScreen from '../screens/main/Messages/ChatDetail';
+import { CaseDetail } from '../screens/main/Cases/CaseDetail';
 
 export type StackScreenRoute = {
   name: string;
@@ -34,6 +36,8 @@ export const AuthStackNames = {
 export const MainStackNames = {
   HomeTabs: 'HomeTabs',
   LawyerProfile: 'LawyerProfile',
+  ChatDetail: 'ChatDetail',
+  CaseDetail: 'CaseDetail',
 };
 
 export const HomeTabsNames = {
@@ -96,6 +100,16 @@ export const MainStackRoutes: StackScreenRoute[] = [
   {
     name: MainStackNames.LawyerProfile,
     component: LawyerProfileScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.ChatDetail,
+    component: ChatDetailScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.CaseDetail,
+    component: CaseDetail,
     options: { headerShown: false },
   },
 ];
