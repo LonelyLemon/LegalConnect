@@ -21,4 +21,5 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "scikit-learn>=1.7.2",
     "sqlalchemy>=2.0.43",
+    "psycopg2-binary>=2.9",
 ]

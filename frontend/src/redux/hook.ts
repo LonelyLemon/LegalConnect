@@ -6,5 +6,5 @@ export type AppThunkDispatch = ThunkDispatch<RootState, any, AnyAction>;
 
 export const useAppDispatch = () => useDispatch<AppThunkDispatch>();
 export const useAppSelector = <T>(selector: (state: RootState) => T): T => {
-  return useSelector((state: { root: RootState }) => selector(state.root));
+  return useSelector((state: RootState) => selector(state));
 };

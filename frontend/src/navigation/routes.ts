@@ -7,8 +7,14 @@ import ResetSuccessScreen from '../screens/auth/ResetSuccess';
 import SetNewPasswordScreen from '../screens/auth/SetNewPassword';
 import CompleteProfileScreen from '../screens/auth/CompleteProfile';
 import HomeScreen from '../screens/main/Home';
-import SettingsScreen from '../screens/main/Settings';
+import SettingsScreen from '../screens/main/Setting';
+import CasesScreen from '../screens/main/Cases';
+import MessagesScreen from '../screens/main/Messages';
+import DocumentsScreen from '../screens/main/Documents';
 import TabNavigator from './TabNavigator';
+import LawyerProfileScreen from '../screens/main/LawyerProfile';
+import ChatDetailScreen from '../screens/main/Messages/ChatDetail';
+import { CaseDetail } from '../screens/main/Cases/CaseDetail';
 
 export type StackScreenRoute = {
   name: string;
@@ -29,12 +35,17 @@ export const AuthStackNames = {
 
 export const MainStackNames = {
   HomeTabs: 'HomeTabs',
+  LawyerProfile: 'LawyerProfile',
+  ChatDetail: 'ChatDetail',
+  CaseDetail: 'CaseDetail',
+  CompleteProfile: 'CompleteProfile',
 };
 
 export const HomeTabsNames = {
   Home: 'Home',
-  Notifications: 'Notifications',
-  CreateForm: 'CreateForm',
+  Cases: 'Cases',
+  Messages: 'Messages',
+  Documents: 'Documents',
   Setting: 'Settings',
 };
 
@@ -87,12 +98,47 @@ export const MainStackRoutes: StackScreenRoute[] = [
     component: TabNavigator,
     options: { headerShown: false },
   },
+  {
+    name: MainStackNames.LawyerProfile,
+    component: LawyerProfileScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.ChatDetail,
+    component: ChatDetailScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.CaseDetail,
+    component: CaseDetail,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.CompleteProfile,
+    component: CompleteProfileScreen,
+    options: { headerShown: false },
+  },
 ];
 
 export const HomeTabsRoutes: StackScreenRoute[] = [
   {
     name: HomeTabsNames.Home,
     component: HomeScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: HomeTabsNames.Cases,
+    component: CasesScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: HomeTabsNames.Messages,
+    component: MessagesScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: HomeTabsNames.Documents,
+    component: DocumentsScreen,
     options: { headerShown: false },
   },
   {

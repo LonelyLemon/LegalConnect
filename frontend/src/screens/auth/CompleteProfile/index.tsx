@@ -115,7 +115,7 @@ export default function CompleteProfileScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Complete your profile" navigation="Welcome" />
+      <Header title="Complete your profile" showBackButton={true} />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"

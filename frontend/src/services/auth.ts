@@ -3,10 +3,10 @@ import { FormLogin, FormSignUp } from '../types/auth';
 import axios from 'axios';
 
 export const signIn = async (data: FormLogin) => {
-  const response = await axios.post('/auth/signin', data, {
-    baseURL: envConfig.authUrl,
+  const response = await axios.post('/auth/login', data, {
+    baseURL: envConfig.baseUrl,
   });
-  console.log('login response: ', response.data);
+  console.log('login response: ', response.data.data);
   if (response.data.status === 'error') {
     throw new Error(response.data.message);
   }
@@ -15,7 +15,7 @@ export const signIn = async (data: FormLogin) => {
 
 export const signUp = async (data: FormSignUp) => {
   const response = await axios.post('/auth/signup', data, {
-    baseURL: envConfig.authUrl,
+    baseURL: envConfig.baseUrl,
   });
   console.log('signup response: ', response.data);
   if (response.data.status === 'error') {

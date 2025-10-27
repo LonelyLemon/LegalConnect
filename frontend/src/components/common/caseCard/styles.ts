@@ -1,28 +1,29 @@
 import { ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { ThemedStyle } from '../../../theme';
-import { moderateScale, verticalScale } from 'react-native-size-matters';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 
 export const cardContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.surface,
-  borderRadius: moderateScale(12),
-  padding: moderateScale(spacing.md),
-  marginVertical: verticalScale(spacing.xs),
-  marginHorizontal: moderateScale(spacing.sm),
+  borderRadius: moderateScale(8),
+  padding: moderateScale(spacing.sm),
+  marginVertical: verticalScale(spacing.xxxs),
+  marginHorizontal: moderateScale(spacing.xs),
   shadowColor: colors.shadow,
   shadowOffset: {
     width: 0,
-    height: moderateScale(2),
+    height: moderateScale(1),
   },
-  shadowOpacity: 0.1,
-  shadowRadius: moderateScale(4),
-  elevation: 3,
+  shadowOpacity: 0.08,
+  shadowRadius: moderateScale(2),
+  elevation: 2,
+  width: moderateScale(280),
 });
 
 export const headerSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'flex-start',
-  marginBottom: verticalScale(spacing.sm),
+  marginBottom: verticalScale(spacing.xs),
 });
 
 export const profileSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -32,10 +33,11 @@ export const profileSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 });
 
 export const profileImage: ThemedStyle<ImageStyle> = ({ spacing }) => ({
-  width: moderateScale(48),
-  height: moderateScale(48),
+  width: moderateScale(spacing.xxxxl),
+  height: moderateScale(spacing.xxxxl),
   borderRadius: moderateScale(8),
-  marginRight: moderateScale(spacing.sm),
+  marginRight: moderateScale(spacing.xs),
+  marginTop: scale(spacing.xxs),
 });
 
 export const titleSection: ThemedStyle<ViewStyle> = () => ({
@@ -48,10 +50,10 @@ export const titleText: ThemedStyle<TextStyle> = ({
   fontSizes,
   spacing,
 }) => ({
-  fontSize: moderateScale(fontSizes.lg),
+  fontSize: moderateScale(fontSizes.md),
   fontWeight: 'bold',
   color: colors.onSurface,
-  marginBottom: verticalScale(spacing.xxxs),
+  marginBottom: verticalScale(spacing.xxs),
 });
 
 export const lawyerText: ThemedStyle<TextStyle> = ({
@@ -72,12 +74,12 @@ export const activityText: ThemedStyle<TextStyle> = ({
   color: colors.onSurfaceVariant,
 });
 
-export const statusBadge: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingHorizontal: moderateScale(spacing.sm),
+export const statusBadge: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
+  paddingHorizontal: moderateScale(spacing.xs),
   paddingVertical: verticalScale(spacing.xxxs),
-  borderRadius: moderateScale(16),
+  borderRadius: moderateScale(12),
   borderWidth: 1,
-  borderColor: 'rgba(0, 0, 0, 0.1)',
+  borderColor: colors.outline,
 });
 
 export const statusText: ThemedStyle<TextStyle> = ({ fontSizes }) => ({
@@ -90,19 +92,17 @@ export const currentTaskText: ThemedStyle<TextStyle> = ({
   fontSizes,
   spacing,
 }) => ({
-  fontSize: moderateScale(fontSizes.md),
+  fontSize: moderateScale(fontSizes.sm),
   color: colors.onSurface,
-  marginBottom: verticalScale(spacing.sm),
+  marginBottom: verticalScale(spacing.xxxs),
   fontWeight: '500',
 });
 
 export const progressSection: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginBottom: verticalScale(spacing.sm),
+  marginBottom: verticalScale(spacing.xxxs),
 });
 
-export const progressBarContainer: ThemedStyle<ViewStyle> = ({
-  spacing: _spacing,
-}) => ({
+export const progressBarContainer: ThemedStyle<ViewStyle> = ({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
 });
@@ -112,16 +112,16 @@ export const progressBarBackground: ThemedStyle<ViewStyle> = ({
   spacing,
 }) => ({
   flex: 1,
-  height: moderateScale(6),
+  height: moderateScale(4),
   backgroundColor: colors.surfaceVariant,
-  borderRadius: moderateScale(3),
-  marginRight: moderateScale(spacing.sm),
+  borderRadius: moderateScale(2),
+  marginRight: moderateScale(spacing.xs),
 });
 
 export const progressBarFill: ThemedStyle<ViewStyle> = ({ colors }) => ({
   height: '100%',
   backgroundColor: colors.primary,
-  borderRadius: moderateScale(3),
+  borderRadius: moderateScale(2),
 });
 
 export const progressText: ThemedStyle<TextStyle> = ({
@@ -131,7 +131,7 @@ export const progressText: ThemedStyle<TextStyle> = ({
   fontSize: moderateScale(fontSizes.sm),
   color: colors.onSurface,
   fontWeight: '500',
-  minWidth: moderateScale(32),
+  minWidth: moderateScale(28),
   textAlign: 'right',
 });
 
@@ -141,9 +141,7 @@ export const footerSection: ThemedStyle<ViewStyle> = () => ({
   alignItems: 'center',
 });
 
-export const commentsSection: ThemedStyle<ViewStyle> = ({
-  spacing: _spacing,
-}) => ({
+export const commentsSection: ThemedStyle<ViewStyle> = ({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
 });
@@ -153,7 +151,7 @@ export const commentsText: ThemedStyle<TextStyle> = ({
   fontSizes,
   spacing,
 }) => ({
-  fontSize: moderateScale(fontSizes.sm),
+  fontSize: moderateScale(fontSizes.xs),
   color: colors.onSurface,
   marginLeft: moderateScale(spacing.xxxs),
 });
@@ -166,7 +164,6 @@ export const lastUpdatedText: ThemedStyle<TextStyle> = ({
   color: colors.onSurfaceVariant,
 });
 
-// Default export for compatibility
 export default {
   cardContainer,
   headerSection,
