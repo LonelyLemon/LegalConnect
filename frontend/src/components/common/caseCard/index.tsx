@@ -1,9 +1,18 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ViewStyle,
+  ImageStyle,
+  TextStyle,
+} from 'react-native';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/ionicons';
 import * as styles from './styles';
+import { ThemedStyle } from '../../../theme';
 
 export interface CaseCardProps {
   id: string;
@@ -17,6 +26,18 @@ export interface CaseCardProps {
   commentsCount: number;
   lastUpdated: string;
   onPress?: () => void;
+  stylesOverride?: CaseCardStylesOverride;
+}
+
+export interface CaseCardStylesOverride {
+  cardContainer?: ThemedStyle<ViewStyle>;
+  headerSection?: ThemedStyle<ViewStyle>;
+  profileSection?: ThemedStyle<ViewStyle>;
+  profileImage?: ThemedStyle<ImageStyle>;
+  titleSection?: ThemedStyle<ViewStyle>;
+  titleText?: ThemedStyle<TextStyle>;
+  lawyerText?: ThemedStyle<TextStyle>;
+  activityText?: ThemedStyle<TextStyle>;
 }
 
 export default function CaseCard({
@@ -31,6 +52,7 @@ export default function CaseCard({
   commentsCount,
   lastUpdated,
   onPress,
+  stylesOverride,
 }: CaseCardProps) {
   const { themed, theme } = useAppTheme();
 
@@ -53,25 +75,53 @@ export default function CaseCard({
 
   return (
     <TouchableOpacity
-      style={themed(styles.cardContainer)}
+      style={[
+        themed(styles.cardContainer),
+        themed(stylesOverride?.cardContainer),
+      ]}
       onPress={onPress}
       activeOpacity={0.8}
     >
       {/* Header Section */}
-      <View style={themed(styles.headerSection)}>
+      <View
+        style={[
+          themed(styles.headerSection),
+          themed(stylesOverride?.headerSection),
+        ]}
+      >
         <View style={themed(styles.profileSection)}>
           <Image
             source={{ uri: lawyerImage }}
-            style={themed(styles.profileImage)}
+            style={[
+              themed(styles.profileImage),
+              themed(stylesOverride?.profileImage),
+            ]}
           />
-          <View style={themed(styles.titleSection)}>
+          <View
+            style={[
+              themed(styles.titleSection),
+              themed(stylesOverride?.titleSection),
+            ]}
+          >
             <Text style={themed(styles.titleText)} numberOfLines={1}>
               {title}
             </Text>
-            <Text style={themed(styles.lawyerText)} numberOfLines={1}>
+            <Text
+              style={[
+                themed(styles.lawyerText),
+                themed(stylesOverride?.lawyerText),
+              ]}
+              numberOfLines={1}
+            >
               Lawyer: {lawyerName}
             </Text>
-            <Text style={themed(styles.activityText)} numberOfLines={1}>
+            <Text
+              style={[
+                themed(styles.activityText),
+                themed(stylesOverride?.activityText),
+              ]}
+              numberOfLines={1}
+            >
               Labor: {lastActivity}
             </Text>
           </View>

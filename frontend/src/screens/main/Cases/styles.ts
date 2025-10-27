@@ -57,3 +57,8 @@ export const placeholderText: ThemedStyle<TextStyle> = ({
   textAlign: 'center',
   marginTop: verticalScale(spacing.xl),
 });
+
+export const listContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingVertical: verticalScale(spacing.xs),
+  paddingHorizontal: moderateScale(spacing.xs),
+});
