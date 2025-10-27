@@ -11,6 +11,7 @@ import { Lawyer } from '../../../types/lawyer.ts';
 import Icon from '@react-native-vector-icons/ionicons';
 import { moderateScale } from 'react-native-size-matters';
 import Description from './Description/index.tsx';
+import Review from './Review/index.tsx';
 
 type TabType = 'description' | 'review' | 'cases';
 
@@ -46,13 +47,7 @@ export default function LawyerProfileScreen({
       case 'description':
         return <Description />;
       case 'review':
-        return (
-          <View style={themed(styles.content)}>
-            <Text style={themed(styles.placeholderText)}>
-              Reviews will be displayed here
-            </Text>
-          </View>
-        );
+        return <Review lawyerId={id} />;
       case 'cases':
         return (
           <View style={themed(styles.content)}>

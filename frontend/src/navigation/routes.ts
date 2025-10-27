@@ -7,7 +7,7 @@ import ResetSuccessScreen from '../screens/auth/ResetSuccess';
 import SetNewPasswordScreen from '../screens/auth/SetNewPassword';
 import CompleteProfileScreen from '../screens/auth/CompleteProfile';
 import HomeScreen from '../screens/main/Home';
-import SettingsScreen from '../screens/main/Settings';
+import SettingsScreen from '../screens/main/Setting';
 import CasesScreen from '../screens/main/Cases';
 import MessagesScreen from '../screens/main/Messages';
 import DocumentsScreen from '../screens/main/Documents';
@@ -38,6 +38,7 @@ export const MainStackNames = {
   LawyerProfile: 'LawyerProfile',
   ChatDetail: 'ChatDetail',
   CaseDetail: 'CaseDetail',
+  CompleteProfile: 'CompleteProfile',
 };
 
 export const HomeTabsNames = {
@@ -110,6 +111,11 @@ export const MainStackRoutes: StackScreenRoute[] = [
   {
     name: MainStackNames.CaseDetail,
     component: CaseDetail,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.CompleteProfile,
+    component: CompleteProfileScreen,
     options: { headerShown: false },
   },
 ];

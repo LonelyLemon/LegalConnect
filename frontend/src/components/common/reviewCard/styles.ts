@@ -95,3 +95,20 @@ export const ratingText: ThemedStyle<TextStyle> = ({ fontSizes, colors }) => ({
   fontWeight: '600' as const,
   color: colors.onSurface,
 });
+
+export const reviewImagesContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  marginBottom: verticalScale(spacing.sm),
+  maxHeight: moderateScale(120),
+});
+
+export const reviewImagesContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  gap: moderateScale(spacing.xs),
+  paddingRight: moderateScale(spacing.md),
+});
+
+export const reviewImage: ThemedStyle<ImageStyle> = ({ spacing }) => ({
+  width: moderateScale(100),
+  height: moderateScale(100),
+  borderRadius: moderateScale(spacing.xs),
+  marginRight: moderateScale(spacing.xs),
+});

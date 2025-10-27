@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, ScrollView } from 'react-native';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/ionicons';
@@ -11,6 +11,7 @@ interface ReviewCardProps {
   reviewText: string;
   rating: number;
   profileImage?: string;
+  reviewImages?: string[];
 }
 
 export default function ReviewCard({
@@ -19,6 +20,7 @@ export default function ReviewCard({
   reviewText,
   rating,
   profileImage,
+  reviewImages,
 }: ReviewCardProps) {
   const { themed, theme } = useAppTheme();
 
@@ -43,6 +45,23 @@ export default function ReviewCard({
       </View>
 
       <Text style={themed(styles.reviewText)}>{reviewText}</Text>
+
+      {reviewImages && reviewImages.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={themed(styles.reviewImagesContainer)}
+          contentContainerStyle={themed(styles.reviewImagesContent)}
+        >
+          {reviewImages.map((imageUri, index) => (
+            <Image
+              key={index}
+              source={{ uri: imageUri }}
+              style={themed(styles.reviewImage)}
+            />
+          ))}
+        </ScrollView>
+      )}
 
       <View style={themed(styles.ratingBadge)}>
         <Text style={themed(styles.ratingText)}>{rating}</Text>

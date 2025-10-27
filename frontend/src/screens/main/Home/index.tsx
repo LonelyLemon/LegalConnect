@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ScrollView, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LawyerCard from '../../../components/common/lawyerCard';
 import { useAppTheme } from '../../../theme/theme.provider';
@@ -20,6 +27,8 @@ import {
 import { Lawyer } from '../../../types/lawyer';
 import { MainStackNames } from '../../../navigation/routes';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import Input from '../../../components/common/input';
+import Icon from '@react-native-vector-icons/ionicons';
 
 // Separator component for horizontal list
 const ItemSeparator = () => <View style={{ width: moderateScale(12) }} />;
@@ -106,12 +115,14 @@ const caseData = [
 ];
 
 export default function HomeScreen() {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<NavigationProp<any>>();
   const dispatch = useAppDispatch();
   const documentsData = useAppSelector(selectDocuments);
   const lawyersData = useAppSelector(selectLawyers);
+
   useEffect(() => {
     dispatch(fetchPopularDocuments());
   }, [dispatch]);
@@ -122,6 +133,10 @@ export default function HomeScreen() {
   const refetchData = () => {
     dispatch(fetchPopularDocuments());
     dispatch(fetchPopularLawyers());
+  };
+
+  const handleProfilePress = () => {
+    navigation.navigate(MainStackNames.CompleteProfile);
   };
 
   const renderDocumentCard = ({ item }: { item: any }) => (
@@ -170,6 +185,31 @@ export default function HomeScreen() {
           <RefreshControl refreshing={false} onRefresh={refetchData} />
         }
       >
+        {/* Header với search và profile icon */}
+        <View style={themed(styles.headerContainer)}>
+          <View style={themed(styles.searchContainer)}>
+            <Input
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search"
+              icon="search"
+              styles={{
+                container: themed(styles.searchInputContainer),
+                inputWrapper: themed(styles.searchInputWrapper),
+              }}
+            />
+          </View>
+          <TouchableOpacity
+            onPress={handleProfilePress}
+            style={themed(styles.profileButton)}
+          >
+            <Icon
+              name="person"
+              size={moderateScale(24)}
+              color={theme.colors.surface}
+            />
+          </TouchableOpacity>
+        </View>
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
             <Text style={themed(styles.sectionTitle)}>Luật sư nổi bật</Text>
