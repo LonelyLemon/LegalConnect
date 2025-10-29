@@ -1,6 +1,7 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Body
+from pathlib import Path
+from fastapi import APIRouter, Depends, Body, File, UploadFile
 from sqlalchemy.future import select
 from arq import create_pool
 from arq.connections import RedisSettings
@@ -21,9 +22,21 @@ from src.user.exceptions import (
     UserNotFound,
     InvalidPasswordMatch,
     UnauthorizedRoleUpdate,
-    InvalidRoleTransition
+    InvalidRoleTransition,
+    InvalidAvatarFile,
+    AvatarUploadFailed
 )
 from src.user.constants import UserRole
+from src.user.utils import (
+    build_avatar_key,
+    build_avatar_url,
+    delete_avatar_from_s3,
+    extract_key_from_avatar_url,
+    upload_avatar_to_s3,
+)
+
+ALLOWED_AVATAR_CONTENT_TYPES = {"image/png", "image/jpeg"}
+ALLOWED_AVATAR_EXTENSIONS = {".png", ".jpg"}
 
 from src.auth.services import (
     hash_password, 
@@ -98,6 +111,44 @@ async def update_user(db: SessionDep,
     await db.refresh(curr_user)
 
     return curr_user
+
+
+@user_route.post('/avatar', response_model=UserResponse)
+async def upload_avatar(db: SessionDep,
+                        avatar: UploadFile = File(...),
+                        current_user: User = Depends(get_current_user)):
+
+    file_suffix = Path(avatar.filename or "").suffix.lower()
+    content_type = avatar.content_type or ""
+
+    if content_type not in ALLOWED_AVATAR_CONTENT_TYPES or file_suffix not in ALLOWED_AVATAR_EXTENSIONS:
+        raise InvalidAvatarFile()
+
+    file_bytes = await avatar.read()
+    await avatar.close()
+
+    if not file_bytes:
+        raise InvalidAvatarFile()
+
+    s3_key = build_avatar_key(current_user.id, avatar.filename)
+    uploaded_key = await upload_avatar_to_s3(file_bytes, s3_key, content_type)
+
+    if not uploaded_key:
+        raise AvatarUploadFailed()
+
+    new_avatar_url = build_avatar_url(uploaded_key)
+
+    previous_key = extract_key_from_avatar_url(current_user.avatar_url)
+    if previous_key and previous_key != uploaded_key:
+        await delete_avatar_from_s3(previous_key)
+
+    current_user.avatar_url = new_avatar_url
+
+    await db.commit()
+    await db.refresh(current_user)
+
+    return current_user
+
 
 @user_route.patch('/{user_id}/role', response_model=UserResponse)
 async def update_user_role(user_id: uuid.UUID,
