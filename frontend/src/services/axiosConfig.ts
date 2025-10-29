@@ -26,6 +26,7 @@ const setupAxiosInterceptors = () => {
     }
     config.headers['User-Agent'] =
       'Mozilla/5.0 (Linux; Android 12; sdk_gphone64_arm64 Build/SE1A.220630.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36';
+    // token is already normalized: `${token_type} ${access_token}`
     if (token) {
       config.headers.Authorization = token;
     }
@@ -47,8 +48,8 @@ const setupAxiosInterceptors = () => {
     }
 
     if (status === 401) {
-      const token = store?.getState()?.user?.token;
-      if (!token) {
+      const refreshToken = store?.getState()?.user?.refreshToken;
+      if (!refreshToken) {
         return Promise.reject(err);
       }
 
@@ -64,21 +65,27 @@ const setupAxiosInterceptors = () => {
                 'Content-Type': 'application/json',
                 'User-Agent':
                   'Mozilla/5.0 (Linux; Android 12; sdk_gphone64_arm64 Build/SE1A.220630.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36',
-                Authorization: token,
+                // Use refresh token as Bearer
+                Authorization: `Bearer ${refreshToken}`,
               },
             },
           )
           .then((res: AxiosResponse) => {
-            const resData = res?.data;
-            console.log('resData refresh token: ', resData);
+            const raw = res?.data?.data ?? res?.data;
+            console.log('resData refresh token: ', raw);
 
-            if (resData?.data?.accessToken) {
-              store.dispatch(
-                userActions.setNewToken(resData?.data?.accessToken),
-              );
-              store.dispatch(userActions.setUser(resData?.data?.user));
+            const accessToken: string = raw?.access_token || '';
+            const newRefreshToken: string = raw?.refresh_token || '';
+            const tokenType: string = raw?.token_type || 'Bearer';
+
+            if (accessToken) {
+              const normalized = `${tokenType} ${accessToken}`;
+              store.dispatch(userActions.setNewToken(normalized));
+              if (newRefreshToken) {
+                store.dispatch(userActions.setRefreshToken(newRefreshToken));
+              }
               requestsToRetry.forEach(callback => {
-                callback(resData?.data?.accessToken);
+                callback(normalized);
               });
             } else {
               store.dispatch(userActions.setNewToken(''));
@@ -91,6 +98,7 @@ const setupAxiosInterceptors = () => {
           .catch((error: AxiosError) => {
             console.log('error refresh token: ', error);
             store.dispatch(userActions.setNewToken(''));
+            store.dispatch(userActions.setRefreshToken(''));
             requestsToRetry.forEach(callback => {
               callback(null);
             });

@@ -39,6 +39,9 @@ export const MainStackNames = {
   ChatDetail: 'ChatDetail',
   CaseDetail: 'CaseDetail',
   CompleteProfile: 'CompleteProfile',
+  Cases: 'Cases',
+  Messages: 'Messages',
+  Documents: 'Documents',
 };
 
 export const HomeTabsNames = {
@@ -116,6 +119,21 @@ export const MainStackRoutes: StackScreenRoute[] = [
   {
     name: MainStackNames.CompleteProfile,
     component: CompleteProfileScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.Cases,
+    component: CasesScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.Messages,
+    component: MessagesScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.Documents,
+    component: DocumentsScreen,
     options: { headerShown: false },
   },
 ];

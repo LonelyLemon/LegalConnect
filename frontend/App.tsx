@@ -16,6 +16,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import ThemeProvider from './src/theme/theme.provider';
 import AppNavigator from './src/navigation/AppNavigator';
+import ToastContainer from './src/components/common/Toast';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -29,6 +30,7 @@ function App() {
               barStyle={isDarkMode ? 'light-content' : 'dark-content'}
             />
             <AppContent />
+            <ToastContainer />
           </PersistGate>
         </ReduxProvider>
       </ThemeProvider>

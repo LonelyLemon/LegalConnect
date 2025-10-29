@@ -13,6 +13,7 @@ const initialState: UserState = {
   },
   permissions: [],
   token: '',
+  refreshToken: '',
   isLoggedIn: false,
   isLoading: false,
   error: null,
@@ -23,16 +24,29 @@ export const signInWithEmailPassword = createAsyncThunk(
   async (data: FormLogin, thunkApi) => {
     try {
       const response = await signIn(data);
+      // Response shape example:
+      // { access_token: string, refresh_token: string, token_type: 'bearer' }
+      const accessToken: string = (response?.access_token || '') as string;
+      const tokenType: string = (response?.token_type || 'Bearer') as string;
+      const normalizedToken = accessToken ? `${tokenType} ${accessToken}` : '';
       return {
-        user: response.user as User,
-        token: response.access_token as string,
-        permissions: response.permissions as string[],
+        user: (response?.user as User) || undefined,
+        token: normalizedToken,
+        refreshToken: (response?.refresh_token as string) || '',
+        permissions: (response?.permissions as string[]) || [],
       };
     } catch (error: any) {
       if (error instanceof AxiosError) {
-        return thunkApi.rejectWithValue(error.response?.data.message);
+        const data: any = error.response?.data;
+        const message =
+          data?.message ||
+          data?.detail ||
+          data?.error ||
+          error.message ||
+          'Login failed';
+        return thunkApi.rejectWithValue(message);
       }
-      return thunkApi.rejectWithValue(error.message || 'Login failed');
+      return thunkApi.rejectWithValue(error?.message || 'Login failed');
     }
   },
 );
@@ -90,6 +104,9 @@ export const userSlice = createSlice({
     setNewToken: (state: UserState, action: PayloadAction<string>) => {
       state.token = action.payload;
     },
+    setRefreshToken: (state: UserState, action: PayloadAction<string>) => {
+      state.refreshToken = action.payload;
+    },
   },
   extraReducers: builder => {
     builder
@@ -100,9 +117,13 @@ export const userSlice = createSlice({
       .addCase(signInWithEmailPassword.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isLoggedIn = true;
-        state.user = action.payload.user;
         state.token = action.payload.token;
-        state.permissions = action.payload.permissions;
+        state.refreshToken = action.payload.refreshToken || '';
+        // Only overwrite user if provided in payload
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        }
+        state.permissions = action.payload.permissions || [];
       })
       .addCase(signInWithEmailPassword.rejected, (state, action) => {
         state.isLoading = false;
@@ -137,6 +158,7 @@ export const userSlice = createSlice({
           name: '',
         };
         state.token = '';
+        state.refreshToken = '';
         state.permissions = [];
       })
       .addCase(signOut.rejected, (state, action) => {
@@ -156,6 +178,8 @@ export const selectIsLoading = (state: { user: UserState }) =>
 export const selectError = (state: { user: UserState }) => state?.user?.error;
 export const selectPermissions = (state: { user: UserState }) =>
   state?.user?.permissions;
+export const selectRefreshToken = (state: { user: UserState }) =>
+  state?.user?.refreshToken;
 
 const userReducer = userSlice.reducer;
 export default userReducer;

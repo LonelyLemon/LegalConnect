@@ -242,7 +242,13 @@ export default function HomeScreen() {
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
             <Text style={themed(styles.sectionTitle)}>Tiến độ vụ án</Text>
-            <Text style={themed(styles.viewMoreText)}>Xem thêm {'>'}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate(MainStackNames.Cases);
+              }}
+            >
+              <Text style={themed(styles.viewMoreText)}>Xem thêm {'>'}</Text>
+            </TouchableOpacity>
           </View>
           <FlatList
             data={caseData}

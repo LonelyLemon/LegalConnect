@@ -45,7 +45,7 @@ export default function LawyerProfileScreen({
   const renderTabContent = () => {
     switch (activeTab) {
       case 'description':
-        return <Description />;
+        return <Description lawyerId={id} />;
       case 'review':
         return <Review lawyerId={id} />;
       case 'cases':
