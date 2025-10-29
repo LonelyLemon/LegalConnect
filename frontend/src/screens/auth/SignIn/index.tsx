@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -17,9 +16,10 @@ import {
   selectError,
   selectIsLoading,
   signInWithEmailPassword,
-} from '../../../stores/user.slices';
+} from '../../../stores/user.slice';
 import { FormLogin } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
+import { showError } from '../../../types/toast';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
@@ -32,7 +32,7 @@ export default function SignInScreen() {
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
   const control = useForm<FormLogin>({
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: 'user1@example.com', password: 'string' },
   });
 
   const {
@@ -43,6 +43,9 @@ export default function SignInScreen() {
   const loading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
 
+  const onError = () => {
+    showError('Login failed');
+  };
   const fields = [
     {
       id: 'email',
@@ -72,8 +75,8 @@ export default function SignInScreen() {
       rules: {
         required: { value: true, message: 'Password is required' },
         minLength: {
-          value: 8,
-          message: 'Password must be at least 8 characters',
+          value: 4,
+          message: 'Password must be at least 4 characters',
         },
       },
     },
@@ -84,7 +87,6 @@ export default function SignInScreen() {
       signInWithEmailPassword({
         email: data.email,
         password: data.password,
-        captchaValue: 'test',
       }),
     );
   };
@@ -139,7 +141,7 @@ export default function SignInScreen() {
           {/* Nút đăng nhập full-width */}
           <TouchableOpacity
             style={themed(styles.signInButton)}
-            onPress={handleSubmit(handleSignIn)}
+            onPress={handleSubmit(handleSignIn, onError)}
             disabled={!!errors.email || !!errors.password}
           >
             <Text style={themed(styles.signInButtonText)}>{'Log in'}</Text>

@@ -5,7 +5,8 @@ interface EnvConfig {
 }
 
 const envConfig: EnvConfig = {
-  authUrl: Config.AUTH_URL || 'http://localhost:3000',
-  baseUrl: Config.BASE_URL || 'http://localhost:3000',
+  authUrl: Config.AUTH_URL || 'http://localhost:8000',
+  // baseUrl: Config.BASE_URL || 'https://legal-connect-xi.vercel.app/',
+  baseUrl: Config.BASE_URL || 'http://10.0.2.2:8000/',
 };
 export default envConfig;

@@ -1,4 +1,4 @@
-import { ThemedStyle } from '../../../../theme';
+import { ThemedStyle } from '../../../theme';
 import { TextStyle, ViewStyle } from 'react-native';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 

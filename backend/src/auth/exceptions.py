@@ -1,18 +1,18 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 
 class InvalidToken(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=401,
-            detail="Invalid token !"
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "Invalid token !"
         )
 
 
 class InvalidPassword(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=401,
-            detail="Invalid password !"
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "Invalid password !"
         )
 

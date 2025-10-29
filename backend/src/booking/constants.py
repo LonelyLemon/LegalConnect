@@ -1,0 +1,18 @@
+from enum import Enum
+
+
+class BookingRequestStatus(str, Enum):
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    DECLINED = "DECLINED"
+
+
+class CaseState(str, Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+MAX_BOOKING_TITLE_LENGTH = 200
+MAX_BOOKING_DESCRIPTION_LENGTH = 1000
+MAX_NOTE_LENGTH = 2000

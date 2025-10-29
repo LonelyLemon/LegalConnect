@@ -12,6 +12,8 @@ interface DatePickerProps {
   placeholder?: string;
   label: string;
   error?: string;
+  minimumDate?: Date;
+  maximumDate?: Date;
 }
 
 const DatePicker = ({
@@ -20,6 +22,8 @@ const DatePicker = ({
   placeholder = 'Select date',
   label,
   error,
+  minimumDate,
+  maximumDate,
 }: DatePickerProps) => {
   const [showPicker, setShowPicker] = useState(false);
   const { themed } = useAppTheme();
@@ -71,7 +75,8 @@ const DatePicker = ({
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={onDateChange}
-          maximumDate={new Date()}
+          minimumDate={minimumDate}
+          maximumDate={maximumDate}
         />
       )}
     </View>

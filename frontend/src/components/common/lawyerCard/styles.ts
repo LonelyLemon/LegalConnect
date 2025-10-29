@@ -16,7 +16,7 @@ export const cardContainer: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   shadowRadius: 8,
   elevation: 4,
   overflow: 'hidden',
-  width: moderateScale(160), // Fixed width for horizontal scroll
+  width: moderateScale(spacing.xxxxxl * 3), // Fixed width for horizontal scroll
   marginHorizontal: moderateScale(spacing.xxxs), // Small margin between cards
 });
 

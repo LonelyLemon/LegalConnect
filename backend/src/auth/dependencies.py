@@ -5,9 +5,10 @@ from sqlalchemy.future import select
 from src.core.database import SessionDep
 from src.core.exceptions import NotAuthenticated
 from src.user.models import User
+from src.user.exceptions import UserNotFound
 from src.auth.services import decode_token
 from src.auth.exceptions import InvalidToken
-from src.user.exceptions import UserNotFound
+
 
 bearer_scheme = HTTPBearer(auto_error=False)
 

@@ -31,6 +31,7 @@ auth_route = APIRouter(
 @auth_route.post('/login')
 async def login(db: SessionDep,
                 login_request: OAuth2PasswordRequestForm = Depends()):
+    
     email = login_request.username.strip().lower()
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -46,7 +47,13 @@ async def login(db: SessionDep,
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user_id": user.id,
+        "username": user.username,
+        "user_email": user.email,
+        "phone_number": user.phone_number,
+        "address": user.address,
+        "role": user.role
     }
 
 #      END LOGIN ROUTE      #
@@ -57,6 +64,7 @@ async def login(db: SessionDep,
 
 @auth_route.post('/refresh')
 async def refresh_token(refresh_token: str):
+    
     try:
         payload = decode_token(refresh_token)
         email: str = payload.get("sub")

@@ -3,6 +3,7 @@ import { User } from './user';
 export interface UserState {
   user: User;
   token: string;
+  refreshToken: string;
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;

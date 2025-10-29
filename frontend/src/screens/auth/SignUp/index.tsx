@@ -17,7 +17,7 @@ import {
   selectError,
   selectIsLoading,
   signUpWithEmailPassword,
-} from '../../../stores/user.slices';
+} from '../../../stores/user.slice';
 import { FormSignUp } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
 import * as styles from './styles';

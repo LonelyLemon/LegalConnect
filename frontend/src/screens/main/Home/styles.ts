@@ -10,14 +10,18 @@ export const scrollView: ThemedStyle<any> = () => ({
   flex: 1,
 });
 
+export const scrollContent: ThemedStyle<any> = ({ spacing }) => ({
+  paddingBottom: verticalScale(spacing.xxxxxl),
+});
+
 export const header: ThemedStyle<any> = ({ spacing }) => ({
   paddingHorizontal: moderateScale(spacing.md),
   paddingVertical: verticalScale(spacing.lg),
   alignItems: 'center',
 });
 
-export const title: ThemedStyle<any> = ({ colors, spacing }) => ({
-  fontSize: moderateScale(24),
+export const title: ThemedStyle<any> = ({ colors, spacing, fontSizes }) => ({
+  fontSize: moderateScale(fontSizes.lg),
   fontWeight: 'bold',
   color: colors.onBackground,
   marginBottom: verticalScale(spacing.xs),
@@ -75,4 +79,34 @@ export const flatListContent: ThemedStyle<any> = ({ spacing }) => ({
 export const horizontalListContent: ThemedStyle<any> = ({ spacing }) => ({
   paddingHorizontal: moderateScale(spacing.sm),
   paddingBottom: verticalScale(spacing.md),
+});
+
+export const headerContainer: ThemedStyle<any> = ({ spacing }) => ({
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: moderateScale(spacing.md),
+  paddingVertical: verticalScale(spacing.sm),
+  gap: moderateScale(spacing.sm),
+});
+
+export const searchContainer: ThemedStyle<any> = () => ({
+  flex: 1,
+});
+
+export const searchInputContainer: ThemedStyle<any> = () => ({
+  marginBottom: 0,
+});
+
+export const searchInputWrapper: ThemedStyle<any> = ({ colors }) => ({
+  backgroundColor: colors.surfaceContainerLowest,
+  borderWidth: 0,
+});
+
+export const profileButton: ThemedStyle<any> = ({ colors, spacing }) => ({
+  width: moderateScale(44),
+  height: moderateScale(44),
+  borderRadius: moderateScale(22),
+  backgroundColor: colors.primary,
+  justifyContent: 'center',
+  alignItems: 'center',
 });
