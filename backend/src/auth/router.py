@@ -53,7 +53,8 @@ async def login(db: SessionDep,
         "user_email": user.email,
         "phone_number": user.phone_number,
         "address": user.address,
-        "role": user.role
+        "role": user.role,
+        "avatar_url": user.avatar_url,
     }
 
 #      END LOGIN ROUTE      #
