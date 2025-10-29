@@ -475,8 +475,35 @@ async def revoke_lawyer_role(lawyer_id: UUID,
         updated_at=revocation.updated_at,
     )
 
+@lawyer_route.get("/profile",
+                  response_model=list[LawyerProfileResponse])
+async def list_lawyer_profiles(db: SessionDep,
+                               ) -> list[LawyerProfileResponse]:
 
-@lawyer_route.get("/profiles/{lawyer_id}",
+    result = await db.execute(
+        select(LawyerProfile, User)
+        .join(User, LawyerProfile.user_id == User.id)
+        .where(User.role == UserRole.LAWYER.value)
+    )
+
+    records = result.all()
+
+    profiles: list[LawyerProfileResponse] = []
+    for profile, user in records:
+        profiles.append(await _build_profile_response(db, profile, user))
+
+    profiles.sort(
+        key=lambda item: (
+            item.average_rating is None,
+            -(item.average_rating or 0),
+            item.display_name.lower(),
+        )
+    )
+
+    return profiles
+
+
+@lawyer_route.get("/profile/{lawyer_id}",
                   response_model=LawyerProfileResponse)
 async def get_public_lawyer_profile(lawyer_id: UUID,
                                     db: SessionDep
