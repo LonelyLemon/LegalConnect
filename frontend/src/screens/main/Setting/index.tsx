@@ -91,9 +91,9 @@ export default function SettingScreen() {
       {
         Father: TouchableOpacity,
         iconName: 'contrast-outline',
-        title: 'Theme',
+        title: t('setting.theme'),
         onPress: handleChangeTheme,
-        children: <TextChild text={themeType === 'light' ? 'Light' : 'Dark'} />,
+        children: <TextChild text={themeType === 'light' ? t('setting.light') : t('setting.dark')} />,
       },
       {
         Father: TouchableOpacity,
@@ -114,28 +114,28 @@ export default function SettingScreen() {
     {
       Father: TouchableOpacity,
       iconName: 'lock-closed-outline',
-      title: 'Password',
+      title: t('setting.password'),
       onPress: () => {},
       hasArrow: true,
     },
     {
       Father: TouchableOpacity,
       iconName: 'help-buoy-outline',
-      title: 'Support',
+      title: t('setting.support'),
       onPress: () => {},
       hasArrow: true,
     },
     {
       Father: TouchableOpacity,
       iconName: 'shield-checkmark-outline',
-      title: 'Terms',
+      title: t('setting.terms'),
       onPress: () => {},
       hasArrow: true,
     },
     {
       Father: TouchableOpacity,
       iconName: 'log-out-outline',
-      title: 'Logout',
+      title: t('setting.logout'),
       onPress: handleSignOut,
       hasArrow: false,
     },
@@ -143,7 +143,7 @@ export default function SettingScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)} edges={['top', 'bottom']}>
-      <Header title="Setting" showBackButton={true} />
+      <Header title={t('setting.title')} showBackButton={true} />
 
       {/* Header */}
       <ScrollView
@@ -169,14 +169,14 @@ export default function SettingScreen() {
             style={themed(styles.editButton)}
             onPress={handleEditProfile}
           >
-            <Text>Edit Profile</Text>
+            <Text>{t('setting.editProfile')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Preference */}
 
         <View style={themed(styles.section)}>
-          <Text style={themed(styles.sectionTitle)}>Preferences</Text>
+          <Text style={themed(styles.sectionTitle)}>{t('setting.preferences')}</Text>
 
           <View style={themed(styles.group)}>
             {settingGroup.map((item, index) => (
@@ -201,7 +201,7 @@ export default function SettingScreen() {
         {/* Account */}
 
         <View style={themed(styles.section)}>
-          <Text style={themed(styles.sectionTitle)}>Account</Text>
+          <Text style={themed(styles.sectionTitle)}>{t('setting.account')}</Text>
 
           <View style={themed(styles.group)}>
             {accountGroup.map((item, index) => (

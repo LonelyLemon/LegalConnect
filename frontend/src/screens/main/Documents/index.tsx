@@ -14,6 +14,7 @@ import * as styles from './styles';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import RadioGroup from '../../../components/common/radio';
 import Header from '../../../components/layout/header';
+import { useTranslation } from 'react-i18next';
 
 const documentData = {
   'DocType 1': [
@@ -76,13 +77,13 @@ const documentData = {
   ],
 };
 
-const filterOptions = ['All', 'DocType 1', 'DocType 2'];
 
 // Separator component for document list
 const ItemSeparator = () => <View style={{ height: moderateScale(12) }} />;
 
 export default function DocumentsScreen() {
   const { themed } = useAppTheme();
+  const { t } = useTranslation();
   const [selectedFilter, setSelectedFilter] = useState('All');
 
   const renderDocumentItem = ({ item }: { item: any }) => (
@@ -127,13 +128,14 @@ export default function DocumentsScreen() {
   return (
     <SafeAreaView style={themed(styles.container)} edges={['top', 'bottom']}>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
-      <Header title="Documents" showBackButton={false} />
+      <Header title={t('documents.title')} showBackButton={false} />
       <View style={themed(styles.filterContainer)}>
         <RadioGroup
-          options={filterOptions.map(filter => ({
-            label: filter,
-            value: filter,
-          }))}
+          options={[
+            { label: t('documents.all'), value: 'All' },
+            { label: 'DocType 1', value: 'DocType 1' },
+            { label: 'DocType 2', value: 'DocType 2' },
+          ]}
           selected={selectedFilter}
           onChange={setSelectedFilter}
         />

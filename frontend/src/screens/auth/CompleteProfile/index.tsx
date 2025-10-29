@@ -8,6 +8,7 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
+import { t } from '../../../i18n';
 // @ts-ignore - React Native image module resolution
 import AvatarPlaceholder from '../../../assets/imgs/Logo.png';
 
@@ -49,69 +50,69 @@ export default function CompleteProfileScreen() {
     {
       id: 'firstName',
       name: 'firstName',
-      label: 'First name',
+      label: t('auth.completeProfile.firstName'),
       type: 'input',
-      placeholder: 'Enter your first name',
+      placeholder: t('auth.completeProfile.enterFirstName'),
       error: errors?.firstName?.message,
-      rules: { required: { value: true, message: 'First name is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.firstNameRequired') } },
     },
     {
       id: 'lastName',
       name: 'lastName',
-      label: 'Last name',
+      label: t('auth.completeProfile.lastName'),
       type: 'input',
-      placeholder: 'Enter your first name',
+      placeholder: t('auth.completeProfile.enterLastName'),
       error: errors?.lastName?.message,
-      rules: { required: { value: true, message: 'Last name is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.lastNameRequired') } },
     },
     {
       id: 'phone',
       name: 'phone',
-      label: 'Phone number',
+      label: t('auth.completeProfile.phone'),
       type: 'input',
-      placeholder: 'Enter your phone number',
+      placeholder: t('auth.completeProfile.enterPhone'),
       error: errors?.phone?.message,
-      rules: { required: { value: true, message: 'Phone is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.phoneRequired') } },
     },
     {
       id: 'address',
       name: 'address',
-      label: 'Address',
+      label: t('auth.completeProfile.address'),
       type: 'input',
-      placeholder: 'Enter your address',
+      placeholder: t('auth.completeProfile.enterAddress'),
       error: errors?.address?.message,
-      rules: { required: { value: true, message: 'Address is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.addressRequired') } },
     },
     {
       id: 'gender',
       name: 'gender',
-      label: 'Gender',
+      label: t('auth.completeProfile.gender'),
       type: 'radio',
       options: [
-        { label: 'Male', value: 'Male' },
-        { label: 'Female', value: 'Female' },
-        { label: 'Other', value: 'Other' },
+        { label: t('auth.completeProfile.male'), value: 'Male' },
+        { label: t('auth.completeProfile.female'), value: 'Female' },
+        { label: t('auth.completeProfile.other'), value: 'Other' },
       ],
       error: errors?.gender?.message,
-      rules: { required: { value: true, message: 'Gender is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.genderRequired') } },
     },
     {
       id: 'dob',
       name: 'dob',
-      label: 'Date of Birth',
+      label: t('auth.completeProfile.dateOfBirth'),
       type: 'date',
       placeholder: 'YYYY-MM-DD',
       error: errors?.dob?.message,
-      rules: { required: { value: true, message: 'DOB is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.dobRequired') } },
     },
     {
       id: 'pob',
       name: 'pob',
-      label: 'Place of Birth',
+      label: t('auth.completeProfile.placeOfBirth'),
       type: 'input',
-      placeholder: 'Enter your place of birth',
+      placeholder: t('auth.completeProfile.enterPlaceOfBirth'),
       error: errors?.pob?.message,
-      rules: { required: { value: true, message: 'Place is required' } },
+      rules: { required: { value: true, message: t('auth.completeProfile.placeRequired') } },
     },
   ];
 
@@ -121,7 +122,7 @@ export default function CompleteProfileScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Complete your profile" showBackButton={true} />
+      <Header title={t('auth.completeProfile.title')} showBackButton={true} />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
@@ -146,7 +147,7 @@ export default function CompleteProfileScreen() {
               !!errors.pob
             }
           >
-            <Text style={themed(styles.primaryButtonText)}>Continue</Text>
+            <Text style={themed(styles.primaryButtonText)}>{t('auth.completeProfile.continue')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

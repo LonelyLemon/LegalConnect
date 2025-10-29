@@ -25,7 +25,7 @@ import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { useNavigation } from '@react-navigation/native';
 import { verticalScale } from 'react-native-size-matters';
-import Header from '../../../components/layout/header';
+import { t } from '../../../i18n';
 
 export default function SignInScreen() {
   const dispatch = useAppDispatch();
@@ -44,39 +44,39 @@ export default function SignInScreen() {
   const error = useAppSelector(selectError);
 
   const onError = () => {
-    showError('Login failed');
+    showError(t('auth.signIn.loginFailed'));
   };
   const fields = [
     {
       id: 'email',
       name: 'email',
-      label: 'Email',
+      label: t('auth.signIn.email'),
       type: 'input',
-      placeholder: 'Enter you email',
+      placeholder: t('auth.signIn.enterEmail'),
       icon: 'person-outline',
       error: errors?.email?.message,
       rules: {
-        required: { value: true, message: 'Email is required' },
+        required: { value: true, message: t('auth.signIn.emailRequired') },
         pattern: {
           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          message: 'Email is invalid',
+          message: t('auth.signIn.emailInvalid'),
         },
       },
     },
     {
       id: 'password',
       name: 'password',
-      label: 'Password',
+      label: t('auth.signIn.password'),
       type: 'input',
-      placeholder: 'Enter your password',
+      placeholder: t('auth.signIn.enterPassword'),
       secureTextEntry: true,
       icon: 'lock-closed-outline',
       error: errors?.password?.message,
       rules: {
-        required: { value: true, message: 'Password is required' },
+        required: { value: true, message: t('auth.signIn.passwordRequired') },
         minLength: {
           value: 4,
-          message: 'Password must be at least 4 characters',
+          message: t('auth.signIn.passwordMinLength', { count: 4 }),
         },
       },
     },
@@ -116,7 +116,7 @@ export default function SignInScreen() {
           </View>
 
           {/* Tiêu đề như ảnh */}
-          <Text style={themed(styles.welcomeTitle)}>{'Welcome back'}</Text>
+          <Text style={themed(styles.welcomeTitle)}>{t('auth.signIn.title')}</Text>
 
           <View
             style={{
@@ -131,7 +131,7 @@ export default function SignInScreen() {
           <View style={themed(styles.optionsContainer)}>
             <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={themed(styles.forgotPassword)}>
-                {'Forgot password?'}
+                {t('auth.signIn.forgotPassword')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -144,16 +144,16 @@ export default function SignInScreen() {
             onPress={handleSubmit(handleSignIn, onError)}
             disabled={!!errors.email || !!errors.password}
           >
-            <Text style={themed(styles.signInButtonText)}>{'Log in'}</Text>
+            <Text style={themed(styles.signInButtonText)}>{t('auth.signIn.logIn')}</Text>
           </TouchableOpacity>
 
           {/* Hàng Sign up giống ảnh */}
           <View style={themed(styles.signUpRow)}>
             <Text style={themed(styles.signUpMuted)}>
-              {'Don’t have an Account? '}
+              {t('auth.signIn.dontHaveAccount')}
             </Text>
             <TouchableOpacity onPress={handleNavigateToSignUp}>
-              <Text style={themed(styles.signUpLink)}>{'Sign up'}</Text>
+              <Text style={themed(styles.signUpLink)}>{t('auth.signIn.signUp')}</Text>
             </TouchableOpacity>
           </View>
         </View>

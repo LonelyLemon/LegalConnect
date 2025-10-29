@@ -192,7 +192,7 @@ export default function HomeScreen() {
             <Input
               value={searchQuery}
               onChange={setSearchQuery}
-              placeholder="Search"
+              placeholder={t('home.search')}
               icon="search"
               styles={{
                 container: themed(styles.searchInputContainer),
@@ -213,16 +213,16 @@ export default function HomeScreen() {
         </View>
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
-            <Text style={themed(styles.sectionTitle)}>Luật sư nổi bật</Text>
-            <Text style={themed(styles.viewMoreText)}>Xem thêm {'>'}</Text>
+            <Text style={themed(styles.sectionTitle)}>{t('home.featuredLawyers')}</Text>
+            <Text style={themed(styles.viewMoreText)}>{t('home.viewMore')} {'>'}</Text>
           </View>
 
           <View style={themed(styles.filterContainer)}>
             <RadioGroup
               options={[
                 { label: t('common.all'), value: 'all' },
-                { label: 'Luật sư nổi bật', value: 'featured' },
-                { label: 'Luật sư mới nhất', value: 'new' },
+                { label: t('home.featured'), value: 'featured' },
+                { label: t('home.newest'), value: 'new' },
               ]}
               selected={selectedFilter}
               onChange={setSelectedFilter}
@@ -242,13 +242,13 @@ export default function HomeScreen() {
         </View>
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
-            <Text style={themed(styles.sectionTitle)}>Tiến độ vụ án</Text>
+            <Text style={themed(styles.sectionTitle)}>{t('home.caseProgress')}</Text>
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate(MainStackNames.Cases);
               }}
             >
-              <Text style={themed(styles.viewMoreText)}>Xem thêm {'>'}</Text>
+              <Text style={themed(styles.viewMoreText)}>{t('home.viewMore')} {'>'}</Text>
             </TouchableOpacity>
           </View>
           <FlatList
@@ -264,8 +264,8 @@ export default function HomeScreen() {
         </View>
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
-            <Text style={themed(styles.sectionTitle)}>Tài liệu nổi bật</Text>
-            <Text style={themed(styles.viewMoreText)}>Xem thêm {'>'}</Text>
+            <Text style={themed(styles.sectionTitle)}>{t('home.featuredDocuments')}</Text>
+            <Text style={themed(styles.viewMoreText)}>{t('home.viewMore')} {'>'}</Text>
           </View>
           <FlatList
             data={documentsData}

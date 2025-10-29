@@ -8,6 +8,7 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainStackNames } from '../../../navigation/routes';
 import CaseCard, { CaseCardProps } from '../../../components/common/caseCard';
 import { verticalScale } from 'react-native-size-matters';
+import { useTranslation } from 'react-i18next';
 
 type TabType = 'pending' | 'processing' | 'completed';
 
@@ -19,13 +20,14 @@ export default function CasesScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
   const { themed } = useAppTheme();
   const navigation = useNavigation<NavigationProp<any>>();
+  const { t } = useTranslation();
   const tabs = useMemo(
     () => [
-      { key: 'pending', label: 'Pending' },
-      { key: 'processing', label: 'Processing' },
-      { key: 'completed', label: 'Completed' },
+      { key: 'pending', label: t('cases.pending') },
+      { key: 'processing', label: t('cases.processing') },
+      { key: 'completed', label: t('cases.completed') },
     ],
-    [],
+    [t],
   );
 
   // Mock data for cases
@@ -185,14 +187,14 @@ export default function CasesScreen() {
   const renderEmptyState = () => (
     <View style={themed(styles.content)}>
       <Text style={themed(styles.placeholderText)}>
-        No {activeTab} cases found
+        {t('cases.noCasesFound', { status: t(`cases.${activeTab}`) })}
       </Text>
     </View>
   );
 
   return (
     <SafeAreaView style={themed(() => ({ flex: 1 }))}>
-      <Header title="Cases" showBackButton={false} />
+      <Header title={t('cases.title')} showBackButton={false} />
       <View style={themed(styles.tabContainer)}>
         {tabs.map(tab => (
           <TouchableOpacity

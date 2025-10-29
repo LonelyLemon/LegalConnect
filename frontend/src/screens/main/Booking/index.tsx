@@ -22,6 +22,7 @@ import { createBookingRequest } from '../../../services/booking.ts';
 import { fetchLawyerById } from '../../../stores/lawyer.slices.ts';
 import { useAppDispatch } from '../../../redux/hook';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 type FormBooking = {
   title: string;
@@ -43,6 +44,7 @@ export default function BookingScreen({
   const { themed, theme } = useAppTheme();
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const control = useForm<FormBooking>({
     defaultValues: {
@@ -79,12 +81,12 @@ export default function BookingScreen({
     {
       id: 'title',
       name: 'title',
-      label: 'Title',
+      label: t('booking.titleLabel'),
       type: 'input',
-      placeholder: 'Enter booking title',
+      placeholder: t('booking.titlePlaceholder'),
       error: errors?.title?.message,
       rules: {
-        required: { value: true, message: 'Title is required' },
+        required: { value: true, message: t('booking.titleRequired') },
       },
     },
     {
@@ -94,11 +96,11 @@ export default function BookingScreen({
       type: 'customRender',
       error: errors?.description?.message,
       rules: {
-        required: { value: true, message: 'Short description is required' },
+        required: { value: true, message: t('booking.descriptionRequired') },
       },
       customRender: (value: string, onChange: (text: string) => void) => (
         <View style={themed(styles.textAreaContainer)}>
-          <Text style={themed(styles.textAreaLabel)}>Short Description</Text>
+          <Text style={themed(styles.textAreaLabel)}>{t('booking.shortDescription')}</Text>
           <TextInput
             style={[
               themed(styles.textArea),
@@ -106,7 +108,7 @@ export default function BookingScreen({
             ]}
             value={value}
             onChangeText={onChange}
-            placeholder="Describe your legal needs..."
+            placeholder={t('booking.shortDescriptionPlaceholder')}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             multiline
             numberOfLines={4}
@@ -127,7 +129,7 @@ export default function BookingScreen({
       type: 'customRender',
       error: errors?.startTime?.message,
       rules: {
-        required: { value: true, message: 'Start date is required' },
+        required: { value: true, message: t('booking.startDateRequired') },
         validate: (value: Date | null) => {
           if (!value) return true;
           const today = new Date();
@@ -135,17 +137,17 @@ export default function BookingScreen({
           const selectedDate = new Date(value);
           selectedDate.setHours(0, 0, 0, 0);
           if (selectedDate < today) {
-            return 'Start date must be today or in the future';
+            return t('booking.endDateInvalid');
           }
           return true;
         },
       },
       customRender: (value: Date | null, onChange: (date: Date) => void) => (
         <DatePicker
-          label="Start Date"
+          label={t('booking.startDate')}
           value={value}
           onChange={onChange}
-          placeholder="Select start date"
+          placeholder={t('booking.selectStartDate')}
           error={errors?.startTime?.message}
           minimumDate={new Date()}
         />
@@ -158,7 +160,7 @@ export default function BookingScreen({
       type: 'customRender',
       error: errors?.endTime?.message,
       rules: {
-        required: { value: true, message: 'End date is required' },
+        required: { value: true, message: t('booking.endDateRequired') },
         validate: (value: Date | null) => {
           if (!value) return true;
           const startTime = control.getValues('startTime');
@@ -168,7 +170,7 @@ export default function BookingScreen({
             const endDate = new Date(value);
             endDate.setHours(0, 0, 0, 0);
             if (endDate < startDate) {
-              return 'End date must be after or equal to start date';
+              return t('booking.endDateAfterStart');
             }
           }
           return true;
@@ -176,10 +178,10 @@ export default function BookingScreen({
       },
       customRender: (value: Date | null, onChange: (date: Date) => void) => (
         <DatePicker
-          label="End Date"
+          label={t('booking.endDate')}
           value={value}
           onChange={onChange}
-          placeholder="Select end date"
+          placeholder={t('booking.selectEndDate')}
           error={errors?.endTime?.message}
         />
       ),
@@ -202,17 +204,17 @@ export default function BookingScreen({
       });
 
       Alert.alert(
-        'Success',
-        'Booking request created successfully!',
+        t('booking.success'),
+        t('booking.bookingCreated'),
         [
           {
-            text: 'OK',
+            text: t('booking.ok'),
             onPress: () => navigation.goBack(),
           },
         ],
       );
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create booking request');
+      Alert.alert(t('booking.error'), error.message || t('booking.bookingFailed'));
     } finally {
       setLoading(false);
     }
@@ -221,7 +223,7 @@ export default function BookingScreen({
   if (lawyerLoading) {
     return (
       <SafeAreaView style={themed(styles.container)}>
-        <Header title="Book a Session" showBackButton={true} />
+        <Header title={t('booking.title')} showBackButton={true} />
         <View style={themed(styles.loadingContainer)}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
@@ -263,7 +265,7 @@ export default function BookingScreen({
               <ActivityIndicator color={theme.colors.onPrimary} />
             ) : (
               <Text style={themed(styles.submitButtonText)}>
-                Submit Booking Request
+                {t('booking.submitBookingRequest')}
               </Text>
             )}
           </TouchableOpacity>

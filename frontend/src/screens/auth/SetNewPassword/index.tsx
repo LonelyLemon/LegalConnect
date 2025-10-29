@@ -16,6 +16,7 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
+import { t } from '../../../i18n';
 
 type FormNewPass = { password: string; repassword: string };
 
@@ -34,28 +35,28 @@ export default function SetNewPasswordScreen() {
     {
       id: 'password',
       name: 'password',
-      label: 'Password',
+      label: t('auth.setNewPassword.password'),
       type: 'input',
-      placeholder: 'Enter your password',
+      placeholder: t('auth.setNewPassword.enterPassword'),
       secureTextEntry: true,
       icon: 'lock-closed-outline',
       error: errors?.password?.message,
-      rules: { required: { value: true, message: 'Password is required' } },
+      rules: { required: { value: true, message: t('auth.setNewPassword.passwordRequired') } },
     },
     {
       id: 'repassword',
       name: 'repassword',
-      label: 'Confirm password',
+      label: t('auth.setNewPassword.confirmPassword'),
       type: 'input',
-      placeholder: 'Confirm your password',
+      placeholder: t('auth.setNewPassword.confirmPasswordPlaceholder'),
       secureTextEntry: true,
       icon: 'lock-closed-outline',
       error: errors?.repassword?.message,
       rules: {
-        required: { value: true, message: 'Confirm password is required' },
+        required: { value: true, message: t('auth.setNewPassword.confirmPasswordRequired') },
         validate: (value: string) => {
           if (value !== control.getValues('password')) {
-            return 'Passwords do not match';
+            return t('auth.setNewPassword.passwordsDoNotMatch');
           }
           return true;
         },
@@ -69,7 +70,7 @@ export default function SetNewPasswordScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Set a new password" />
+      <Header title={t('auth.setNewPassword.title')} />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
@@ -90,7 +91,7 @@ export default function SetNewPasswordScreen() {
             disabled={!!errors.password || !!errors.repassword}
           >
             <Text style={themed(styles.primaryButtonText)}>
-              {'Update Password'}
+              {t('auth.setNewPassword.updatePassword')}
             </Text>
           </TouchableOpacity>
         </View>
