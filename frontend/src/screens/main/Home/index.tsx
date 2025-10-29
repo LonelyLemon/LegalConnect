@@ -29,6 +29,7 @@ import { MainStackNames } from '../../../navigation/routes';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import Input from '../../../components/common/input';
 import Icon from '@react-native-vector-icons/ionicons';
+import { useTranslation } from 'react-i18next';
 
 // Separator component for horizontal list
 const ItemSeparator = () => <View style={{ width: moderateScale(12) }} />;
@@ -122,7 +123,7 @@ export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const documentsData = useAppSelector(selectDocuments);
   const lawyersData = useAppSelector(selectLawyers);
-
+  const { t } = useTranslation();
   useEffect(() => {
     dispatch(fetchPopularDocuments());
   }, [dispatch]);
@@ -219,7 +220,7 @@ export default function HomeScreen() {
           <View style={themed(styles.filterContainer)}>
             <RadioGroup
               options={[
-                { label: 'Tất cả', value: 'all' },
+                { label: t('common.all'), value: 'all' },
                 { label: 'Luật sư nổi bật', value: 'featured' },
                 { label: 'Luật sư mới nhất', value: 'new' },
               ]}

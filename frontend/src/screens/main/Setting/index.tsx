@@ -3,13 +3,22 @@ import { useAppDispatch, useAppSelector } from '../../../redux/hook';
 import { getUserInfo, selectUser, signOut } from '../../../stores/user.slice';
 import Icon from '@react-native-vector-icons/ionicons'; // Or any other icon library
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import {
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  InteractionManager,
+} from 'react-native';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as styles from './styles';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { MainStackNames } from '../../../navigation/routes';
+import i18n from 'i18next';
+import { t } from '../../../i18n';
 
 function TextChild({ text }: { text: string }) {
   const { themed, theme } = useAppTheme();
@@ -23,6 +32,9 @@ function TextChild({ text }: { text: string }) {
 
 export default function SettingScreen() {
   // --- Existing Hooks & State ---
+  const [lang, setLanguage] = React.useState(
+    i18n.language?.split('-')[0] || 'en',
+  );
   const { themed, themeType, setThemeType, theme } = useAppTheme();
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
@@ -31,8 +43,33 @@ export default function SettingScreen() {
   useEffect(() => {
     dispatch(getUserInfo());
   }, [dispatch]);
+
+  // Sync language state when i18n language changes
+  useEffect(() => {
+    const updateLanguage = () => {
+      const currentLang = i18n.language?.split('-')[0] || 'en';
+      setLanguage(currentLang);
+    };
+
+    updateLanguage();
+    i18n.on('languageChanged', updateLanguage);
+
+    return () => {
+      i18n.off('languageChanged', updateLanguage);
+    };
+  }, []);
+
   const user = useAppSelector(selectUser);
   console.log('User data:', user);
+
+  const handleChangeLanguage = () => {
+    const newLang = lang === 'en' ? 'vi' : 'en';
+    if (newLang === i18n.language) return;
+    // Defer heavy language change work until after current animations/interactions
+    InteractionManager.runAfterInteractions(() => {
+      i18n.changeLanguage(newLang);
+    });
+  };
 
   const handleChangeTheme = () => {
     const newTheme = themeType === 'light' ? 'dark' : 'light';
@@ -49,15 +86,29 @@ export default function SettingScreen() {
     navigation.navigate(MainStackNames.CompleteProfile);
   };
 
-  const settingGroup = [
-    {
-      Father: TouchableOpacity,
-      iconName: 'contrast-outline',
-      title: 'Theme',
-      onPress: handleChangeTheme,
-      children: <TextChild text={themeType === 'light' ? 'Light' : 'Dark'} />,
-    },
-  ];
+  const settingGroup = useMemo(
+    () => [
+      {
+        Father: TouchableOpacity,
+        iconName: 'contrast-outline',
+        title: 'Theme',
+        onPress: handleChangeTheme,
+        children: <TextChild text={themeType === 'light' ? 'Light' : 'Dark'} />,
+      },
+      {
+        Father: TouchableOpacity,
+        iconName: 'language-outline',
+        title: t('common.language'),
+        onPress: handleChangeLanguage,
+        children: (
+          <TextChild
+            text={lang === 'en' ? t('common.english') : t('common.vietnamese')}
+          />
+        ),
+      },
+    ],
+    [lang, themeType],
+  );
 
   const accountGroup = [
     {
