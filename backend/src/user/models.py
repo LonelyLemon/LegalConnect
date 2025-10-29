@@ -17,3 +17,4 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20), nullable=False, default=UserRole.CLIENT.value)
     is_email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     email_verification_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)

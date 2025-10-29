@@ -39,4 +39,19 @@ class InvalidRoleTransition(HTTPException):
             status_code=400,
             detail="Invalid role transition requested !",
         )
-    
+
+
+class InvalidAvatarFile(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=400,
+            detail="Avatar must be a PNG or JPG image !",
+        )
+
+
+class AvatarUploadFailed(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=500,
+            detail="Failed to upload avatar !",
+        )

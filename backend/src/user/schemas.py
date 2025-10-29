@@ -18,6 +18,7 @@ class UserResponse(BaseModel):
     phone_number: str | None
     address: str | None
     role: UserRole
+    avatar_url: str | None
 
     class Config:
         from_attributes = True
@@ -27,6 +28,7 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     phone_number: Optional[str] = None
     address: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 class UserRoleUpdate(BaseModel):
     role: UserRole
