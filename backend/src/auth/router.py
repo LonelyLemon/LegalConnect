@@ -47,7 +47,13 @@ async def login(db: SessionDep,
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user_id": user.id,
+        "username": user.username,
+        "user_email": user.email,
+        "phone_number": user.phone_number,
+        "address": user.address,
+        "role": user.role
     }
 
 #      END LOGIN ROUTE      #

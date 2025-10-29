@@ -14,7 +14,7 @@ Formatting legend
 * **Success** — key fields returned on success.
 * **Errors** — backend exceptions or HTTP codes the UI should surface.
 
-1. Account access and authentication
+1 Account access and authentication
 ------------------------------------
 
 ### 1.1 Login and bootstrap current user
@@ -81,7 +81,7 @@ Formatting legend
   - **Success**: target `UserResponse` with new role.
   - **Errors**: `403 UnauthorizedRoleUpdate`, `400 InvalidRoleTransition`, `404 UserNotFound`.
 
-2. Documentation consumption and management
+2 Documentation consumption and management
 -------------------------------------------
 
 ### 2.1 Browse documents
@@ -116,7 +116,7 @@ Formatting legend
   - **Success**: empty body (`204 No Content`).
   - **Errors**: `404 DocumentationNotFound`, `500 DocumentationDeletionFailed` (surface message).
 
-3. Lawyer onboarding and profile management
+3 Lawyer onboarding and profile management
 -------------------------------------------
 
 ### 3.1 Submit verification request (client -> lawyer)
@@ -171,7 +171,7 @@ Formatting legend
   - **Path**: `lawyer_id` UUID.
   - **Success**: public profile with rating aggregate.
 
-4. Schedule publication and booking lifecycle
+4 Schedule publication and booking lifecycle
 ---------------------------------------------
 
 ### 4.1 Lawyer schedule management
@@ -235,7 +235,7 @@ Formatting legend
 - **Endpoint** `GET /booking/cases/{case_id}/rating`
   - **Auth**: bearer (participant or admin).
 
-5. Real-time chat interactions
+5 Real-time chat interactions
 ------------------------------
 
 ### 5.1 Conversation lifecycle
@@ -270,7 +270,7 @@ Formatting legend
   - **Auth**: query parameter `token=<access JWT>`.
   - **Usage**: establish socket after login; send/receive JSON events for `message`, `receipt`, `presence` updates.
 
-6. Legal AI assistant usage
+6 Legal AI assistant usage
 ---------------------------
 
 - **Endpoint** `GET /legal-ai/health`
@@ -281,7 +281,7 @@ Formatting legend
   - **Request**: JSON `{ "question": "...", "session_id": "<UUID>" }` (session_id optional; backend will default if omitted).
   - **Success**: `LegalAIResponse` with answer, citations, suggestions, etc.
 
-7. Admin oversight touchpoints
+7 Admin oversight touchpoints
 ------------------------------
 
 Combine the above endpoints depending on dashboard view:
