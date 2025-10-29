@@ -6,7 +6,12 @@ import * as styles from './styles.ts';
 import Header from '../../../components/layout/header/index.tsx';
 import { useAppDispatch } from '../../../redux/hook';
 import { fetchLawyerById } from '../../../stores/lawyer.slices.ts';
-import { RouteProp } from '@react-navigation/native';
+import {
+  RouteProp,
+  useNavigation,
+  NavigationProp,
+} from '@react-navigation/native';
+import { MainStackNames } from '../../../navigation/routes';
 import { Lawyer } from '../../../types/lawyer.ts';
 import Icon from '@react-native-vector-icons/ionicons';
 import { moderateScale } from 'react-native-size-matters';
@@ -26,6 +31,7 @@ export default function LawyerProfileScreen({
   const { themed, theme } = useAppTheme();
   const [activeTab, setActiveTab] = useState<TabType>('description');
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<NavigationProp<any>>();
   useEffect(() => {
     const fetchLawyer = async () => {
       const response = await dispatch(fetchLawyerById(id));
@@ -91,7 +97,14 @@ export default function LawyerProfileScreen({
           </View>
         </View>
 
-        <TouchableOpacity style={themed(styles.editButton)}>
+        <TouchableOpacity
+          style={themed(styles.editButton)}
+          onPress={() => {
+            navigation.navigate(MainStackNames.Booking, {
+              lawyerId: id,
+            });
+          }}
+        >
           <Text style={themed(styles.editButtonText)}>Order a session</Text>
           <Icon
             name="chevron-forward"
