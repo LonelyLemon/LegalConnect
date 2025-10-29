@@ -136,7 +136,7 @@ export default function HomeScreen() {
   };
 
   const handleProfilePress = () => {
-    navigation.navigate(MainStackNames.CompleteProfile);
+    navigation.navigate(MainStackNames.Setting);
   };
 
   const renderDocumentCard = ({ item }: { item: any }) => (

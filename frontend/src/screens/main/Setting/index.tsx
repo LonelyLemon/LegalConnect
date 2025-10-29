@@ -1,14 +1,15 @@
 import Header from '../../../components/layout/header';
 import { useAppDispatch, useAppSelector } from '../../../redux/hook';
-import { selectUser, signOut } from '../../../stores/user.slice';
+import { getUserInfo, selectUser, signOut } from '../../../stores/user.slice';
 import Icon from '@react-native-vector-icons/ionicons'; // Or any other icon library
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as styles from './styles';
 import { useAppTheme } from '../../../theme/theme.provider';
+import { MainStackNames } from '../../../navigation/routes';
 
 function TextChild({ text }: { text: string }) {
   const { themed, theme } = useAppTheme();
@@ -27,6 +28,9 @@ export default function SettingScreen() {
   const navigation = useNavigation<any>();
   // --- State for New UI Elements ---
 
+  useEffect(() => {
+    dispatch(getUserInfo());
+  }, [dispatch]);
   const user = useAppSelector(selectUser);
   console.log('User data:', user);
 
@@ -42,7 +46,7 @@ export default function SettingScreen() {
   // --- Dummy data for user profile ---
 
   const handleEditProfile = () => {
-    navigation.navigate('Profile');
+    navigation.navigate(MainStackNames.CompleteProfile);
   };
 
   const settingGroup = [
@@ -88,7 +92,7 @@ export default function SettingScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)} edges={['top', 'bottom']}>
-      <Header title="Setting" showBackButton={false} />
+      <Header title="Setting" showBackButton={true} />
 
       {/* Header */}
       <ScrollView
@@ -108,7 +112,7 @@ export default function SettingScreen() {
               color={theme.colors.onBackground}
             />
           )}
-          <Text style={themed(styles.profileName)}>{user?.name}</Text>
+          <Text style={themed(styles.profileName)}>{user?.username}</Text>
           <Text style={themed(styles.profileEmail)}>{user?.email}</Text>
           <TouchableOpacity
             style={themed(styles.editButton)}

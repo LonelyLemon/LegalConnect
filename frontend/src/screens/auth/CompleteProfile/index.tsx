@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRoute } from '@react-navigation/native';
 import dayjs, { Dayjs } from 'dayjs';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
@@ -22,16 +23,21 @@ type FormProfile = {
 
 export default function CompleteProfileScreen() {
   const { themed } = useAppTheme();
+  const route = useRoute<any>();
+  const userData = route?.params?.userData as Partial<FormProfile> | undefined;
+
+  const initialDefaults: FormProfile = {
+    firstName: userData?.firstName ?? '',
+    lastName: userData?.lastName ?? '',
+    phone: userData?.phone ?? '',
+    address: userData?.address ?? '',
+    gender: (userData?.gender as any) ?? 'Male',
+    dob: userData?.dob ? dayjs(userData.dob as any) : dayjs(),
+    pob: userData?.pob ?? '',
+  };
+
   const control = useForm<FormProfile>({
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      phone: '',
-      address: '',
-      gender: 'Male',
-      dob: dayjs(),
-      pob: '',
-    },
+    defaultValues: initialDefaults,
   });
 
   const {

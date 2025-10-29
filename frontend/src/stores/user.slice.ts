@@ -1,4 +1,9 @@
-import { signIn, signUp } from '../services/auth';
+import {
+  fetchUserInfo,
+  signIn,
+  signUp,
+  updateUserInfo,
+} from '../services/auth';
 import { FormLogin, FormSignUp } from '../types/auth';
 import { User } from '../types/user';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
@@ -9,7 +14,9 @@ const initialState: UserState = {
     id: '',
     email: '',
     avatar: '',
-    name: '',
+    username: '',
+    phone_number: '',
+    address: '',
   },
   permissions: [],
   token: '',
@@ -37,14 +44,13 @@ export const signInWithEmailPassword = createAsyncThunk(
       };
     } catch (error: any) {
       if (error instanceof AxiosError) {
-        const data: any = error.response?.data;
-        const message =
-          data?.message ||
-          data?.detail ||
-          data?.error ||
-          error.message ||
-          'Login failed';
-        return thunkApi.rejectWithValue(message);
+        return thunkApi.rejectWithValue(
+          error.response?.data?.message ||
+            error.response?.data?.detail ||
+            error.response?.data?.error ||
+            error.message ||
+            'Login failed',
+        );
       }
       return thunkApi.rejectWithValue(error?.message || 'Login failed');
     }
@@ -75,6 +81,34 @@ export const signOut = createAsyncThunk('user/signOut', async () => {
     await new Promise((resolve: any) => setTimeout(resolve, 1000)); // Simulate network delay
   } catch (error) {}
 });
+
+export const getUserInfo = createAsyncThunk(
+  'user/getUserInfo',
+  async (_, thunkApi) => {
+    try {
+      const response = await fetchUserInfo();
+      return response.data;
+    } catch (error: any) {
+      return thunkApi.rejectWithValue(
+        error.message || 'Fetch user info failed',
+      );
+    }
+  },
+);
+
+export const updateUserProfile = createAsyncThunk(
+  'user/updateUserProfile',
+  async (data: any, thunkApi) => {
+    try {
+      const response = await updateUserInfo(data);
+      return response.data;
+    } catch (error: any) {
+      return thunkApi.rejectWithValue(
+        error.message || 'Update user info failed',
+      );
+    }
+  },
+);
 
 export const userSlice = createSlice({
   initialState,
@@ -162,6 +196,31 @@ export const userSlice = createSlice({
         state.permissions = [];
       })
       .addCase(signOut.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getUserInfo.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getUserInfo.fulfilled, (state, action) => {
+        state.isLoading = false;
+        console.log('action.payload: ', action.payload);
+        state.user = action.payload;
+      })
+      .addCase(getUserInfo.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateUserProfile.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

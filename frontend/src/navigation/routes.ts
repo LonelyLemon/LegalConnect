@@ -7,7 +7,6 @@ import ResetSuccessScreen from '../screens/auth/ResetSuccess';
 import SetNewPasswordScreen from '../screens/auth/SetNewPassword';
 import CompleteProfileScreen from '../screens/auth/CompleteProfile';
 import HomeScreen from '../screens/main/Home';
-import SettingsScreen from '../screens/main/Setting';
 import CasesScreen from '../screens/main/Cases';
 import MessagesScreen from '../screens/main/Messages';
 import DocumentsScreen from '../screens/main/Documents';
@@ -15,6 +14,7 @@ import TabNavigator from './TabNavigator';
 import LawyerProfileScreen from '../screens/main/LawyerProfile';
 import ChatDetailScreen from '../screens/main/Messages/ChatDetail';
 import { CaseDetail } from '../screens/main/Cases/CaseDetail';
+import SettingScreen from '../screens/main/Setting';
 
 export type StackScreenRoute = {
   name: string;
@@ -42,6 +42,7 @@ export const MainStackNames = {
   Cases: 'Cases',
   Messages: 'Messages',
   Documents: 'Documents',
+  Setting: 'Setting',
 };
 
 export const HomeTabsNames = {
@@ -49,7 +50,6 @@ export const HomeTabsNames = {
   Cases: 'Cases',
   Messages: 'Messages',
   Documents: 'Documents',
-  Setting: 'Settings',
 };
 
 export const AuthStackRoutes: StackScreenRoute[] = [
@@ -136,6 +136,11 @@ export const MainStackRoutes: StackScreenRoute[] = [
     component: DocumentsScreen,
     options: { headerShown: false },
   },
+  {
+    name: MainStackNames.Setting,
+    component: SettingScreen,
+    options: { headerShown: false },
+  },
 ];
 
 export const HomeTabsRoutes: StackScreenRoute[] = [
@@ -157,11 +162,6 @@ export const HomeTabsRoutes: StackScreenRoute[] = [
   {
     name: HomeTabsNames.Documents,
     component: DocumentsScreen,
-    options: { headerShown: false },
-  },
-  {
-    name: HomeTabsNames.Setting,
-    component: SettingsScreen,
     options: { headerShown: false },
   },
 ];

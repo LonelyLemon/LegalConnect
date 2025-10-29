@@ -1,62 +1,118 @@
 /* eslint-disable react/no-unstable-nested-components */
 import Icon from '@react-native-vector-icons/ionicons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+  BottomTabBarProps,
+  createBottomTabNavigator,
+} from '@react-navigation/bottom-tabs';
 import { ThemedStyle } from '../theme';
 import React, { useState } from 'react';
-import { ViewStyle, TextStyle, Platform, Animated } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  ViewStyle,
+  TextStyle,
+  Animated,
+  Text,
+} from 'react-native';
 import { verticalScale, moderateScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeTabsNames, HomeTabsRoutes, StackScreenRoute } from './routes';
 import { useAppTheme } from '../theme/theme.provider';
 
 export default function TabNavigator() {
-  const [tick] = useState(0); // Dummy state to force re-render
-  const { themed } = useAppTheme();
+  const [tick] = useState(0);
   const insets = useSafeAreaInsets();
-
   const Tab = createBottomTabNavigator();
+
   return (
     <Tab.Navigator
       key={tick}
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: themed($tabBar(insets)),
-        tabBarActiveTintColor: themed($tabBarActiveColor),
-        tabBarInactiveTintColor: themed($tabBarInactiveColor),
-        tabBarLabelStyle: themed($tabBarLabel),
-        tabBarIconStyle: themed($tabBarIcon),
-        tabBarItemStyle: themed($tabBarItem),
-        tabBarShowLabel: true,
-        tabBarHideOnKeyboard: true,
-        tabBarBackground: () => (
-          <Animated.View style={themed($tabBarBackground)} />
-        ),
-        tabBarAccessibilityLabel: 'Bottom navigation',
-      }}
+      screenOptions={{ headerShown: false }}
+      tabBar={(props: BottomTabBarProps) => (
+        <CustomTabBar {...props} insets={insets} />
+      )}
     >
       {HomeTabsRoutes.map((route: StackScreenRoute) => (
         <Tab.Screen
           key={route.name}
           name={route.name}
           component={route.component}
-          options={{
-            tabBarIcon: ({ focused, color, size }) => {
-              return (
-                <AnimatedTabIcon
-                  route={route}
-                  focused={focused}
-                  color={color}
-                  size={size}
-                />
-              );
-            },
-            tabBarLabel: getTabLabel(route.name),
-            headerShown: false,
-            tabBarAccessibilityLabel: getTabAccessibilityLabel(route.name),
-          }}
+          options={{ headerShown: false }}
         />
       ))}
     </Tab.Navigator>
+  );
+}
+
+function CustomTabBar(props: BottomTabBarProps & { insets: any }) {
+  const { state, navigation, insets } = props;
+  const { themed, theme } = useAppTheme();
+  const activeColor = themed($tabBarActiveColor);
+  const inactiveColor = themed($tabBarInactiveColor);
+
+  return (
+    <View style={themed($tabBar(insets))}>
+      {/* Nền và bo góc */}
+      <Animated.View style={themed($tabBarBackground)} />
+
+      {/* Đường kẻ mảnh dưới cùng (để huy hiệu nhìn nổi) */}
+      <View style={themed($bottomHairline)} />
+
+      {/* Huy hiệu nổi ở giữa (không nhận touch) */}
+      <View style={themed($centerBadgeWrapper)} pointerEvents="none">
+        <View style={themed($centerBadge)}>
+          {/* Icon cân công lý giống hình demo */}
+          <Icon
+            name="scale"
+            size={moderateScale(22)}
+            color={theme.colors.onPrimary}
+          />
+        </View>
+      </View>
+
+      {/* Hàng item */}
+      <View style={themed($tabItemsRow)}>
+        {state.routes.map((route, index) => {
+          const isFocused = state.index === index;
+          const color = isFocused
+            ? theme.colors.primary
+            : theme.colors.onBackground;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityLabel={getTabAccessibilityLabel(route.name)}
+              onPress={onPress}
+              style={themed($tabBarItem(isFocused))}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              activeOpacity={0.8}
+            >
+              <AnimatedTabIcon
+                route={{ name: route.name, component: () => null }}
+                focused={isFocused}
+                color={color}
+                size={22}
+              />
+              <Text style={[themed($tabBarLabel), { color }]} numberOfLines={1}>
+                {getTabLabel(route.name)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -72,30 +128,30 @@ function AnimatedTabIcon({
   size: number;
 }) {
   const scaleValue = React.useRef(
-    new Animated.Value(focused ? 1.1 : 1),
+    new Animated.Value(focused ? 1.08 : 1),
   ).current;
   const opacityValue = React.useRef(
-    new Animated.Value(focused ? 1 : 0.7),
+    new Animated.Value(focused ? 1 : 0.8),
   ).current;
 
   React.useEffect(() => {
     Animated.parallel([
       Animated.spring(scaleValue, {
-        toValue: focused ? 1.1 : 1,
+        toValue: focused ? 1.08 : 1,
         useNativeDriver: true,
-        tension: 150,
-        friction: 15,
+        tension: 140,
+        friction: 14,
       }),
       Animated.spring(opacityValue, {
-        toValue: focused ? 1 : 0.7,
+        toValue: focused ? 1 : 0.8,
         useNativeDriver: true,
-        tension: 150,
-        friction: 15,
+        tension: 140,
+        friction: 14,
       }),
     ]).start();
   }, [focused, scaleValue, opacityValue]);
 
-  let iconName: any = 'home';
+  let iconName: string = 'home-outline';
 
   if (route.name === HomeTabsNames.Home) {
     iconName = focused ? 'home' : 'home-outline';
@@ -105,18 +161,13 @@ function AnimatedTabIcon({
     iconName = focused ? 'chatbubble' : 'chatbubble-outline';
   } else if (route.name === HomeTabsNames.Documents) {
     iconName = focused ? 'book' : 'book-outline';
-  } else if (route.name === HomeTabsNames.Setting) {
-    iconName = focused ? 'settings' : 'settings-outline';
   }
 
   return (
     <Animated.View
-      style={{
-        transform: [{ scale: scaleValue }],
-        opacity: opacityValue,
-      }}
+      style={{ transform: [{ scale: scaleValue }], opacity: opacityValue }}
     >
-      <Icon name={iconName} size={moderateScale(size)} color={color} />
+      <Icon name={iconName as any} size={moderateScale(size)} color={color} />
     </Animated.View>
   );
 }
@@ -124,15 +175,13 @@ function AnimatedTabIcon({
 function getTabLabel(routeName: string): string {
   switch (routeName) {
     case HomeTabsNames.Home:
-      return 'Trang chủ';
+      return 'Home';
     case HomeTabsNames.Cases:
-      return 'Vụ án';
+      return 'Works';
     case HomeTabsNames.Messages:
-      return 'Tin nhắn';
+      return 'Messages';
     case HomeTabsNames.Documents:
-      return 'Tài liệu';
-    case HomeTabsNames.Setting:
-      return 'Cài đặt';
+      return 'Documents';
     default:
       return routeName;
   }
@@ -143,91 +192,131 @@ function getTabAccessibilityLabel(routeName: string): string {
     case HomeTabsNames.Home:
       return 'Navigate to Home screen';
     case HomeTabsNames.Cases:
-      return 'Navigate to Cases screen';
+      return 'Navigate to Works screen';
     case HomeTabsNames.Messages:
       return 'Navigate to Messages screen';
     case HomeTabsNames.Documents:
       return 'Navigate to Documents screen';
-    case HomeTabsNames.Setting:
-      return 'Navigate to Settings screen';
     default:
       return `Navigate to ${routeName} screen`;
   }
 }
 
-// Modern Tab Bar Styling
 const $tabBar =
   (insets: any): ThemedStyle<ViewStyle> =>
-  ({ colors, spacing }) => ({
-    backgroundColor: colors.surfaceContainerLowest || '#FFFFFF',
+  ({ spacing }) => ({
+    backgroundColor: 'transparent',
     borderTopWidth: 0,
-    borderTopLeftRadius: moderateScale(20),
-    borderTopRightRadius: moderateScale(20),
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: verticalScale(spacing.xxxxxl) + insets.bottom, // 56px + safe area
-    paddingBottom: Platform.OS === 'ios' ? insets.bottom : insets.bottom, // 8px : 2px + safe area
-    paddingTop:
-      Platform.OS === 'ios'
-        ? verticalScale(spacing.xs)
-        : verticalScale(spacing.xxxs), // 8px : 2px - cân đối với bottom
-    paddingHorizontal: moderateScale(spacing.sm), // 12px
-    justifyContent: 'center',
-    alignItems: 'center',
 
-    // Enhanced shadow for modern look
-    shadowColor: colors.shadow || '#000000',
-    shadowOffset: {
-      width: 0,
-      height: -8,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 20,
+    // Cao hơn mặc định một chút để giống hình (nổi và thoáng)
+    height: verticalScale(spacing.xxxxxl) + insets.bottom + verticalScale(2), // ~58 + safe area
+    paddingBottom: insets.bottom,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   });
 
 const $tabBarBackground: ThemedStyle<ViewStyle> = ({ colors }) => ({
-  flex: 1,
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  top: 0,
   backgroundColor: colors.surfaceContainerLowest || '#FFFFFF',
-  borderTopLeftRadius: moderateScale(20),
-  borderTopRightRadius: moderateScale(20),
-  borderTopWidth: 1,
-  borderTopColor: colors.outlineVariant || 'rgba(0,0,0,0.05)',
+  borderTopLeftRadius: moderateScale(22),
+  borderTopRightRadius: moderateScale(22),
+
+  // Bóng đổ mềm phía trên giống iOS
+  shadowColor: colors.shadow || '#000',
+  shadowOffset: { width: 0, height: -8 },
+  shadowOpacity: 0.12,
+  shadowRadius: 20,
+  elevation: 18,
 });
 
-const $tabBarActiveColor: ThemedStyle<string> = ({ colors }) =>
-  colors.primary || '#3C3EB7';
+const $bottomHairline: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  bottom: 0,
+  height: spacing.xxxxs,
+  backgroundColor: colors.outlineVariant || 'rgba(0,0,0,0.06)',
+});
 
+const $tabBarActiveColor: ThemedStyle<string> = ({ colors }) => colors.primary;
+// Use onSurface for better contrast across light/dark backgrounds
 const $tabBarInactiveColor: ThemedStyle<string> = ({ colors }) =>
-  colors.onSurfaceVariant || '#8E8E93';
+  colors.onBackground;
 
-const $tabBarLabel: ThemedStyle<TextStyle> = ({ colors, spacing }) => ({
-  fontSize: moderateScale(10),
+const $tabBarLabel: ThemedStyle<TextStyle> = ({
+  spacing,
+  fontSizes,
+  colors,
+}) => ({
+  fontSize: moderateScale(fontSizes.sm),
   fontWeight: '600',
   marginTop: verticalScale(spacing.xxxs), // 2px
-  color: colors.onSurface || '#1B1B22',
+  color: colors.onBackground,
   letterSpacing: 0.05,
 });
 
-const $tabBarIcon: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  marginTop: verticalScale(spacing.xxxs), // 2px
+const $tabBarItem =
+  (focused: boolean): ThemedStyle<ViewStyle> =>
+  ({ spacing }) => ({
+    paddingVertical: verticalScale(spacing.xxxs),
+    paddingHorizontal: moderateScale(spacing.xxxs),
+    borderRadius: moderateScale(8),
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: verticalScale(spacing.xxxxl), // ~48px
+    minWidth: moderateScale(spacing.xxxl), // ~40px
+    flex: 1,
+    backgroundColor: 'transparent',
+    // Nhẹ nhàng làm nổi icon khi active
+    transform: [{ translateY: focused ? -1 : 0 }],
+  });
+
+const $tabItemsRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  // Kéo hàng item lên một chút để khoảng cách với huy hiệu giống ảnh
+  bottom: verticalScale(spacing.xs),
+  flexDirection: 'row',
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'space-around',
+  paddingHorizontal: moderateScale(12),
 });
 
-const $tabBarItem: ThemedStyle<ViewStyle> = ({ spacing }) => ({
-  paddingVertical: verticalScale(spacing.xxxs), // 2px
-  paddingHorizontal: moderateScale(spacing.xxxs), // 2px
-  borderRadius: moderateScale(6),
+const $centerBadgeWrapper: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  position: 'absolute',
+  // Nổi hẳn lên khỏi mép trên thanh tab như hình
+  top: -moderateScale(spacing.lg),
+  left: 0,
+  right: 0,
+  alignItems: 'center',
+  zIndex: 2,
+});
+
+const $centerBadge: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  width: moderateScale(spacing.xxxxxl),
+  height: moderateScale(spacing.xxxxxl),
+  borderRadius: moderateScale(spacing.xxxxxl / 2),
+  backgroundColor: colors.primary,
   alignItems: 'center',
   justifyContent: 'center',
-  minHeight: verticalScale(spacing.xxxxl), // 48px
-  minWidth: moderateScale(spacing.xxxl), // 40px
-  flex: 1, // Để các tab items chia đều không gian
-  // Add subtle background for active state
-  backgroundColor: 'transparent',
-  // Better touch feedback
-  activeOpacity: 0.7,
+
+  // Viền sáng (vòng trắng) như đĩa nổi
+  borderWidth: spacing.xxs,
+  borderColor: colors.surfaceContainerLowest as string,
+
+  // Bóng đổ mềm
+  shadowColor: '#000',
+  shadowOpacity: 0.22,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 10,
 });
