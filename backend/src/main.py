@@ -31,6 +31,7 @@ async def create_admin() -> None:
         admin_user = result.scalar_one_or_none()
 
         if admin_user:
+            print("👑 Admin đã tồn tại, bỏ qua.")
             return
 
         new_admin = User(
@@ -44,18 +45,19 @@ async def create_admin() -> None:
 
         session.add(new_admin)
         await session.commit()
+        print("✅ Admin mặc định đã được tạo.")
 
 
 @asynccontextmanager
 async def lifespan(_app: fastapi.FastAPI):
-    """Lifecycle: chạy migration, khởi tạo Redis và tạo dữ liệu ban đầu."""
-    # 🧱 1. Chạy Alembic migration tự động
+    """Lifecycle: chạy migration, khởi tạo Redis và seed dữ liệu."""
+    # 🧱 1. Chạy Alembic migration
     try:
-        print("🔄 Running Alembic migrations...")
+        print("🔄 Running Alembic migrations...", flush=True)
         subprocess.run(["uv", "run", "alembic", "upgrade", "head"], check=True)
-        print("✅ Alembic migration completed successfully.")
+        print("✅ Alembic migration completed successfully.", flush=True)
     except Exception as e:
-        print("❌ Alembic migration failed:", e)
+        print("❌ Alembic migration failed:", e, flush=True)
 
     # ⚙️ 2. Kết nối Redis
     if getattr(settings, "REDIS_URL", None):
@@ -77,25 +79,22 @@ async def lifespan(_app: fastapi.FastAPI):
     # 🌱 4. Seed dữ liệu demo (chỉ chạy 1 lần)
     try:
         async with SessionLocal() as session:
-            from src.user.models import User
-
             exists = await session.execute(
                 select(User).where(User.email == "demo_client@example.com")
             )
             if not exists.first():
-                print("🌱 Running seed_data.py ...")
-                import importlib.util, runpy, os
-
+                print("🌱 Running seed_data.py ...", flush=True)
+                import runpy
                 seed_path = Path(__file__).resolve().parents[1] / "scripts" / "seed_data.py"
                 if seed_path.exists():
                     runpy.run_path(str(seed_path))
-                    print("✅ Seeding completed.")
+                    print("✅ Seeding completed.", flush=True)
                 else:
-                    print("⚠️ seed_data.py not found, skipping.")
+                    print("⚠️ seed_data.py not found, skipping.", flush=True)
             else:
-                print("✅ Demo data already exists, skipping seed.")
+                print("✅ Demo data already exists, skipping seed.", flush=True)
     except Exception as e:
-        print("⚠️ Error running seed_data:", e)
+        print("⚠️ Error running seed_data:", e, flush=True)
 
     try:
         yield
