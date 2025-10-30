@@ -6,15 +6,27 @@ import Header from '../../../components/layout/header';
 import * as styles from './styles';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { MainStackNames } from '../../../navigation/routes';
-import CaseCard, { CaseCardProps } from '../../../components/common/caseCard';
-import { verticalScale } from 'react-native-size-matters';
+import { Case, CaseStatus } from '../../../types/case';
+// import { verticalScale } from 'react-native-size-matters';
+import CaseCard from '../../../components/common/caseCard';
 import { useTranslation } from 'react-i18next';
 
 type TabType = 'pending' | 'processing' | 'completed';
 
-interface MockCase extends CaseCardProps {
+type MockCase = {
+  id: string;
+  title: string;
+  lawyerName: string;
+  lawyerImage: string;
+  lastActivity: string;
+  currentTask: string;
+  status: 'Pending' | 'Processing' | 'Completed' | 'New';
+  progress: number;
+  commentsCount: number;
+  lastUpdated: string;
   tab: TabType;
-}
+  onPress?: () => void;
+};
 
 export default function CasesScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('pending');
@@ -171,18 +183,44 @@ export default function CasesScreen() {
     caseItem => caseItem.tab === activeTab,
   );
 
-  const renderCaseCard = ({ item }: { item: MockCase }) => (
-    <CaseCard
-      {...item}
-      stylesOverride={{
-        cardContainer: ({ spacing }) => ({
-          width: '100%',
-          marginHorizontal: 0,
-          // marginVertical: verticalScale(spacing.xs),
-        }),
-      }}
-    />
-  );
+  const renderCaseCard = ({ item }: { item: MockCase }) => {
+    const statusMap: Record<MockCase['status'], CaseStatus> = {
+      Pending: 'PENDING',
+      Processing: 'IN_PROGRESS',
+      Completed: 'COMPLETED',
+      New: 'PENDING',
+    } as const;
+
+    const caseData: Case = {
+      id: item.id,
+      booking_request_id: item.id,
+      lawyer_id: 'n/a',
+      client_id: 'n/a',
+      title: item.title,
+      description: item.currentTask || item.lastActivity,
+      state: statusMap[item.status],
+      attachment_urls: [],
+      lawyer_note: '',
+      client_note: '',
+      started_at: new Date().toISOString(),
+      ending_time: new Date().toISOString(),
+      create_at: new Date().toISOString(),
+      updated_at: item.lastUpdated,
+    };
+
+    return (
+      <CaseCard
+        caseData={caseData}
+        onPress={item.onPress}
+        stylesOverride={{
+          cardContainer: () => ({
+            width: '100%',
+            marginHorizontal: 0,
+          }),
+        }}
+      />
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={themed(styles.content)}>

@@ -4,11 +4,13 @@ import { persistReducer, persistStore } from 'redux-persist';
 import userReducer from '../stores/user.slice';
 import { documentReducer } from '../stores/document.slice';
 import { lawyerReducer } from '../stores/lawyer.slices';
+import { caseReducer } from '../stores/case.slice';
 
 const allReducers = {
   user: userReducer,
   document: documentReducer,
   lawyer: lawyerReducer,
+  case: caseReducer,
 };
 
 export const rootReducer = combineReducers(allReducers);

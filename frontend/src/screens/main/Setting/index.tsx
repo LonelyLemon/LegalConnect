@@ -93,7 +93,13 @@ export default function SettingScreen() {
         iconName: 'contrast-outline',
         title: t('setting.theme'),
         onPress: handleChangeTheme,
-        children: <TextChild text={themeType === 'light' ? t('setting.light') : t('setting.dark')} />,
+        children: (
+          <TextChild
+            text={
+              themeType === 'light' ? t('setting.light') : t('setting.dark')
+            }
+          />
+        ),
       },
       {
         Father: TouchableOpacity,
@@ -107,6 +113,7 @@ export default function SettingScreen() {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lang, themeType],
   );
 
@@ -169,14 +176,18 @@ export default function SettingScreen() {
             style={themed(styles.editButton)}
             onPress={handleEditProfile}
           >
-            <Text>{t('setting.editProfile')}</Text>
+            <Text style={themed(styles.editButtonText)}>
+              {t('setting.editProfile')}
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Preference */}
 
         <View style={themed(styles.section)}>
-          <Text style={themed(styles.sectionTitle)}>{t('setting.preferences')}</Text>
+          <Text style={themed(styles.sectionTitle)}>
+            {t('setting.preferences')}
+          </Text>
 
           <View style={themed(styles.group)}>
             {settingGroup.map((item, index) => (
@@ -201,7 +212,9 @@ export default function SettingScreen() {
         {/* Account */}
 
         <View style={themed(styles.section)}>
-          <Text style={themed(styles.sectionTitle)}>{t('setting.account')}</Text>
+          <Text style={themed(styles.sectionTitle)}>
+            {t('setting.account')}
+          </Text>
 
           <View style={themed(styles.group)}>
             {accountGroup.map((item, index) => (

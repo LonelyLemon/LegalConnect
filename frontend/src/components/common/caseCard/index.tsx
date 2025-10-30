@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   ViewStyle,
   ImageStyle,
@@ -13,18 +12,10 @@ import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/ionicons';
 import * as styles from './styles';
 import { ThemedStyle } from '../../../theme';
+import { Case } from '../../../types/case';
 
 export interface CaseCardProps {
-  id: string;
-  title: string;
-  lawyerName: string;
-  lawyerImage: string;
-  lastActivity: string;
-  currentTask: string;
-  status: 'Processing' | 'Completed' | 'Pending' | 'New';
-  progress: number;
-  commentsCount: number;
-  lastUpdated: string;
+  caseData: Case;
   onPress?: () => void;
   stylesOverride?: CaseCardStylesOverride;
 }
@@ -41,20 +32,13 @@ export interface CaseCardStylesOverride {
 }
 
 export default function CaseCard({
-  id: _id,
-  title,
-  lawyerName,
-  lawyerImage,
-  lastActivity,
-  currentTask,
-  status,
-  progress,
-  commentsCount,
-  lastUpdated,
+  caseData,
   onPress,
   stylesOverride,
 }: CaseCardProps) {
   const { themed, theme } = useAppTheme();
+  const { title, description, state, attachment_urls, updated_at } =
+    caseData as any;
 
   const getStatusColor = (caseStatus: string) => {
     switch (caseStatus) {
@@ -71,7 +55,7 @@ export default function CaseCard({
     }
   };
 
-  const statusColors = getStatusColor(status);
+  const statusColors = getStatusColor(state);
 
   return (
     <TouchableOpacity
@@ -90,12 +74,10 @@ export default function CaseCard({
         ]}
       >
         <View style={themed(styles.profileSection)}>
-          <Image
-            source={{ uri: lawyerImage }}
-            style={[
-              themed(styles.profileImage),
-              themed(stylesOverride?.profileImage),
-            ]}
+          <Icon
+            name="briefcase-outline"
+            size={moderateScale(theme.fontSizes.lg)}
+            color={theme.colors.onSurface}
           />
           <View
             style={[
@@ -113,7 +95,7 @@ export default function CaseCard({
               ]}
               numberOfLines={1}
             >
-              Lawyer: {lawyerName}
+              {description}
             </Text>
             <Text
               style={[
@@ -122,7 +104,7 @@ export default function CaseCard({
               ]}
               numberOfLines={1}
             >
-              Labor: {lastActivity}
+              Attachments: {attachment_urls?.length || 0}
             </Text>
           </View>
         </View>
@@ -139,42 +121,16 @@ export default function CaseCard({
               { color: statusColors.textColor },
             ]}
           >
-            {status}
+            {state}
           </Text>
         </View>
       </View>
-
-      <Text style={themed(styles.currentTaskText)} numberOfLines={1}>
-        {currentTask}
-      </Text>
-
-      <View style={themed(styles.progressSection)}>
-        <View style={themed(styles.progressBarContainer)}>
-          <View style={themed(styles.progressBarBackground)}>
-            <View
-              style={[
-                themed(styles.progressBarFill),
-                { width: `${progress}%` },
-              ]}
-            />
-          </View>
-          <Text style={themed(styles.progressText)}>{progress}%</Text>
-        </View>
-      </View>
+      {/* Additional content can be added here if needed */}
 
       {/* Footer Section */}
       <View style={themed(styles.footerSection)}>
-        <View style={themed(styles.commentsSection)}>
-          <Icon
-            name="chatbubble-outline"
-            size={moderateScale(theme.fontSizes.sm)}
-            color={theme.colors.onSurface}
-          />
-          <Text style={themed(styles.commentsText)}>{commentsCount}</Text>
-        </View>
-
         <Text style={themed(styles.lastUpdatedText)}>
-          Updated: {lastUpdated}
+          Updated: {updated_at}
         </Text>
       </View>
     </TouchableOpacity>

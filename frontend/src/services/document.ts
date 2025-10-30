@@ -3,7 +3,12 @@ import { showError } from '../types/toast';
 
 export const getPopularDocuments = async () => {
   try {
-    const response = await axios.get('/api/legal_documents');
+    const page = 1;
+    const size = 10;
+    // Backend lists documents at GET /documentation (no path param). We can pass query params.
+    const response = await axios.get(`/documentation`, {
+      params: { page, size },
+    });
     return response.data;
   } catch (error: any) {
     const data = error?.response?.data;
@@ -21,7 +26,7 @@ export const getPopularDocuments = async () => {
 export const getDocumentById = async (id: string) => {
   try {
     const response = await axios.get(`/api/legal_documents/${id}`);
-    return response.data.data;
+    return response.data;
   } catch (error: any) {
     const data = error?.response?.data;
     const message =
@@ -56,8 +61,10 @@ export const getDocumentByCategory = async (category: string) => {
 
 export const getDocumentByPage = async (page: number) => {
   try {
-    const response = await axios.get(`/api/legal_documents/page/${page}`);
-    return response.data.data;
+    const response = await axios.get(`/documentation`, {
+      params: { page },
+    });
+    return response.data;
   } catch (error: any) {
     const data = error?.response?.data;
     const message =
