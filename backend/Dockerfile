@@ -14,3 +14,4 @@ RUN uv sync --frozen --no-dev
 ENV ALEMBIC_CONFIG=/app/alembic.ini
 EXPOSE 8000
 CMD ["sh", "-lc", "uv run alembic upgrade head && uv run uvicorn src.main:app --host 0.0.0.0 --port 8000"]
+
