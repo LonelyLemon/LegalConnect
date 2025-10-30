@@ -8,18 +8,21 @@ from src.booking.models import LawyerScheduleSlot, BookingRequest, CaseHistory, 
 from src.chat.models import ChatConversation, ChatParticipant, ChatMessage
 
 async def seed_data():
-    print("DEBUG: DATABASE_URL =", DATABASE_URL)
+    print("=== SEED FILE VERSION: DEBUG2025 ===", flush=True)
+    print("DEBUG: DATABASE_URL =", DATABASE_URL, flush=True)
     try:
-        print("🌱 Seeding demo data...")
+        print("🌱 Seeding demo data...", flush=True)
         async with SessionLocal() as session:
+            # Kiểm tra record client demo đã có chưa
             exists = await session.execute(User.__table__.select().where(User.email == "demo_client@example.com"))
             row = exists.first()
-            print("DEBUG: row:", row)
+            print("DEBUG: row (existing demo client):", row, flush=True)
             if row:
-                print("✅ Demo data already exists.")
+                print("✅ Demo data already exists. Bỏ qua!", flush=True)
                 return
 
-            # Client & Lawyer
+            # 1. Seed users
+            print("DEBUG: Tạo user demo_client", flush=True)
             client = User(
                 username="demo_client",
                 email="demo_client@example.com",
@@ -28,6 +31,7 @@ async def seed_data():
                 is_email_verified=True,
             )
 
+            print("DEBUG: Tạo user demo_lawyer", flush=True)
             lawyer = User(
                 username="demo_lawyer",
                 email="demo_lawyer@example.com",
@@ -37,8 +41,10 @@ async def seed_data():
             )
             session.add_all([client, lawyer])
             await session.flush()
+            print(f"DEBUG: ID client={client.id}, lawyer={lawyer.id}", flush=True)
 
-            # Lawyer profile
+            # 2. Lawyer profile
+            print("DEBUG: Thêm LawyerProfile", flush=True)
             profile = LawyerProfile(
                 user_id=lawyer.id,
                 display_name="Luật sư Nguyễn Văn A",
@@ -52,8 +58,9 @@ async def seed_data():
             )
             session.add(profile)
 
-            # Schedule slot
+            # 3. Schedule slot
             now = datetime.utcnow()
+            print("DEBUG: Thêm LawyerScheduleSlot", flush=True)
             slot = LawyerScheduleSlot(
                 lawyer_id=lawyer.id,
                 start_time=now + timedelta(hours=2),
@@ -62,8 +69,10 @@ async def seed_data():
             )
             session.add(slot)
             await session.flush()
+            print(f"DEBUG: slot.id={slot.id}", flush=True)
 
-            # Booking request
+            # 4. Booking request
+            print("DEBUG: Thêm BookingRequest", flush=True)
             booking = BookingRequest(
                 client_id=client.id,
                 lawyer_id=lawyer.id,
@@ -76,8 +85,10 @@ async def seed_data():
             )
             session.add(booking)
             await session.flush()
+            print(f"DEBUG: booking.id={booking.id}", flush=True)
 
-            # Case history
+            # 5. Case history
+            print("DEBUG: Thêm CaseHistory", flush=True)
             case = CaseHistory(
                 booking_request_id=booking.id,
                 lawyer_id=lawyer.id,
@@ -93,8 +104,10 @@ async def seed_data():
             )
             session.add(case)
             await session.flush()
+            print(f"DEBUG: case.id={case.id}", flush=True)
 
-            # Rating
+            # 6. Rating
+            print("DEBUG: Thêm LawyerRating", flush=True)
             rating = LawyerRating(
                 case_history_id=case.id,
                 lawyer_id=lawyer.id,
@@ -103,15 +116,19 @@ async def seed_data():
             )
             session.add(rating)
 
-            # Chat
+            # 7. Chat
+            print("DEBUG: Thêm ChatConversation", flush=True)
             conv = ChatConversation(last_message_at=now)
             session.add(conv)
             await session.flush()
+            print(f"DEBUG: conv.id={conv.id}", flush=True)
 
+            print("DEBUG: Thêm ChatParticipant", flush=True)
             part1 = ChatParticipant(conversation_id=conv.id, user_id=client.id)
             part2 = ChatParticipant(conversation_id=conv.id, user_id=lawyer.id)
             session.add_all([part1, part2])
 
+            print("DEBUG: Thêm ChatMessage", flush=True)
             msg = ChatMessage(
                 conversation_id=conv.id,
                 sender_id=client.id,
@@ -120,9 +137,9 @@ async def seed_data():
             session.add(msg)
 
             await session.commit()
-            print("✅ Demo data inserted successfully.")
+            print("✅ Demo data inserted successfully!", flush=True)
     except Exception as e:
-        print("SEED ERROR:", e)
+        print("SEED ERROR:", e, flush=True)
         import traceback
         traceback.print_exc()
         raise
