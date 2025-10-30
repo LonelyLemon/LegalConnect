@@ -1,4 +1,5 @@
 import fastapi
+import subprocess
 from contextlib import asynccontextmanager
 from pathlib import Path
 from arq.connections import create_pool, RedisSettings
@@ -22,6 +23,7 @@ THIS_DIR = Path(__file__).parent
 
 
 async def create_admin() -> None:
+    """Tạo tài khoản admin mặc định nếu chưa có."""
     admin_email = settings.ADMIN_EMAIL.strip().lower()
 
     async with SessionLocal() as session:
@@ -46,7 +48,16 @@ async def create_admin() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: fastapi.FastAPI):
-    # Ưu tiên dùng REDIS_URL nếu có (Railway)
+    """Lifecycle: chạy migration, khởi tạo Redis và admin."""
+    # 🧱 Chạy Alembic migration tự động khi khởi động app
+    try:
+        print("🔄 Running Alembic migrations...")
+        subprocess.run(["uv", "run", "alembic", "upgrade", "head"], check=True)
+        print("✅ Alembic migration completed successfully.")
+    except Exception as e:
+        print("❌ Alembic migration failed:", e)
+
+    # ⚙️ Kết nối Redis (ưu tiên REDIS_URL nếu có)
     if getattr(settings, "REDIS_URL", None):
         redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
     else:
@@ -54,11 +65,13 @@ async def lifespan(_app: fastapi.FastAPI):
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
             username="default",
-            password=settings.REDIS_PASSWORD,
+            password=getattr(settings, "REDIS_PASSWORD", None),
             database=0,
         )
 
     _app.state.arq_pool = await create_pool(redis_settings)
+
+    # 👑 Tạo tài khoản admin mặc định
     await create_admin()
 
     try:
@@ -67,8 +80,10 @@ async def lifespan(_app: fastapi.FastAPI):
         await _app.state.arq_pool.close()
 
 
+# 🚀 Khởi tạo FastAPI app
 app = fastapi.FastAPI(lifespan=lifespan)
 
+# 🛡️ Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGIN,
@@ -78,7 +93,7 @@ app.add_middleware(
     allow_headers=settings.CORS_HEADERS,
 )
 
-# Routers
+# 📦 Đăng ký các router
 app.include_router(auth_route)
 app.include_router(user_route)
 app.include_router(lawyer_route)
