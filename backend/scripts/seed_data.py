@@ -144,5 +144,12 @@ async def seed_data():
         traceback.print_exc()
         raise
 
-if __name__ == "__main__":
+def _entry():
     asyncio.run(seed_data())
+
+# GỌI HÀM ENTRY ngay cả khi runpy.run_path
+_entry()
+
+
+if __name__ == "__main__":
+    pass # đã gọi _entry() phía trên
