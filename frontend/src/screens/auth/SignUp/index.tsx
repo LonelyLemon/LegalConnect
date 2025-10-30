@@ -17,23 +17,30 @@ import {
   selectError,
   selectIsLoading,
   signUpWithEmailPassword,
+  userActions,
 } from '../../../stores/user.slice';
 import { FormSignUp } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { verticalScale } from 'react-native-size-matters';
 import Header from '../../../components/layout/header';
 import { t } from '../../../i18n';
+import { AuthStackNames } from '../../../navigation/routes';
 
 export default function SignUpScreen() {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
   const control = useForm<FormSignUp>({
-    defaultValues: { email: '', password: '', repassword: '', name: '' },
+    defaultValues: {
+      email: 'user1@example.com',
+      password: 'string',
+      repassword: 'string',
+      name: 'user1',
+    },
   });
 
   const {
@@ -43,6 +50,14 @@ export default function SignUpScreen() {
 
   const loading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
+
+  // Clear stale error when entering/leaving this screen
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(userActions.clearError());
+      return () => dispatch(userActions.clearError());
+    }, [dispatch]),
+  );
 
   const fields = [
     {
@@ -73,8 +88,8 @@ export default function SignUpScreen() {
       rules: {
         required: { value: true, message: t('auth.signUp.passwordRequired') },
         minLength: {
-          value: 8,
-          message: t('auth.signUp.passwordMinLength', { count: 8 }),
+          value: 4,
+          message: t('auth.signUp.passwordMinLength', { count: 4 }),
         },
       },
     },
@@ -88,7 +103,10 @@ export default function SignUpScreen() {
       icon: 'lock-closed-outline',
       error: errors?.repassword?.message,
       rules: {
-        required: { value: true, message: t('auth.signUp.confirmPasswordRequired') },
+        required: {
+          value: true,
+          message: t('auth.signUp.confirmPasswordRequired'),
+        },
         validate: (value: string) => {
           if (value !== control.getValues('password')) {
             return t('auth.signUp.passwordsDoNotMatch');
@@ -105,12 +123,14 @@ export default function SignUpScreen() {
       placeholder: t('auth.signUp.enterName'),
       icon: 'person-outline',
       error: errors?.name?.message,
-      rules: { required: { value: true, message: t('auth.signUp.nameRequired') } },
+      rules: {
+        required: { value: true, message: t('auth.signUp.nameRequired') },
+      },
     },
   ];
 
   const handleSignUp = (data: FormSignUp) => {
-    console.log(data);
+    dispatch(userActions.clearError());
     dispatch(
       signUpWithEmailPassword({
         email: data.email,
@@ -119,7 +139,7 @@ export default function SignUpScreen() {
         name: data.name,
       }),
     );
-    navigation.navigate('CompleteProfile');
+    navigation.navigate(AuthStackNames.SignIn);
   };
 
   const handleForgotPassword = () => {
@@ -146,7 +166,9 @@ export default function SignUpScreen() {
             />
           </View>
 
-          <Text style={themed(styles.welcomeTitle)}>{t('auth.signUp.title')}</Text>
+          <Text style={themed(styles.welcomeTitle)}>
+            {t('auth.signUp.title')}
+          </Text>
 
           <View
             style={{
@@ -176,7 +198,9 @@ export default function SignUpScreen() {
               !!errors.name
             }
           >
-            <Text style={themed(styles.signInButtonText)}>{t('auth.signUp.register')}</Text>
+            <Text style={themed(styles.signInButtonText)}>
+              {t('auth.signUp.register')}
+            </Text>
           </TouchableOpacity>
 
           <View style={themed(styles.signUpRow)}>
@@ -184,7 +208,9 @@ export default function SignUpScreen() {
               {t('auth.signUp.alreadyHaveAccount')}
             </Text>
             <TouchableOpacity onPress={handleNavigateToSignIn}>
-              <Text style={themed(styles.signUpLink)}>{t('auth.signUp.signIn')}</Text>
+              <Text style={themed(styles.signUpLink)}>
+                {t('auth.signUp.signIn')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

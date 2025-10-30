@@ -3,8 +3,9 @@ import { showError } from '../types/toast';
 
 export const getUserCase = async () => {
   try {
-    const response = await axios.get('/api/cases');
-    return response.data.data;
+    const response = await axios.get('/booking/cases/me');
+    const payload = response?.data?.data ?? response?.data ?? [];
+    return payload;
   } catch (error: any) {
     const data = error?.response?.data;
     const message =

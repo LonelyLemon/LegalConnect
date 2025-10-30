@@ -70,7 +70,7 @@ export default function HomeScreen() {
     <CaseCard
       caseData={item}
       onPress={() => {
-        console.log('Pressed case:', item.title);
+        navigation.navigate(MainStackNames.CaseDetail, { id: item.id });
       }}
     />
   );
@@ -119,7 +119,7 @@ export default function HomeScreen() {
           >
             <Icon
               name="person"
-              size={moderateScale(24)}
+              size={moderateScale(theme.fontSizes.lg)}
               color={theme.colors.surface}
             />
           </TouchableOpacity>
@@ -146,16 +146,24 @@ export default function HomeScreen() {
             />
           </View>
 
-          <FlatList
-            data={lawyersData}
-            renderItem={renderLawyerCard}
-            keyExtractor={item => item.id.toString()}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            scrollEnabled={true}
-            contentContainerStyle={themed(styles.horizontalListContent)}
-            ItemSeparatorComponent={ItemSeparator}
-          />
+          {lawyersData.length > 0 ? (
+            <FlatList
+              data={lawyersData}
+              renderItem={renderLawyerCard}
+              keyExtractor={(item, index) =>
+                item?.id !== undefined ? String(item.id) : `lawyer-${index}`
+              }
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              scrollEnabled={true}
+              contentContainerStyle={themed(styles.horizontalListContent)}
+              ItemSeparatorComponent={ItemSeparator}
+            />
+          ) : (
+            <View style={themed(styles.noDataContainer)}>
+              <Text style={themed(styles.noDataText)}>{t('home.noData')}</Text>
+            </View>
+          )}
         </View>
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
@@ -172,16 +180,22 @@ export default function HomeScreen() {
               </Text>
             </TouchableOpacity>
           </View>
-          <FlatList
-            data={casesData}
-            renderItem={renderCaseCard}
-            keyExtractor={item => item.id}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            scrollEnabled={true}
-            contentContainerStyle={themed(styles.horizontalListContent)}
-            ItemSeparatorComponent={ItemSeparator}
-          />
+          {casesData.length > 0 ? (
+            <FlatList
+              data={(casesData || []).filter(Boolean)}
+              renderItem={renderCaseCard}
+              keyExtractor={(item, index) => item?.id || `case-${index}`}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              scrollEnabled={true}
+              contentContainerStyle={themed(styles.horizontalListContent)}
+              ItemSeparatorComponent={ItemSeparator}
+            />
+          ) : (
+            <View style={themed(styles.noDataContainer)}>
+              <Text style={themed(styles.noDataText)}>{t('home.noData')}</Text>
+            </View>
+          )}
         </View>
         <View style={themed(styles.listContainer)}>
           <View style={themed(styles.sectionHeader)}>
@@ -202,7 +216,7 @@ export default function HomeScreen() {
             <FlatList
               data={documentsData}
               renderItem={renderDocumentCard}
-              keyExtractor={item => item.id}
+              keyExtractor={(item, index) => item?.id || `doc-${index}`}
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               scrollEnabled={true}
@@ -211,9 +225,7 @@ export default function HomeScreen() {
             />
           ) : (
             <View style={themed(styles.noDataContainer)}>
-              <Text style={themed(styles.noDataText)}>
-                Không có tài liệu nổi bật
-              </Text>
+              <Text style={themed(styles.noDataText)}>{t('home.noData')}</Text>
             </View>
           )}
         </View>

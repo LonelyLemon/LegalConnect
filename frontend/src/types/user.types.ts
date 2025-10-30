@@ -7,7 +7,6 @@ export interface UserState {
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
-  permissions: string[];
 }
 
 export interface UserAction {

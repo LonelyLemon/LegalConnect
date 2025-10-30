@@ -5,4 +5,5 @@ export interface User {
   username: string;
   phone_number: string | null;
   address: string | null;
+  role: string;
 }

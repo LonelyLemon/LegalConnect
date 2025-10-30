@@ -52,7 +52,6 @@ export const caseSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchUserCases.fulfilled, (state, action) => {
-        // Handle both array and single object responses
         if (Array.isArray(action.payload)) {
           state.cases = action.payload;
         } else {

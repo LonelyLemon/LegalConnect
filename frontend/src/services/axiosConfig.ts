@@ -40,7 +40,7 @@ const setupAxiosInterceptors = () => {
   const onResponseError = (err: any) => {
     const { response, config } = err;
     const status = response?.status;
-
+    console.log('status: ', status);
     if (status === 403) {
       store.dispatch(userActions.setNewToken(''));
       store.dispatch(userActions.isLoggedOut());
@@ -49,6 +49,7 @@ const setupAxiosInterceptors = () => {
 
     if (status === 401) {
       const refreshToken = store?.getState()?.user?.refreshToken;
+      console.log('refreshToken: ', refreshToken);
       if (!refreshToken) {
         return Promise.reject(err);
       }

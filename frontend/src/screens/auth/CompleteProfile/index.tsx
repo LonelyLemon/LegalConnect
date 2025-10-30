@@ -2,8 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute } from '@react-navigation/native';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
 import ControllerForm from '../../../components/common/controllerForm';
@@ -11,34 +10,36 @@ import Header from '../../../components/layout/header';
 import { t } from '../../../i18n';
 // @ts-ignore - React Native image module resolution
 import AvatarPlaceholder from '../../../assets/imgs/Logo.png';
+import { useAppDispatch, useAppSelector } from '../../../redux/hook.ts';
+import { selectUser, updateUserProfile } from '../../../stores/user.slice.ts';
+import { MainStackNames } from '../../../navigation/routes.ts';
+import { useNavigation } from '@react-navigation/native';
 
 type FormProfile = {
-  firstName: string;
-  lastName: string;
-  phone: string;
+  username: string;
+  email: string;
+  phone_number: string;
   address: string;
   gender: 'Male' | 'Female' | 'Other';
-  dob: Dayjs;
-  pob: string;
+  dob: string;
+  avatar_url: string;
 };
 
-export default function CompleteProfileScreen() {
-  const { themed } = useAppTheme();
-  const route = useRoute<any>();
-  const userData = route?.params?.userData as Partial<FormProfile> | undefined;
+export default function CompleteProfileScreen({}) {
+  const user = useAppSelector(selectUser);
 
-  const initialDefaults: FormProfile = {
-    firstName: userData?.firstName ?? '',
-    lastName: userData?.lastName ?? '',
-    phone: userData?.phone ?? '',
-    address: userData?.address ?? '',
-    gender: (userData?.gender as any) ?? 'Male',
-    dob: userData?.dob ? dayjs(userData.dob as any) : dayjs(),
-    pob: userData?.pob ?? '',
+  const userData: FormProfile = {
+    username: user?.username ?? '',
+    email: user?.email ?? '',
+    phone_number: user?.phone_number ?? '',
+    address: user?.address ?? '',
+    avatar_url: user?.avatar ?? '',
+    gender: 'Male',
+    dob: dayjs().format('YYYY-MM-DD'),
   };
-
+  const { themed } = useAppTheme();
   const control = useForm<FormProfile>({
-    defaultValues: initialDefaults,
+    defaultValues: userData,
   });
 
   const {
@@ -48,31 +49,32 @@ export default function CompleteProfileScreen() {
 
   const fields = [
     {
-      id: 'firstName',
-      name: 'firstName',
-      label: t('auth.completeProfile.firstName'),
+      id: 'username',
+      name: 'username',
+      label: t('auth.completeProfile.username'),
       type: 'input',
-      placeholder: t('auth.completeProfile.enterFirstName'),
-      error: errors?.firstName?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.firstNameRequired') } },
+      placeholder: t('auth.completeProfile.enterUsername'),
+      error: errors?.username?.message,
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.userNameRequired'),
+        },
+      },
     },
     {
-      id: 'lastName',
-      name: 'lastName',
-      label: t('auth.completeProfile.lastName'),
-      type: 'input',
-      placeholder: t('auth.completeProfile.enterLastName'),
-      error: errors?.lastName?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.lastNameRequired') } },
-    },
-    {
-      id: 'phone',
-      name: 'phone',
+      id: 'phone_number',
+      name: 'phone_number',
       label: t('auth.completeProfile.phone'),
       type: 'input',
       placeholder: t('auth.completeProfile.enterPhone'),
-      error: errors?.phone?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.phoneRequired') } },
+      error: errors?.phone_number?.message,
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.phoneRequired'),
+        },
+      },
     },
     {
       id: 'address',
@@ -81,7 +83,12 @@ export default function CompleteProfileScreen() {
       type: 'input',
       placeholder: t('auth.completeProfile.enterAddress'),
       error: errors?.address?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.addressRequired') } },
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.addressRequired'),
+        },
+      },
     },
     {
       id: 'gender',
@@ -94,7 +101,12 @@ export default function CompleteProfileScreen() {
         { label: t('auth.completeProfile.other'), value: 'Other' },
       ],
       error: errors?.gender?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.genderRequired') } },
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.genderRequired'),
+        },
+      },
     },
     {
       id: 'dob',
@@ -103,26 +115,40 @@ export default function CompleteProfileScreen() {
       type: 'date',
       placeholder: 'YYYY-MM-DD',
       error: errors?.dob?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.dobRequired') } },
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.dobRequired'),
+        },
+      },
     },
     {
-      id: 'pob',
-      name: 'pob',
-      label: t('auth.completeProfile.placeOfBirth'),
-      type: 'input',
-      placeholder: t('auth.completeProfile.enterPlaceOfBirth'),
-      error: errors?.pob?.message,
-      rules: { required: { value: true, message: t('auth.completeProfile.placeRequired') } },
+      id: 'avatar_url',
+      name: 'avatar_url',
+      label: t('auth.completeProfile.avatar'),
+      type: 'image',
+      placeholder: t('auth.completeProfile.enterAvatar'),
+      error: errors?.avatar_url?.message,
     },
   ];
-
-  const onSubmit = (_: FormProfile) => {
-    // Submit to API later
+  const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+  const onSubmit = (data: FormProfile) => {
+    dispatch(updateUserProfile(data));
+    navigation.navigate(MainStackNames.HomeTabs as never);
   };
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title={t('auth.completeProfile.title')} showBackButton={true} />
+      <Header
+        title={t('auth.completeProfile.title')}
+        showBackButton={true}
+        navigation={
+          !(user?.phone_number && user?.address)
+            ? MainStackNames.Setting
+            : undefined
+        }
+      />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
@@ -138,16 +164,18 @@ export default function CompleteProfileScreen() {
             style={themed(styles.primaryButton)}
             onPress={handleSubmit(onSubmit)}
             disabled={
-              !!errors.firstName ||
-              !!errors.lastName ||
-              !!errors.phone ||
+              !!errors.username ||
+              !!errors.email ||
+              !!errors.phone_number ||
               !!errors.address ||
               !!errors.gender ||
               !!errors.dob ||
-              !!errors.pob
+              !!errors.avatar_url
             }
           >
-            <Text style={themed(styles.primaryButtonText)}>{t('auth.completeProfile.continue')}</Text>
+            <Text style={themed(styles.primaryButtonText)}>
+              {t('auth.completeProfile.continue')}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

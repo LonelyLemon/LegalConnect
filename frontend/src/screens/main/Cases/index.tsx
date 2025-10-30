@@ -231,7 +231,7 @@ export default function CasesScreen() {
   );
 
   return (
-    <SafeAreaView style={themed(() => ({ flex: 1 }))}>
+    <SafeAreaView style={themed(styles.container)}>
       <Header title={t('cases.title')} showBackButton={false} />
       <View style={themed(styles.tabContainer)}>
         {tabs.map(tab => (

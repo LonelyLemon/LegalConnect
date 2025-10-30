@@ -33,14 +33,15 @@ export const signIn = async (data: FormLogin) => {
 };
 
 export const signUp = async (data: FormSignUp) => {
-  const formData = new FormData();
-  formData.append('email', data.email);
-  formData.append('password', data.password);
-  formData.append('repassword', data.repassword);
-  formData.append('name', data.name);
   try {
-    const response = await axios.post('/auth/signup', formData, {
+    const body = {
+      email: data.email,
+      password: data.password,
+      username: data.name,
+    };
+    const response = await axios.post('/users/register', body, {
       baseURL: envConfig.baseUrl,
+      headers: { 'Content-Type': 'application/json' },
     });
     const payload = response?.data?.data ?? response?.data;
     console.log('signup response: ', payload);
@@ -83,16 +84,20 @@ export const fetchUserInfo = async () => {
 };
 export const updateUserInfo = async (data: any) => {
   try {
-    const formData = new FormData();
-    formData.append('username', data.username);
-    formData.append('password', data.password);
-    formData.append('phone_number', data.phone_number);
-    formData.append('address', data.address);
-    const response = await axios.put('/users/update', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    const body = {
+      username: data.username,
+      phone_number: data.phone_number,
+      address: data.address,
+      gender: data.gender,
+      dob: data.dob,
+      avatar_url: data.avatar_url,
+    };
+    const response = await axios.put('/users/update', body, {
+      headers: { 'Content-Type': 'application/json' },
       baseURL: envConfig.baseUrl,
     });
-    return response.data.data;
+    showSuccess('Update user info successful');
+    return response?.data?.data ?? response?.data;
   } catch (error: any) {
     console.log('error update user info: ', error);
     const errmsg = error?.response?.data;

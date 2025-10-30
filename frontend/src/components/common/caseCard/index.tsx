@@ -37,8 +37,16 @@ export default function CaseCard({
   stylesOverride,
 }: CaseCardProps) {
   const { themed, theme } = useAppTheme();
-  const { title, description, state, attachment_urls, updated_at } =
-    caseData as any;
+  if (!caseData) {
+    return null;
+  }
+  const {
+    title = '',
+    description = '',
+    state = 'PENDING',
+    attachment_urls = [],
+    updated_at = '',
+  } = (caseData as any) ?? {};
 
   const getStatusColor = (caseStatus: string) => {
     switch (caseStatus) {

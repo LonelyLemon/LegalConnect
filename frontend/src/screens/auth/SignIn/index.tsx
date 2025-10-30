@@ -16,6 +16,9 @@ import {
   selectError,
   selectIsLoading,
   signInWithEmailPassword,
+  userActions,
+  selectIsLoggedIn,
+  selectUser,
 } from '../../../stores/user.slice';
 import { FormLogin } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
@@ -23,9 +26,10 @@ import { showError } from '../../../types/toast';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { verticalScale } from 'react-native-size-matters';
 import { t } from '../../../i18n';
+import Header from '../../../components/layout/header';
 
 export default function SignInScreen() {
   const dispatch = useAppDispatch();
@@ -42,6 +46,16 @@ export default function SignInScreen() {
 
   const loading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const user = useAppSelector(selectUser);
+
+  // Clear stale error when entering/leaving this screen
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(userActions.clearError());
+      return () => dispatch(userActions.clearError());
+    }, [dispatch]),
+  );
 
   const onError = () => {
     showError(t('auth.signIn.loginFailed'));
@@ -83,6 +97,7 @@ export default function SignInScreen() {
   ];
 
   const handleSignIn = (data: FormLogin) => {
+    dispatch(userActions.clearError());
     dispatch(
       signInWithEmailPassword({
         email: data.email,
@@ -90,6 +105,17 @@ export default function SignInScreen() {
       }),
     );
   };
+
+  // Navigate after successful login based on profile completeness
+  React.useEffect(() => {
+    if (!isLoggedIn) return;
+    const missingProfile = !user?.phone_number || !user?.address;
+    if (missingProfile) {
+      navigation.navigate('CompleteProfile' as never);
+    } else {
+      navigation.navigate('HomeTabs' as never);
+    }
+  }, [isLoggedIn, user, navigation]);
 
   const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword');
@@ -115,8 +141,9 @@ export default function SignInScreen() {
             />
           </View>
 
-          {/* Tiêu đề như ảnh */}
-          <Text style={themed(styles.welcomeTitle)}>{t('auth.signIn.title')}</Text>
+          <Text style={themed(styles.welcomeTitle)}>
+            {t('auth.signIn.title')}
+          </Text>
 
           <View
             style={{
@@ -127,7 +154,6 @@ export default function SignInScreen() {
             <ControllerForm fields={fields} control={control} />
           </View>
 
-          {/* Forgot password? căn phải */}
           <View style={themed(styles.optionsContainer)}>
             <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={themed(styles.forgotPassword)}>
@@ -138,22 +164,24 @@ export default function SignInScreen() {
 
           {error && <Text style={themed(styles.error)}>{error}</Text>}
 
-          {/* Nút đăng nhập full-width */}
           <TouchableOpacity
             style={themed(styles.signInButton)}
             onPress={handleSubmit(handleSignIn, onError)}
             disabled={!!errors.email || !!errors.password}
           >
-            <Text style={themed(styles.signInButtonText)}>{t('auth.signIn.logIn')}</Text>
+            <Text style={themed(styles.signInButtonText)}>
+              {t('auth.signIn.logIn')}
+            </Text>
           </TouchableOpacity>
 
-          {/* Hàng Sign up giống ảnh */}
           <View style={themed(styles.signUpRow)}>
             <Text style={themed(styles.signUpMuted)}>
               {t('auth.signIn.dontHaveAccount')}
             </Text>
             <TouchableOpacity onPress={handleNavigateToSignUp}>
-              <Text style={themed(styles.signUpLink)}>{t('auth.signIn.signUp')}</Text>
+              <Text style={themed(styles.signUpLink)}>
+                {t('auth.signIn.signUp')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

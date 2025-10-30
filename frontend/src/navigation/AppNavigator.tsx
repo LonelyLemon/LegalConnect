@@ -2,8 +2,10 @@ import { useAppSelector } from '../redux/hook';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect } from 'react';
 import { AuthStackRoutes } from './routes';
-import { selectIsLoggedIn } from '../stores/user.slice';
+import { selectIsLoggedIn, selectUser } from '../stores/user.slice';
 import MainStack from './MainStack';
+import AdminStack from './AdminStack';
+import LawyerStack from './LawyerStack';
 
 const AppStack = createNativeStackNavigator();
 
@@ -24,10 +26,44 @@ function AuthStack() {
 
 export default function AppNavigator() {
   const isLoggedIn = useAppSelector(selectIsLoggedIn);
-  // const isLoggedIn = true;
+  const user = useAppSelector(selectUser);
   useEffect(() => {
-    console.log('isLoggedIn: ', isLoggedIn);
-  }, [isLoggedIn]);
+    console.log('isLoggedIn: ', isLoggedIn, 'user.role:', user?.role);
+  }, [isLoggedIn, user]);
+
+  let MainSwitch;
+  if (!isLoggedIn)
+    MainSwitch = (
+      <AppStack.Screen
+        name="Auth"
+        component={AuthStack}
+        options={{ headerShown: false }}
+      />
+    );
+  else if (user?.role === 'admin')
+    MainSwitch = (
+      <AppStack.Screen
+        name="Admin"
+        component={AdminStack}
+        options={{ headerShown: false }}
+      />
+    );
+  else if (user?.role === 'lawyer')
+    MainSwitch = (
+      <AppStack.Screen
+        name="Lawyer"
+        component={LawyerStack}
+        options={{ headerShown: false }}
+      />
+    );
+  else
+    MainSwitch = (
+      <AppStack.Screen
+        name="Main"
+        component={MainStack}
+        options={{ headerShown: false }}
+      />
+    );
 
   return (
     <AppStack.Navigator
@@ -38,21 +74,8 @@ export default function AppNavigator() {
           backgroundColor: '#F5F7FA',
         },
       }}
-      initialRouteName={isLoggedIn ? 'Main' : 'Auth'}
     >
-      {isLoggedIn ? (
-        <AppStack.Screen
-          name="Main"
-          component={MainStack}
-          options={{ headerShown: false }}
-        />
-      ) : (
-        <AppStack.Screen
-          name="Auth"
-          component={AuthStack}
-          options={{ headerShown: false }}
-        />
-      )}
+      {MainSwitch}
     </AppStack.Navigator>
   );
 }

@@ -3,7 +3,7 @@ import { showError } from '../types/toast';
 
 export const getPopularLawyers = async () => {
   try {
-    const response = await axios.get('/lawyer/profiles', {
+    const response = await axios.get('/lawyer/profile', {
       // params: { sort: 'average_rating', order: 'desc' },
     });
     return response.data;
@@ -22,7 +22,7 @@ export const getPopularLawyers = async () => {
 
 export const getLawyerById = async (id: number) => {
   try {
-    const response = await axios.get(`/api/lawyer_profiles/${id}`);
+    const response = await axios.get(`/lawyer/profile/${id}`);
     return response.data;
   } catch (error: any) {
     const data = error?.response?.data;
@@ -39,9 +39,7 @@ export const getLawyerById = async (id: number) => {
 
 export const getLawyerByCategory = async (category: string) => {
   try {
-    const response = await axios.get(
-      `/api/lawyers_profiles/category/${category}`,
-    );
+    const response = await axios.get(`/lawyer/profile/category/${category}`);
     return response.data.data;
   } catch (error: any) {
     const data = error?.response?.data;
@@ -58,7 +56,7 @@ export const getLawyerByCategory = async (category: string) => {
 
 export const getLawyerByPage = async (page: number) => {
   try {
-    const response = await axios.get(`/api/lawyer_profiles/page/${page}`);
+    const response = await axios.get(`/lawyer/profile/page/${page}`);
     return response.data.data;
   } catch (error: any) {
     const data = error?.response?.data;
@@ -75,9 +73,7 @@ export const getLawyerByPage = async (page: number) => {
 
 export const getLawyerRatings = async (lawyerId: number) => {
   try {
-    const response = await axios.get(
-      `/api/booking/lawyers/${lawyerId}/ratings`,
-    );
+    const response = await axios.get(`/lawyer/profile/${lawyerId}/ratings`);
     return response.data;
   } catch (error: any) {
     const data = error?.response?.data;
