@@ -1,5 +1,4 @@
 import fastapi
-
 from contextlib import asynccontextmanager
 from pathlib import Path
 from arq.connections import create_pool, RedisSettings
@@ -20,6 +19,7 @@ from src.documentation.router import documentation_route
 from src.booking.router import booking_route
 
 THIS_DIR = Path(__file__).parent
+
 
 async def create_admin() -> None:
     admin_email = settings.ADMIN_EMAIL.strip().lower()
@@ -43,21 +43,29 @@ async def create_admin() -> None:
         session.add(new_admin)
         await session.commit()
 
+
 @asynccontextmanager
 async def lifespan(_app: fastapi.FastAPI):
-    _app.state.arq_pool = await create_pool(
-        RedisSettings(
+    # Ưu tiên dùng REDIS_URL nếu có (Railway)
+    if getattr(settings, "REDIS_URL", None):
+        redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
+    else:
+        redis_settings = RedisSettings(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
-            database=0
+            username="default",
+            password=settings.REDIS_PASSWORD,
+            database=0,
         )
-    )
+
+    _app.state.arq_pool = await create_pool(redis_settings)
     await create_admin()
 
     try:
         yield
     finally:
         await _app.state.arq_pool.close()
+
 
 app = fastapi.FastAPI(lifespan=lifespan)
 
@@ -70,6 +78,7 @@ app.add_middleware(
     allow_headers=settings.CORS_HEADERS,
 )
 
+# Routers
 app.include_router(auth_route)
 app.include_router(user_route)
 app.include_router(lawyer_route)

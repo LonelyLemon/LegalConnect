@@ -1,5 +1,5 @@
 from pathlib import Path
-from pydantic import computed_field, PostgresDsn
+from pydantic import computed_field, PostgresDsn, Field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,21 +7,46 @@ from src.core.constants import Environment
 
 BASE_DIR = Path(__file__).resolve().parents[3]
 
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env", env_ignore_empty=True, extra="ignore"
     )
 
+    # ─────────────── App & Env ───────────────
     APP_KEY: str
     ENVIRONMENT: Environment = Environment.LOCAL
 
-    POSTGRES_DB: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_PORT: int
-    POSTGRES_HOST: str
-    SQLALCHEMY_DATABASE_URL: str
+    # ─────────────── Database ───────────────
+    # Railway chỉ cần 1 URL; local có thể dùng các field bên dưới
+    SQLALCHEMY_DATABASE_URL: str | None = None
 
+    POSTGRES_DB: str | None = None
+    POSTGRES_USER: str | None = None
+    POSTGRES_PASSWORD: str | None = None
+    POSTGRES_PORT: int | None = None
+    POSTGRES_HOST: str | None = None
+
+    @computed_field
+    @property
+    def ASYNC_DATABASE_URI(self) -> PostgresDsn:
+        """
+        Tự động chọn chuỗi kết nối asyncpg.
+        - Nếu SQLALCHEMY_DATABASE_URL được đặt (ví dụ Railway), dùng luôn.
+        - Nếu không, build từ các POSTGRES_* cục bộ.
+        """
+        if self.SQLALCHEMY_DATABASE_URL:
+            return self.SQLALCHEMY_DATABASE_URL
+        return MultiHostUrl.build(
+            scheme="postgresql+asyncpg",
+            username=self.POSTGRES_USER,
+            password=self.POSTGRES_PASSWORD,
+            host=self.POSTGRES_HOST,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB,
+        )
+
+    # ─────────────── Mail ───────────────
     MAIL_SERVER: str = "smtp.sendgrid.net"
     MAIL_PORT: int = 2525
     MAIL_USERNAME: str
@@ -30,14 +55,19 @@ class Settings(BaseSettings):
     MAIL_TLS: bool = True
     FRONTEND_URL: str
 
-    REDIS_HOST: str
-    REDIS_PORT: int
+    # ─────────────── Redis ───────────────
+    REDIS_URL: str | None = None
+    REDIS_HOST: str | None = None
+    REDIS_PORT: int | None = None
+    REDIS_PASSWORD: str | None = None
 
+    # ─────────────── AWS ───────────────
     AWS_ACCESS_KEY: str
     AWS_SECRET_ACCESS_KEY: str
     AWS_REGION: str
     S3_BUCKET: str
 
+    # ─────────────── Chat settings ───────────────
     CHAT_ATTACHMENT_MAX_BYTES: int = 10 * 1024 * 1024
     CHAT_ATTACHMENT_ALLOWED_CONTENT_TYPES: list[str] = [
         "image/png",
@@ -50,22 +80,27 @@ class Settings(BaseSettings):
     CHAT_RATE_LIMIT_MAX_EVENTS: int = 30
     CHAT_RATE_LIMIT_WINDOW_SECONDS: int = 10
 
+    # ─────────────── Database pool ───────────────
     DATABASE_POOL_SIZE: int = 16
-    DATABASE_POOL_TTL: int = 60 * 20    #20 minutes
+    DATABASE_POOL_TTL: int = 60 * 20  # 20 minutes
     DATABASE_POOL_PRE_PING: bool = True
 
+    # ─────────────── CORS ───────────────
     CORS_ORIGIN: list[str] = ["*"]
     CORS_ORIGIN_REGEX: str | None = None
     CORS_HEADERS: list[str] = ["*"]
 
+    # ─────────────── JWT ───────────────
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRES: int = 86400   #seconds
-    REFRESH_TOKEN_EXPIRES: int = 30     #days
+    ACCESS_TOKEN_EXPIRES: int = 86400  # seconds
+    REFRESH_TOKEN_EXPIRES: int = 30  # days
 
+    # ─────────────── Admin ───────────────
     ADMIN_EMAIL: str = "fallfree498@gmail.com"
     ADMIN_USERNAME: str = "Admin"
     ADMIN_PASSWORD: str = "Admin123!"
 
+    # ─────────────── Legal AI ───────────────
     LEGAL_AI_MODEL_ID: str = "legal-connect-vi-law-qa"
     LEGAL_AI_PROVIDER_BASE_URL: str | None = None
     LEGAL_AI_API_KEY: str | None = None
@@ -79,16 +114,5 @@ class Settings(BaseSettings):
     LEGAL_AI_DATASET_PATH: str = str(BASE_DIR / "backend" / "data" / "vi-law-qa-3161.csv")
     LEGAL_AI_LOG_SAMPLE_RATE: float = 1.0
 
-    @computed_field
-    @property
-    def ASYNC_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
-            scheme="postgresql+asyncpg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_HOST,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB
-        )
-    
+
 settings = Settings()
