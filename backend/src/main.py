@@ -48,8 +48,8 @@ async def create_admin() -> None:
 
 @asynccontextmanager
 async def lifespan(_app: fastapi.FastAPI):
-    """Lifecycle: chạy migration, khởi tạo Redis và admin."""
-    # 🧱 Chạy Alembic migration tự động khi khởi động app
+    """Lifecycle: chạy migration, khởi tạo Redis và tạo dữ liệu ban đầu."""
+    # 🧱 1. Chạy Alembic migration tự động
     try:
         print("🔄 Running Alembic migrations...")
         subprocess.run(["uv", "run", "alembic", "upgrade", "head"], check=True)
@@ -57,7 +57,7 @@ async def lifespan(_app: fastapi.FastAPI):
     except Exception as e:
         print("❌ Alembic migration failed:", e)
 
-    # ⚙️ Kết nối Redis (ưu tiên REDIS_URL nếu có)
+    # ⚙️ 2. Kết nối Redis
     if getattr(settings, "REDIS_URL", None):
         redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
     else:
@@ -71,8 +71,31 @@ async def lifespan(_app: fastapi.FastAPI):
 
     _app.state.arq_pool = await create_pool(redis_settings)
 
-    # 👑 Tạo tài khoản admin mặc định
+    # 👑 3. Tạo admin mặc định
     await create_admin()
+
+    # 🌱 4. Seed dữ liệu demo (chỉ chạy 1 lần)
+    try:
+        async with SessionLocal() as session:
+            from src.user.models import User
+
+            exists = await session.execute(
+                select(User).where(User.email == "demo_client@example.com")
+            )
+            if not exists.first():
+                print("🌱 Running seed_data.py ...")
+                import importlib.util, runpy, os
+
+                seed_path = Path(__file__).resolve().parents[1] / "scripts" / "seed_data.py"
+                if seed_path.exists():
+                    runpy.run_path(str(seed_path))
+                    print("✅ Seeding completed.")
+                else:
+                    print("⚠️ seed_data.py not found, skipping.")
+            else:
+                print("✅ Demo data already exists, skipping seed.")
+    except Exception as e:
+        print("⚠️ Error running seed_data:", e)
 
     try:
         yield
@@ -80,10 +103,10 @@ async def lifespan(_app: fastapi.FastAPI):
         await _app.state.arq_pool.close()
 
 
-# 🚀 Khởi tạo FastAPI app
+# 🚀 FastAPI App
 app = fastapi.FastAPI(lifespan=lifespan)
 
-# 🛡️ Cấu hình CORS
+# 🛡️ Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGIN,
@@ -93,7 +116,7 @@ app.add_middleware(
     allow_headers=settings.CORS_HEADERS,
 )
 
-# 📦 Đăng ký các router
+# 📦 Routers
 app.include_router(auth_route)
 app.include_router(user_route)
 app.include_router(lawyer_route)
