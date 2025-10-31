@@ -86,7 +86,7 @@ class Settings(BaseSettings):
     DATABASE_POOL_PRE_PING: bool = True
 
     # ─────────────── CORS ───────────────
-    CORS_ORIGIN: list[str] = ["*"]
+    CORS_ORIGIN: list[str] = ["http://localhost:8081"]
     CORS_ORIGIN_REGEX: str | None = None
     CORS_HEADERS: list[str] = ["*"]
 
