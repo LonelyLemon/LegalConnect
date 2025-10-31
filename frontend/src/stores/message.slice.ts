@@ -48,6 +48,7 @@ export const fetchMessagesByConversationId = createAsyncThunk(
   async ({ conversationId }: { conversationId: string }, thunkApi) => {
     try {
       const response = await getMessagesByConversationId(conversationId);
+      console.log('response: ', response);
       return response;
     } catch (error) {
       return thunkApi.rejectWithValue(
@@ -77,7 +78,18 @@ export const sendMessageAction = createAsyncThunk(
 export const messageSlice = createSlice({
   initialState,
   name: 'message',
-  reducers: {},
+  reducers: {
+    addIncomingMessage: (state, action) => {
+      // Thêm tin nhắn từ WebSocket
+      const newMessage = action.payload;
+      if (newMessage && !state.messages.find(m => m.id === newMessage.id)) {
+        state.messages.push(newMessage);
+      }
+    },
+    clearMessages: state => {
+      state.messages = [];
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(fetchConversations.pending, state => {
@@ -107,23 +119,44 @@ export const messageSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(fetchMessagesByConversationId.pending, state => {
-        state.messages = [];
-        state.loadingMessages = true;
+        console.log('Fetching messages - pending');
+        // Không xóa messages cũ để tránh hiện loading khi refetch
+        // Chỉ set loading = true khi chưa có messages
+        if (state.messages.length === 0) {
+          state.loadingMessages = true;
+        }
         state.error = null;
       })
       .addCase(fetchMessagesByConversationId.fulfilled, (state, action) => {
+        console.log('Fetching messages - fulfilled, payload:', action.payload);
+        console.log('Number of messages:', action.payload?.length);
         state.messages = action.payload;
         state.loadingMessages = false;
         state.error = null;
       })
       .addCase(fetchMessagesByConversationId.rejected, (state, action) => {
+        console.log('Fetching messages - rejected:', action.payload);
         state.loadingMessages = false;
         state.error = action.payload as string;
       })
-      .addCase(sendMessageAction.pending, state => {})
-      .addCase(sendMessageAction.fulfilled, (state, action) => {})
-      .addCase(sendMessageAction.rejected, (state, action) => {});
+      .addCase(sendMessageAction.pending, _state => {
+        // Có thể thêm loading state cho nút send nếu cần
+      })
+      .addCase(sendMessageAction.fulfilled, (state, action) => {
+        // Thêm tin nhắn mới vào cuối danh sách
+        console.log('Message sent successfully:', action.payload);
+        if (
+          action.payload &&
+          !state.messages.find(m => m.id === action.payload.id)
+        ) {
+          state.messages.push(action.payload);
+        }
+      })
+      .addCase(sendMessageAction.rejected, (_state, _action) => {
+        console.error('Failed to send message');
+      });
   },
 });
 
 export const messageReducer = messageSlice.reducer;
+export const messageActions = messageSlice.actions;

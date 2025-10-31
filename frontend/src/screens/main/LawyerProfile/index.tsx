@@ -17,6 +17,7 @@ import Icon from '@react-native-vector-icons/ionicons';
 import { moderateScale } from 'react-native-size-matters';
 import Description from './Description/index.tsx';
 import Review from './Review/index.tsx';
+import { createNewConversation } from '../../../stores/message.slice.ts';
 
 type TabType = 'description' | 'review' | 'cases';
 
@@ -68,6 +69,49 @@ export default function LawyerProfileScreen({
     }
   };
 
+  const handleChatPress = async () => {
+    try {
+      const response = await dispatch(
+        createNewConversation({ receiverId: lawyer?.user_id || '' }),
+      );
+      console.log('Full response:', JSON.stringify(response, null, 2));
+
+      if (response?.payload) {
+        const payload: any = response.payload;
+        console.log('Payload:', payload);
+
+        // Lấy conversation_id từ response (có thể là top-level hoặc trong participants)
+        const conversationId =
+          payload.id ||
+          payload.conversation_id ||
+          payload.participants?.[0]?.conversation_id;
+
+        console.log('Conversation ID:', conversationId);
+
+        if (!conversationId) {
+          console.error('No conversation ID found in response');
+          return;
+        }
+
+        // Tìm thông tin lawyer từ participants hoặc dùng từ state
+        const lawyerParticipant = payload.participants?.find(
+          (p: any) => p.user_id === lawyer?.user_id,
+        );
+
+        navigation.navigate(MainStackNames.ChatDetail, {
+          chatId: conversationId,
+          name:
+            lawyerParticipant?.user?.username ||
+            lawyer?.display_name ||
+            'Lawyer',
+          avatar: lawyerParticipant?.user?.image_url || lawyer?.image_url || '',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={themed(styles.container)}>
       <Header />
@@ -114,21 +158,37 @@ export default function LawyerProfileScreen({
           </View>
         </View>
 
-        <TouchableOpacity
-          style={themed(styles.editButton)}
-          onPress={() => {
-            navigation.navigate(MainStackNames.Booking, {
-              lawyerId: id,
-            });
-          }}
-        >
-          <Text style={themed(styles.editButtonText)}>Order a session</Text>
-          <Icon
-            name="chevron-forward"
-            size={moderateScale(theme.fontSizes.xl)}
-            color={theme.colors.primary}
-          />
-        </TouchableOpacity>
+        <View style={themed(styles.buttonContainer)}>
+          <TouchableOpacity
+            style={themed(styles.secondaryButton)}
+            onPress={() => {
+              handleChatPress();
+            }}
+          >
+            <Icon
+              name="chatbubble-outline"
+              size={moderateScale(theme.fontSizes.lg)}
+              color={theme.colors.onPrimary}
+            />
+            <Text style={themed(styles.secondaryButtonText)}>Chat</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={themed(styles.primaryButton)}
+            onPress={() => {
+              navigation.navigate(MainStackNames.Booking, {
+                lawyerId: id,
+              });
+            }}
+          >
+            <Icon
+              name="calendar-outline"
+              size={moderateScale(theme.fontSizes.lg)}
+              color={theme.colors.primary}
+            />
+            <Text style={themed(styles.primaryButtonText)}>Book</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={themed(styles.tabContainer)}>

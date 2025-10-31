@@ -77,6 +77,65 @@ export const statLabel: ThemedStyle<TextStyle> = ({
   opacity: 0.9,
 });
 
+export const buttonContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: 'row',
+  marginTop: verticalScale(spacing.md),
+  paddingHorizontal: scale(spacing.md),
+  gap: scale(spacing.sm),
+  width: '100%',
+});
+
+export const primaryButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  flex: 1,
+  backgroundColor: colors.onPrimary,
+  paddingVertical: verticalScale(spacing.sm),
+  borderRadius: scale(spacing.sm),
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: scale(spacing.xs),
+  shadowColor: colors.shadow,
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+});
+
+export const secondaryButton: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+}) => ({
+  flex: 1,
+  backgroundColor: 'transparent',
+  paddingVertical: verticalScale(spacing.sm),
+  borderRadius: scale(spacing.sm),
+  borderWidth: 2,
+  borderColor: colors.onPrimary,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: scale(spacing.xs),
+});
+
+export const primaryButtonText: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+}) => ({
+  color: colors.primary,
+  fontSize: moderateScale(fontSizes.md),
+  fontWeight: '700',
+});
+
+export const secondaryButtonText: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+}) => ({
+  color: colors.onPrimary,
+  fontSize: moderateScale(fontSizes.md),
+  fontWeight: '700',
+});
+
+// Deprecated - keeping for backward compatibility
 export const editButton: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   backgroundColor: colors.onPrimary,
   paddingHorizontal: scale(spacing.sm),

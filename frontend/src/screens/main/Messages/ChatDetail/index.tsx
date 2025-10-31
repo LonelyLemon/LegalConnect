@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from '../../../../redux/hook';
 import {
   fetchMessagesByConversationId,
   sendMessageAction,
+  messageActions,
 } from '../../../../stores/message.slice.ts';
 import { useAppTheme } from '../../../../theme/theme.provider';
 import { MessageItem } from '../../../../types/message.ts';
@@ -27,55 +28,6 @@ import {
   subscribeChatEvents,
 } from '../../../../services/message';
 import { store } from '../../../../redux/store';
-
-// type Message = {
-//   id: string;
-//   text: string;
-//   isMe: boolean;
-//   time: string;
-//   avatar?: string;
-// };
-
-// type ChatDetailProps = {
-//   route: {
-//     params: {
-//       chatId: string;
-//       name: string;
-//       avatar: string;
-//     };
-//   };
-// };
-
-// const mockMessages: Message[] = [
-//   {
-//     id: '1',
-//     text: 'Hello',
-//     isMe: true,
-//     time: '9:30 AM',
-//   },
-//   {
-//     id: '2',
-//     text: "Hi, I'm Sansa",
-//     isMe: false,
-//     time: '9:31 AM',
-//     avatar:
-//       'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop',
-//   },
-//   {
-//     id: '3',
-//     text: "I'm looking for an legal matter advisor, can you assist me?",
-//     isMe: true,
-//     time: '9:32 AM',
-//   },
-//   {
-//     id: '4',
-//     text: 'Sure, how can I help?',
-//     isMe: false,
-//     time: '9:33 AM',
-//     avatar:
-//       'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop',
-//   },
-// ];
 
 function MessageItemComponent({
   item,
@@ -138,9 +90,11 @@ export default function ChatDetailScreen({ route }: { route: any }) {
   const dispatch = useAppDispatch();
 
   const { chatId, name } = route.params;
-  const messageList = useAppSelector((state: any) => state.message.messages);
+  console.log('chatId: ', chatId);
+  console.log('name: ', name);
+  const messageList = useAppSelector((state: any) => state?.message?.messages);
   const loadingMessages = useAppSelector(
-    (state: any) => state.message.loadingMessages,
+    (state: any) => state?.message?.loadingMessages,
   );
   const userId = useAppSelector((state: any) => state.user.user.id);
 
@@ -155,9 +109,9 @@ export default function ChatDetailScreen({ route }: { route: any }) {
       if (evt.type === 'message') {
         const msg = evt.data;
         if (msg?.conversation_id === chatId) {
-          // Optimistically append incoming message
-          // Re-dispatch fetch could be heavy; for now, refetch
-          dispatch(fetchMessagesByConversationId({ conversationId: chatId }));
+          // Thêm tin nhắn trực tiếp vào state thay vì refetch
+          console.log('Incoming message from WebSocket:', msg);
+          dispatch(messageActions.addIncomingMessage(msg));
         }
       }
     });
@@ -266,27 +220,28 @@ export default function ChatDetailScreen({ route }: { route: any }) {
       </View>
 
       {/* Messages */}
-      <KeyboardAvoidingView
-        style={themed(styles.chatContainer)}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        {loadingMessages ? (
-          <View>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        ) : (
-          <FlatList
-            data={messageList}
-            renderItem={({ item }) => (
-              <MessageItemComponent item={item} userId={userId} />
-            )}
-            keyExtractor={item => item.id}
-            contentContainerStyle={themed(styles.messagesList)}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
+      {loadingMessages ? (
+        <View style={themed(styles.chatContainer)}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={messageList}
+          renderItem={({ item }) => (
+            <MessageItemComponent item={item} userId={userId} />
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={themed(styles.messagesList)}
+          style={themed(styles.chatContainer)}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
-        {/* Input Area */}
+      {/* Input Area */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
         <View style={themed(styles.inputContainer)}>
           <View style={themed(styles.inputRow)}>
             <TouchableOpacity style={themed(styles.inputButton)}>
