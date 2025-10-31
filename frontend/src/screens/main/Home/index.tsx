@@ -78,11 +78,12 @@ export default function HomeScreen() {
   const renderLawyerCard = ({ item }: { item: Lawyer }) => (
     <LawyerCard
       id={item.id}
-      name={item.name}
-      description={item.bio}
-      rating={item.rating_avg}
-      price={item.price_per_session_cents}
-      imageUri={item.imageUri}
+      displayName={item.display_name}
+      officeAddress={item.office_address}
+      education={item.education}
+      averageRating={item.average_rating}
+      currentLevel={item.current_level}
+      imageUrl={item.image_url}
       onPress={() => {
         navigation.navigate(MainStackNames.LawyerProfile, { id: item.id });
       }}

@@ -35,6 +35,18 @@ export const profileImage: ThemedStyle<ImageStyle> = ({ spacing }) => ({
   borderRadius: moderateScale(spacing.sm),
 });
 
+export const profilePlaceholder: ThemedStyle<ViewStyle> = ({
+  spacing,
+  colors,
+}) => ({
+  width: '100%',
+  height: '100%',
+  borderRadius: moderateScale(spacing.sm),
+  backgroundColor: colors.surfaceContainer,
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
 export const contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingHorizontal: moderateScale(spacing.sm),
   paddingBottom: verticalScale(spacing.sm),

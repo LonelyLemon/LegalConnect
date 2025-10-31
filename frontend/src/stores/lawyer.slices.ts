@@ -10,20 +10,28 @@ const InitialState: LawyerState = {
 
 export const fetchPopularLawyers = createAsyncThunk(
   'lawyer/fetchPopularLawyers',
-  async () => {
-    const response = await getPopularLawyers();
-    return response;
+  async (_, thunkApi) => {
+    try {
+      const response = await getPopularLawyers();
+      return response;
+    } catch (error) {
+      return thunkApi.rejectWithValue(
+        'Đã có lỗi xảy ra khi tải danh sách các luật sư. Vui lòng thử lại sau.',
+      );
+    }
   },
 );
 
 export const fetchLawyerById = createAsyncThunk(
   'lawyer/fetchLawyerById',
-  async (id: number) => {
+  async (id: number, thunkApi) => {
     try {
       const response = await getLawyerById(id);
       return response;
     } catch (error) {
-      throw error;
+      return thunkApi.rejectWithValue(
+        'Đã có lỗi xảy ra khi tải thông tin luật sư. Vui lòng thử lại sau.',
+      );
     }
   },
 );

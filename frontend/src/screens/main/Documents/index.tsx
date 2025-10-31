@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Text,
   View,
-  ScrollView,
   FlatList,
   StatusBar,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { moderateScale } from 'react-native-size-matters';
@@ -15,68 +15,15 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import RadioGroup from '../../../components/common/radio';
 import Header from '../../../components/layout/header';
 import { useTranslation } from 'react-i18next';
-
-const documentData = {
-  'DocType 1': [
-    {
-      id: '1',
-      name: 'Contract Agreement',
-      timeApplied: '2 hours ago',
-      hasImage: false,
-    },
-    {
-      id: '2',
-      name: 'Legal Brief',
-      timeApplied: '1 day ago',
-      hasImage: false,
-    },
-    {
-      id: '3',
-      name: 'Court Filing',
-      timeApplied: '3 days ago',
-      hasImage: false,
-    },
-    {
-      id: '4',
-      name: 'Settlement Document',
-      timeApplied: '1 week ago',
-      hasImage: false,
-    },
-  ],
-  'DocType 2': [
-    {
-      id: '5',
-      name: 'Evidence Report',
-      timeApplied: '4 hours ago',
-      hasImage: false,
-    },
-    {
-      id: '6',
-      name: 'Witness Statement',
-      timeApplied: '2 days ago',
-      hasImage: false,
-    },
-    {
-      id: '7',
-      name: 'Expert Opinion',
-      timeApplied: '5 days ago',
-      hasImage: false,
-    },
-    {
-      id: '8',
-      name: 'Medical Records',
-      timeApplied: '1 week ago',
-      hasImage: false,
-    },
-    {
-      id: '9',
-      name: 'Financial Analysis',
-      timeApplied: '2 weeks ago',
-      hasImage: false,
-    },
-  ],
-};
-
+import { formatDate } from '../../../utils/formatDate';
+import { MainStackNames } from '../../../navigation/routes';
+import { useNavigation } from '@react-navigation/native';
+import {
+  fetchDocuments,
+  selectDocuments,
+  selectIsLoading,
+} from '../../../stores/document.slice';
+import { useAppDispatch, useAppSelector } from '../../../redux/hook';
 
 // Separator component for document list
 const ItemSeparator = () => <View style={{ height: moderateScale(12) }} />;
@@ -85,9 +32,30 @@ export default function DocumentsScreen() {
   const { themed } = useAppTheme();
   const { t } = useTranslation();
   const [selectedFilter, setSelectedFilter] = useState('All');
+  const documents = useAppSelector(selectDocuments);
+  const isLoading = useAppSelector(selectIsLoading);
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
+
+  const getDocuments = async () => {
+    await dispatch(fetchDocuments());
+    console.log('documents: ', documents);
+  };
+  useEffect(() => {
+    getDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   const renderDocumentItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={themed(styles.documentCard)}>
+    <TouchableOpacity
+      style={themed(styles.documentCard)}
+      onPress={() =>
+        navigation.navigate(MainStackNames.PdfViewer, {
+          url: item.file_url,
+          title: item.display_name,
+        })
+      }
+    >
       <View style={themed(styles.documentIconContainer)}>
         <Ionicons
           name="document-text-outline"
@@ -96,34 +64,35 @@ export default function DocumentsScreen() {
         />
       </View>
       <View style={themed(styles.documentInfo)}>
-        <Text style={themed(styles.documentName)}>{item.name}</Text>
-        <Text style={themed(styles.documentTime)}>{item.timeApplied}</Text>
+        <Text style={themed(styles.documentName)}>{item.display_name}</Text>
+        <Text style={themed(styles.documentTime)}>
+          {formatDate(item.created_at)}
+        </Text>
       </View>
     </TouchableOpacity>
   );
+  // const renderDocumentSection = (docType: string, documents: any[]) => (
+  //   <View key={docType} style={themed(styles.documentSection)}>
+  //     <Text style={themed(styles.sectionTitle)}>{docType}</Text>
+  //     <FlatList
+  //       data={documents}
+  //       renderItem={renderDocumentItem}
+  //       keyExtractor={item => item.id}
+  //       scrollEnabled={false}
+  //       ItemSeparatorComponent={ItemSeparator}
+  //     />
+  //   </View>
+  // );
 
-  const renderDocumentSection = (docType: string, documents: any[]) => (
-    <View key={docType} style={themed(styles.documentSection)}>
-      <Text style={themed(styles.sectionTitle)}>{docType}</Text>
-      <FlatList
-        data={documents}
-        renderItem={renderDocumentItem}
-        keyExtractor={item => item.id}
-        scrollEnabled={false}
-        ItemSeparatorComponent={ItemSeparator}
-      />
-    </View>
-  );
-
-  const getFilteredData = () => {
-    if (selectedFilter === 'All') {
-      return documentData;
-    }
-    return {
-      [selectedFilter]:
-        documentData[selectedFilter as keyof typeof documentData] || [],
-    };
-  };
+  // const getFilteredData = () => {
+  //   if (selectedFilter === 'All') {
+  //     return documentData;
+  //   }
+  //   return {
+  //     [selectedFilter]:
+  //       documentData[selectedFilter as keyof typeof documentData] || [],
+  //   };
+  // };
 
   return (
     <SafeAreaView style={themed(styles.container)} edges={['top', 'bottom']}>
@@ -141,15 +110,16 @@ export default function DocumentsScreen() {
         />
       </View>
 
-      <ScrollView
-        style={themed(styles.scrollView)}
+      <FlatList
+        data={documents}
+        renderItem={renderDocumentItem}
+        keyExtractor={item => item.id}
         contentContainerStyle={themed(styles.scrollContent)}
-        showsVerticalScrollIndicator={false}
-      >
-        {Object.entries(getFilteredData()).map(([docType, documents]) =>
-          renderDocumentSection(docType, documents),
-        )}
-      </ScrollView>
+        ItemSeparatorComponent={ItemSeparator}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={getDocuments} />
+        }
+      />
     </SafeAreaView>
   );
 }
