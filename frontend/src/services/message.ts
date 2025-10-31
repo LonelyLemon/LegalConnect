@@ -33,15 +33,12 @@ export const getMessagesByConversationId = async (
     const response = await axios.get(
       `/chat/conversations/${conversationId}/messages`,
     );
-    console.log('Raw API response:', response);
-    console.log('Response data:', response.data);
 
     // API có thể trả về trực tiếp array hoặc trong wrapper
     const messages = Array.isArray(response.data)
       ? response.data
       : response.data?.data || response.data?.messages || [];
 
-    console.log('Parsed messages:', messages);
     return messages as MessageItem[];
   } catch (error: any) {
     console.log('error: ', error);

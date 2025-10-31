@@ -104,7 +104,7 @@ export const addDocument = createAsyncThunk(
 export const updateDoc = createAsyncThunk(
   'document/updateDocument',
   async (
-    { id, title, document }: { id: string; title: string; document: File },
+    { id, title, document }: { id: string; title: string; document?: File },
     thunkApi,
   ) => {
     try {

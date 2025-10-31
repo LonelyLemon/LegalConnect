@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../redux/hook';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import Icon from '@react-native-vector-icons/ionicons';
 import { Alert } from 'react-native';
@@ -23,13 +23,18 @@ import * as styles from './styles';
 import { moderateScale } from 'react-native-size-matters';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { formatDate } from '../../../../utils/formatDate';
+import CreateDocumentModal from '../CreateDocumentModal';
+import { Document } from '../../../../types/document';
+
 const Separator = () => <View style={{ height: moderateScale(12) }} />;
 export default function DocumentListScreen() {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
   const documents = useAppSelector(selectDocuments);
   const isLoading = useAppSelector(selectIsLoading);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
+  const [showModal, setShowModal] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const getDocuments = async () => {
     await dispatch(fetchDocuments());
     console.log('documents: ', documents);
@@ -57,8 +62,18 @@ export default function DocumentListScreen() {
     );
   };
 
-  const handleEdit = (item: any) => {
-    navigation.navigate('AdminHome', { editDocument: item });
+  const handleEdit = (item: Document) => {
+    setEditingDocument(item);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingDocument(null);
+  };
+
+  const handleModalSuccess = async () => {
+    await getDocuments();
   };
 
   const renderDocumentItem = ({ item }: { item: any }) => (
@@ -97,13 +112,21 @@ export default function DocumentListScreen() {
           style={themed(styles.actionBtn)}
           onPress={() => handleEdit(item)}
         >
-          <Icon name="create-outline" size={moderateScale(18)} />
+          <Icon
+            name="create-outline"
+            size={moderateScale(18)}
+            color={theme.colors.primary}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           style={themed(styles.actionBtn)}
           onPress={() => handleDelete(item.id)}
         >
-          <Icon name="trash-outline" size={moderateScale(18)} color="#FF3B30" />
+          <Icon
+            name="trash-outline"
+            size={moderateScale(18)}
+            color={theme.colors.error}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -120,6 +143,12 @@ export default function DocumentListScreen() {
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={getDocuments} />
         }
+      />
+      <CreateDocumentModal
+        visible={showModal}
+        onClose={handleCloseModal}
+        onSuccess={handleModalSuccess}
+        document={editingDocument}
       />
     </SafeAreaView>
   );

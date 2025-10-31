@@ -5,7 +5,7 @@ import {
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import { ThemedStyle } from '../theme';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   TouchableOpacity,
@@ -49,8 +49,6 @@ function CustomTabBar(props: BottomTabBarProps & { insets: any }) {
   const { state, navigation, insets } = props;
   const { themed, theme } = useAppTheme();
   const { t } = useTranslation();
-  const activeColor = themed($tabBarActiveColor);
-  const inactiveColor = themed($tabBarInactiveColor);
 
   return (
     <View style={themed($tabBar(insets))}>
@@ -60,16 +58,25 @@ function CustomTabBar(props: BottomTabBarProps & { insets: any }) {
       {/* Đường kẻ mảnh dưới cùng (để huy hiệu nhìn nổi) */}
       <View style={themed($bottomHairline)} />
 
-      {/* Huy hiệu nổi ở giữa (không nhận touch) */}
-      <View style={themed($centerBadgeWrapper)} pointerEvents="none">
-        <View style={themed($centerBadge)}>
-          {/* Icon cân công lý giống hình demo */}
+      {/* Huy hiệu nổi ở giữa - Chatbot button */}
+      <View style={themed($centerBadgeWrapper)} pointerEvents="box-none">
+        <TouchableOpacity
+          style={themed($centerBadge)}
+          onPress={() => {
+            // Navigate to parent navigator (MainStack) then to Chatbot
+            const parentNav = navigation.getParent();
+            if (parentNav) {
+              parentNav.navigate('Chatbot' as any);
+            }
+          }}
+          activeOpacity={0.8}
+        >
           <Icon
-            name="scale"
-            size={moderateScale(22)}
+            name="chatbubbles"
+            size={moderateScale(24)}
             color={theme.colors.onPrimary}
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Hàng item */}
@@ -247,11 +254,6 @@ const $bottomHairline: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
   height: spacing.xxxxs,
   backgroundColor: colors.outlineVariant || 'rgba(0,0,0,0.06)',
 });
-
-const $tabBarActiveColor: ThemedStyle<string> = ({ colors }) => colors.primary;
-// Use onSurface for better contrast across light/dark backgrounds
-const $tabBarInactiveColor: ThemedStyle<string> = ({ colors }) =>
-  colors.onBackground;
 
 const $tabBarLabel: ThemedStyle<TextStyle> = ({
   spacing,

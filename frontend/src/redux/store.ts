@@ -6,6 +6,7 @@ import { documentReducer } from '../stores/document.slice';
 import { lawyerReducer } from '../stores/lawyer.slices';
 import { caseReducer } from '../stores/case.slice';
 import { messageReducer } from '../stores/message.slice';
+import { chatbotReducer } from '../stores/chatbot.slice';
 
 const allReducers = {
   user: userReducer,
@@ -13,6 +14,7 @@ const allReducers = {
   lawyer: lawyerReducer,
   case: caseReducer,
   message: messageReducer,
+  chatbot: chatbotReducer,
 };
 
 export const rootReducer = combineReducers(allReducers);

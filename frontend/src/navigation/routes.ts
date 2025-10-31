@@ -17,6 +17,7 @@ import { CaseDetail } from '../screens/main/Cases/CaseDetail';
 import BookingScreen from '../screens/main/Booking';
 import SettingScreen from '../screens/main/Setting';
 import PdfViewerScreen from '../components/common/PdfViewer';
+import ChatbotScreen from '../screens/main/Chatbot';
 
 export type StackScreenRoute = {
   name: string;
@@ -47,6 +48,7 @@ export const MainStackNames = {
   Booking: 'Booking',
   Setting: 'Setting',
   PdfViewer: 'PdfViewer',
+  Chatbot: 'Chatbot',
 };
 
 export const HomeTabsNames = {
@@ -153,6 +155,11 @@ export const MainStackRoutes: StackScreenRoute[] = [
   {
     name: MainStackNames.PdfViewer,
     component: PdfViewerScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.Chatbot,
+    component: ChatbotScreen,
     options: { headerShown: false },
   },
 ];

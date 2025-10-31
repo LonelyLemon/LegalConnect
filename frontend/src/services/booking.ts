@@ -24,7 +24,9 @@ export interface ScheduleSlot {
   updated_at: string;
 }
 
-export const getLawyerSchedule = async (lawyerId: string): Promise<ScheduleSlot[]> => {
+export const getLawyerSchedule = async (
+  lawyerId: string,
+): Promise<ScheduleSlot[]> => {
   try {
     const response = await axios.get(`/booking/lawyers/${lawyerId}/schedule`);
     return response.data;
@@ -74,3 +76,19 @@ export const createBookingRequest = async (
   }
 };
 
+export const getPersonalBookingRequest = async (): Promise<any> => {
+  try {
+    const response = await axios.get('/booking/requests/me');
+    return response.data;
+  } catch (error: any) {
+    const errmsg = error?.response?.data;
+    const message =
+      errmsg?.message ||
+      errmsg?.detail ||
+      errmsg?.error ||
+      error?.message ||
+      'Failed to create booking request';
+    showError('Failed to get personal booking request', message);
+    throw new Error(message);
+  }
+};

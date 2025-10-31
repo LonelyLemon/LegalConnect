@@ -129,20 +129,33 @@ export const createDocument = async ({
 
 export const updateDocument = async (
   id: string,
-  { title, document }: { title: string; document: File },
+  { title, document }: { title: string; document?: File },
 ) => {
   try {
+    console.log('updateDocument called:', {
+      id,
+      title,
+      hasDocument: !!document,
+    });
     const formData = new FormData();
     formData.append('display_name', title);
-    // @ts-ignore RN FormData file shape
-    formData.append('document', {
-      uri: document.uri,
-      name: document.name || 'document.pdf',
-      type: document.type || 'application/pdf',
-    });
-    const response = await axios.patch(`/documentation/${id}/`, formData, {
+
+    // Chỉ append document nếu có chọn file mới
+    if (document) {
+      console.log('Appending document to FormData:', document);
+      // @ts-ignore RN FormData file shape
+      formData.append('document', {
+        uri: document.uri,
+        name: document.name || 'document.pdf',
+        type: document.type || 'application/pdf',
+      });
+    }
+
+    console.log('Sending PATCH request to /documentation/' + id);
+    const response = await axios.patch(`/documentation/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    console.log('Update response:', response.data);
     return response.data;
   } catch (error: any) {
     const data = error?.response?.data;
