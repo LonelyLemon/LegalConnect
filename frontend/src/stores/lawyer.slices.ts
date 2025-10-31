@@ -24,7 +24,7 @@ export const fetchPopularLawyers = createAsyncThunk(
 
 export const fetchLawyerById = createAsyncThunk(
   'lawyer/fetchLawyerById',
-  async (id: number, thunkApi) => {
+  async (id: string, thunkApi) => {
     try {
       const response = await getLawyerById(id);
       return response;
@@ -60,8 +60,16 @@ export const lawyerSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchLawyerById.fulfilled, (state, action) => {
+        console.log('action.payload: ', action.payload);
         const existingIndex = state.lawyers.findIndex(
-          lawyer => lawyer.id === action.payload.id,
+          lawyer => lawyer.user_id === action.payload.user_id,
+        );
+        console.log('existingIndex: ', existingIndex);
+        console.log(
+          'state.lawyers: ',
+          state.lawyers.find(
+            lawyer => lawyer.user_id === action.payload.user_id,
+          ),
         );
         if (existingIndex !== -1) {
           state.lawyers[existingIndex] = {
@@ -89,5 +97,5 @@ export const selectError = (state: { lawyer: LawyerState }) =>
   state.lawyer.error;
 export const lawyerReducer = lawyerSlice.reducer;
 export const lawyerActions = lawyerSlice.actions;
-export const selectLawyerById = (state: { lawyer: LawyerState }, id: Number) =>
-  state.lawyer.lawyers.find(lawyer => lawyer.id === id);
+export const selectLawyerById = (state: { lawyer: LawyerState }, id: string) =>
+  state.lawyer.lawyers.find(lawyer => lawyer.user_id === id);

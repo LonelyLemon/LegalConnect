@@ -6,7 +6,7 @@ import * as styles from './styles';
 import { getLawyerRatings } from '../../../../services/lawyer';
 import { Rating } from '../../../../types/rating';
 
-export default function Review({ lawyerId }: { lawyerId: number }) {
+export default function Review({ lawyerId }: { lawyerId: string }) {
   const { themed } = useAppTheme();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);

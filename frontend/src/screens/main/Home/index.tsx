@@ -32,6 +32,7 @@ import Icon from '@react-native-vector-icons/ionicons';
 import { useTranslation } from 'react-i18next';
 import { fetchUserCases, selectCases } from '../../../stores/case.slice';
 import { Case } from '../../../types/case';
+import { Document } from '../../../types/document';
 
 // Separator component for horizontal list
 const ItemSeparator = () => <View style={{ width: moderateScale(12) }} />;
@@ -62,8 +63,16 @@ export default function HomeScreen() {
     navigation.navigate(MainStackNames.Setting);
   };
 
-  const renderDocumentCard = ({ item }: { item: any }) => (
-    <DocumentCard title={item.title || 'Title'} previewUrl={item.url} />
+  const renderDocumentCard = ({ item }: { item: Document }) => (
+    <DocumentCard
+      document={item}
+      onPress={() => {
+        navigation.navigate(MainStackNames.PdfViewer, {
+          url: item.file_url,
+          title: item.display_name,
+        });
+      }}
+    />
   );
 
   const renderCaseCard = ({ item }: { item: Case }) => (
@@ -77,7 +86,7 @@ export default function HomeScreen() {
 
   const renderLawyerCard = ({ item }: { item: Lawyer }) => (
     <LawyerCard
-      id={item.id}
+      id={item.user_id}
       displayName={item.display_name}
       officeAddress={item.office_address}
       education={item.education}
@@ -85,7 +94,7 @@ export default function HomeScreen() {
       currentLevel={item.current_level}
       imageUrl={item.image_url}
       onPress={() => {
-        navigation.navigate(MainStackNames.LawyerProfile, { id: item.id });
+        navigation.navigate(MainStackNames.LawyerProfile, { id: item.user_id });
       }}
     />
   );

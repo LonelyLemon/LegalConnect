@@ -20,7 +20,7 @@ export const getPopularLawyers = async () => {
   }
 };
 
-export const getLawyerById = async (id: number) => {
+export const getLawyerById = async (id: string) => {
   try {
     const response = await axios.get(`/lawyer/profile/${id}`);
     return response.data;
@@ -71,7 +71,7 @@ export const getLawyerByPage = async (page: number) => {
   }
 };
 
-export const getLawyerRatings = async (lawyerId: number) => {
+export const getLawyerRatings = async (lawyerId: string) => {
   try {
     const response = await axios.get(`/lawyer/profile/${lawyerId}/ratings`);
     return response.data;
