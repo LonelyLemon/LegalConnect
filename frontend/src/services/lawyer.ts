@@ -87,3 +87,20 @@ export const getLawyerRatings = async (lawyerId: string) => {
     throw new Error(message);
   }
 };
+
+export const getLawyerSchedule = async (lawyerId: string) => {
+  try {
+    const response = await axios.get(`/booking/lawyers/${lawyerId}/schedule`);
+    return response.data;
+  } catch (error: any) {
+    const data = error?.response?.data;
+    const message =
+      data?.message ||
+      data?.detail ||
+      data?.error ||
+      error?.message ||
+      'Fetch ratings failed';
+    showError('Failed to load ratings', message);
+    throw new Error(message);
+  }
+};

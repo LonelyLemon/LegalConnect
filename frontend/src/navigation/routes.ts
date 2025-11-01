@@ -18,6 +18,7 @@ import BookingScreen from '../screens/main/Booking';
 import SettingScreen from '../screens/main/Setting';
 import PdfViewerScreen from '../components/common/PdfViewer';
 import ChatbotScreen from '../screens/main/Chatbot';
+import ScheduleScreen from '../screens/main/LawyerProfile/Schedule';
 
 export type StackScreenRoute = {
   name: string;
@@ -49,6 +50,7 @@ export const MainStackNames = {
   Setting: 'Setting',
   PdfViewer: 'PdfViewer',
   Chatbot: 'Chatbot',
+  Schedule: 'Schedule',
 };
 
 export const HomeTabsNames = {
@@ -160,6 +162,11 @@ export const MainStackRoutes: StackScreenRoute[] = [
   {
     name: MainStackNames.Chatbot,
     component: ChatbotScreen,
+    options: { headerShown: false },
+  },
+  {
+    name: MainStackNames.Schedule,
+    component: ScheduleScreen,
     options: { headerShown: false },
   },
 ];

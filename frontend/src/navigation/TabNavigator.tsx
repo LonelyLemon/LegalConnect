@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import Icon from '@react-native-vector-icons/ionicons';
+import FontAwesomeIcon from '@react-native-vector-icons/fontawesome';
 import {
   BottomTabBarProps,
   createBottomTabNavigator,
@@ -71,8 +72,8 @@ function CustomTabBar(props: BottomTabBarProps & { insets: any }) {
           }}
           activeOpacity={0.8}
         >
-          <Icon
-            name="chatbubbles"
+          <FontAwesomeIcon
+            name="balance-scale"
             size={moderateScale(24)}
             color={theme.colors.onPrimary}
           />

@@ -1,6 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { LawyerState } from '../types/lawyer';
-import { getLawyerById, getPopularLawyers } from '../services/lawyer';
+import {
+  getLawyerById,
+  getLawyerSchedule,
+  getPopularLawyers,
+} from '../services/lawyer';
+import { showError } from '../types/toast';
 
 const InitialState: LawyerState = {
   lawyers: [],
@@ -32,6 +37,26 @@ export const fetchLawyerById = createAsyncThunk(
       return thunkApi.rejectWithValue(
         'Đã có lỗi xảy ra khi tải thông tin luật sư. Vui lòng thử lại sau.',
       );
+    }
+  },
+);
+
+export const fetchLawyerSchedule = createAsyncThunk(
+  'lawyer/fetchLawyerSchedule',
+  async (id: string, thunkApi) => {
+    try {
+      const response = await getLawyerSchedule(id);
+      return response;
+    } catch (error: any) {
+      console.log('error getting schedule: ', error);
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.detail ||
+        error?.response?.data?.error ||
+        error?.message ||
+        'Failed to fetch schedule';
+      showError(message);
+      return thunkApi.rejectWithValue(message);
     }
   },
 );
@@ -83,6 +108,18 @@ export const lawyerSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchLawyerById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(fetchLawyerSchedule.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchLawyerSchedule.fulfilled, state => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(fetchLawyerSchedule.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

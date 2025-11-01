@@ -1,4 +1,4 @@
-export type CaseStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'PENDING';
+export type CaseStatus = 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export interface Case {
   id: string;

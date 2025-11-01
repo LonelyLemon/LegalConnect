@@ -38,6 +38,15 @@ export const inputError: ThemedStyle<ViewStyle> = ({ colors }) => ({
   borderColor: colors.error,
 });
 
+export const inputDisabled: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.surfaceVariant,
+  opacity: 0.6,
+});
+
+export const dateTextDisabled: ThemedStyle<TextStyle> = ({ colors }) => ({
+  color: colors.onSurfaceVariant,
+});
+
 export const errorText: ThemedStyle<TextStyle> = ({ colors, fontSizes }) => ({
   marginTop: scale(4),
   color: colors.error,

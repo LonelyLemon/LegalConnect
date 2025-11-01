@@ -176,8 +176,9 @@ export default function LawyerProfileScreen({
           <TouchableOpacity
             style={themed(styles.primaryButton)}
             onPress={() => {
-              navigation.navigate(MainStackNames.Booking, {
+              navigation.navigate(MainStackNames.Schedule, {
                 lawyerId: id,
+                lawyerName: lawyer?.display_name,
               });
             }}
           >

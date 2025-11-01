@@ -43,21 +43,19 @@ export default function CaseCard({
   const {
     title = '',
     description = '',
-    state = 'PENDING',
+    state = 'IN_PROGRESS',
     attachment_urls = [],
     updated_at = '',
   } = (caseData as any) ?? {};
 
   const getStatusColor = (caseStatus: string) => {
     switch (caseStatus) {
-      case 'Processing':
+      case 'IN_PROGRESS':
         return theme.colors.processStatus.pending;
-      case 'Completed':
+      case 'COMPLETED':
         return theme.colors.processStatus.approved;
-      case 'Pending':
-        return theme.colors.processStatus.pending;
-      case 'New':
-        return theme.colors.processStatus.new;
+      case 'CANCELLED':
+        return theme.colors.processStatus.rejected;
       default:
         return theme.colors.processStatus.undefined;
     }
