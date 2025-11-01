@@ -9,7 +9,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
+import { pick, types } from '@react-native-documents/picker';
 import { useAppTheme } from '../../../../theme/theme.provider';
 import {
   NavigationProp,
@@ -24,8 +27,10 @@ import * as styles from './styles';
 import { t } from '../../../../i18n';
 import { MainStackNames } from '../../../../navigation/routes';
 import { getBookingRequest, decideBookingRequest } from '../../../../services/booking';
-import { useAppSelector } from '../../../../redux/hook';
+import { getCaseById, updateCaseNotes, addCaseAttachment } from '../../../../services/case';
+import { useAppSelector, useAppDispatch } from '../../../../redux/hook';
 import { selectUser } from '../../../../stores/user.slice';
+import { createNewConversation } from '../../../../stores/message.slice';
 
 type CaseDetailRouteProp = RouteProp<
   { params: { caseData?: Case | BookingRequest } },
@@ -37,10 +42,17 @@ export const CaseDetail = () => {
   const route = useRoute<CaseDetailRouteProp>();
   const navigation = useNavigation<NavigationProp<any>>();
   const user = useAppSelector(selectUser);
+  const dispatch = useAppDispatch();
   const caseData = route.params?.caseData;
   const [bookingRequestData, setBookingRequestData] = useState<BookingRequest | null>(null);
+  const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLawyer, setIsLawyer] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
 
   // Helper function to check if item is BookingRequest (pending case)
   const isBookingRequest = (
@@ -51,7 +63,7 @@ export const CaseDetail = () => {
 
   const isPending = isBookingRequest(caseData);
 
-  // Fetch booking request details if it's a pending request
+  // Fetch booking request or case details
   useEffect(() => {
     if (isPending && caseData?.id) {
       setIsLoading(true);
@@ -67,10 +79,36 @@ export const CaseDetail = () => {
         .finally(() => {
           setIsLoading(false);
         });
+    } else if (!isPending && caseData?.id) {
+      // Fetch case details to get latest data
+      setIsLoading(true);
+      getCaseById(caseData.id)
+        .then(data => {
+          setCurrentCase(data);
+        })
+        .catch(error => {
+          console.error('Failed to fetch case:', error);
+          // Use the caseData if fetch fails
+          setCurrentCase(caseData as Case);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   }, [isPending, caseData]);
 
-  const displayCase = isPending && bookingRequestData ? bookingRequestData : caseData;
+  const displayCase = isPending 
+    ? (bookingRequestData || caseData) 
+    : (currentCase || caseData);
+
+  // Determine user role relative to case
+  useEffect(() => {
+    if (!isPending && displayCase) {
+      const caseItem = displayCase as Case;
+      setIsLawyer(caseItem.lawyer_id === user?.id);
+      setIsClient(caseItem.client_id === user?.id);
+    }
+  }, [isPending, displayCase, user?.id]);
 
   // Check if this is an incoming request (user is the lawyer, not the client)
   // Use the bookingRequestData if available, otherwise use caseData
@@ -144,6 +182,134 @@ export const CaseDetail = () => {
         },
       ],
     );
+  };
+
+  // Handle contact button - navigate to chat
+  const handleContact = async () => {
+    if (!displayCase || !user?.id) return;
+
+    try {
+      let receiverId: string | null = null;
+      let receiverName = '';
+
+      if (isPending) {
+        // For pending requests, contact the other party
+        const request = displayCase as BookingRequest;
+        if (user.id === request.client_id) {
+          // Client contacting lawyer
+          receiverId = request.lawyer_id;
+          receiverName = 'Lawyer';
+        } else if (user.id === request.lawyer_id) {
+          // Lawyer contacting client
+          receiverId = request.client_id;
+          receiverName = 'Client';
+        }
+      } else {
+        // For active cases
+        const caseItem = displayCase as Case;
+        if (user.id === caseItem.client_id) {
+          // Client contacting lawyer
+          receiverId = caseItem.lawyer_id;
+          receiverName = 'Lawyer';
+        } else if (user.id === caseItem.lawyer_id) {
+          // Lawyer contacting client
+          receiverId = caseItem.client_id;
+          receiverName = 'Client';
+        }
+      }
+
+      if (!receiverId) {
+        console.error('Cannot determine receiver ID');
+        return;
+      }
+
+      const response = await dispatch(
+        createNewConversation({ receiverId }),
+      );
+
+      if (response?.payload) {
+        const payload: any = response.payload;
+        const conversationId =
+          payload.id ||
+          payload.conversation_id ||
+          payload.participants?.[0]?.conversation_id;
+
+        if (!conversationId) {
+          console.error('No conversation ID found in response');
+          return;
+        }
+
+        const otherParticipant = payload.participants?.find(
+          (p: any) => p.user?.id === receiverId,
+        );
+
+        navigation.navigate(MainStackNames.ChatDetail, {
+          chatId: conversationId,
+          name: otherParticipant?.user?.username || receiverName,
+          avatar: otherParticipant?.user?.avatar_url || '',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
+  };
+
+  // Handle adding note (for lawyers)
+  const handleAddNote = async () => {
+    if (!displayCase || !isLawyer || isPending) return;
+
+    setAddingNote(true);
+    try {
+      const caseItem = currentCase || (displayCase as Case);
+      await updateCaseNotes(caseItem.id, {
+        lawyer_note: noteText.trim() || null,
+      });
+      // Refresh case data
+      const updatedCase = await getCaseById(caseItem.id);
+      setCurrentCase(updatedCase);
+      setShowNoteModal(false);
+      setNoteText('');
+    } catch (error) {
+      console.error('Failed to update note:', error);
+    } finally {
+      setAddingNote(false);
+    }
+  };
+
+  // Handle adding attachment (for lawyers)
+  const handleAddAttachment = async () => {
+    if (!displayCase || !isLawyer || isPending) return;
+
+    try {
+      const res = await pick({
+        type: [types.pdf, types.doc, types.docx, types.images],
+        allowMultiSelection: false,
+      });
+
+      if (!res || res.length === 0) {
+        return;
+      }
+
+      const file = res[0];
+      setIsProcessing(true);
+
+      const caseItem = currentCase || (displayCase as Case);
+      await addCaseAttachment(caseItem.id, {
+        uri: file.uri,
+        type: file.type || 'application/octet-stream',
+        name: file.name || 'attachment',
+      });
+
+      // Refresh case data
+      const updatedCase = await getCaseById(caseItem.id);
+      setCurrentCase(updatedCase);
+    } catch (error: any) {
+      if (error?.code !== 'DOCUMENT_PICKER_CANCELED') {
+        console.error('Failed to add attachment:', error);
+      }
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!displayCase) {
@@ -323,14 +489,51 @@ export const CaseDetail = () => {
         {/* Lawyer Note - Only for active cases */}
         {!isPending && (displayCase as Case).lawyer_note && (
           <View style={themed(styles.section)}>
-            <Text style={themed(styles.sectionTitle)}>
-              {t('caseDetail.lawyersNote')}
-            </Text>
+            <View style={themed(styles.sectionHeader)}>
+              <Text style={themed(styles.sectionTitle)}>
+                {t('caseDetail.lawyersNote')}
+              </Text>
+              {isLawyer && (
+                <TouchableOpacity
+                  onPress={() => {
+                    const caseItem = currentCase || (displayCase as Case);
+                    setNoteText(caseItem.lawyer_note || '');
+                    setShowNoteModal(true);
+                  }}
+                >
+                  <Icon
+                    name="create-outline"
+                    size={moderateScale(20)}
+                    color={theme.colors.primary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
             <View style={themed(styles.noteContainer)}>
               <Text style={themed(styles.noteText)}>
                 {(displayCase as Case).lawyer_note}
               </Text>
             </View>
+          </View>
+        )}
+
+        {/* Add Lawyer Note Button - Only for lawyers on active cases */}
+        {!isPending && isLawyer && !(displayCase as Case).lawyer_note && (
+          <View style={themed(styles.section)}>
+            <TouchableOpacity
+              style={themed(styles.addNoteButton)}
+              onPress={() => {
+                setNoteText('');
+                setShowNoteModal(true);
+              }}
+            >
+              <Icon
+                name="add-circle-outline"
+                size={moderateScale(20)}
+                color={theme.colors.primary}
+              />
+              <Text style={themed(styles.addNoteButtonText)}>Add Note</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -348,40 +551,58 @@ export const CaseDetail = () => {
           </View>
         )}
 
-        {/* Attachments - Only for active cases with attachments */}
-        {!isPending && attachmentUrls.length > 0 && (
+        {/* Attachments - Only for active cases */}
+        {!isPending && (
           <View style={themed(styles.section)}>
-            <Text style={themed(styles.sectionTitle)}>
-              {t('caseDetail.attachments')} ({attachmentUrls.length})
-            </Text>
-            {attachmentUrls.map((url, index) => (
-              <TouchableOpacity
-                key={index}
-                style={themed(styles.attachmentItem)}
-                onPress={() => {
-                  navigation.navigate(MainStackNames.PdfViewer, {
-                    url: url,
-                    title: t('caseDetail.attachmentNumber', {
-                      number: index + 1,
-                    }),
-                  });
-                }}
-              >
-                <Icon
-                  name="document-attach-outline"
-                  size={moderateScale(24)}
-                  color={theme.colors.primary}
-                />
-                <Text style={themed(styles.attachmentText)}>
-                  {t('caseDetail.attachmentNumber', { number: index + 1 })}
-                </Text>
-                <Icon
-                  name="chevron-forward-outline"
-                  size={moderateScale(20)}
-                  color={theme.colors.onSurface}
-                />
-              </TouchableOpacity>
-            ))}
+            <View style={themed(styles.sectionHeader)}>
+              <Text style={themed(styles.sectionTitle)}>
+                {t('caseDetail.attachments')} ({attachmentUrls.length})
+              </Text>
+              {isLawyer && (
+                <TouchableOpacity
+                  onPress={handleAddAttachment}
+                  disabled={isProcessing}
+                >
+                  <Icon
+                    name="add-circle-outline"
+                    size={moderateScale(20)}
+                    color={theme.colors.primary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+            {attachmentUrls.length > 0 && (
+              <>
+                {attachmentUrls.map((url, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={themed(styles.attachmentItem)}
+                    onPress={() => {
+                      navigation.navigate(MainStackNames.PdfViewer, {
+                        url: url,
+                        title: t('caseDetail.attachmentNumber', {
+                          number: index + 1,
+                        }),
+                      });
+                    }}
+                  >
+                    <Icon
+                      name="document-attach-outline"
+                      size={moderateScale(24)}
+                      color={theme.colors.primary}
+                    />
+                    <Text style={themed(styles.attachmentText)}>
+                      {t('caseDetail.attachmentNumber', { number: index + 1 })}
+                    </Text>
+                    <Icon
+                      name="chevron-forward-outline"
+                      size={moderateScale(20)}
+                      color={theme.colors.onSurface}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
           </View>
         )}
 
@@ -424,18 +645,80 @@ export const CaseDetail = () => {
               </TouchableOpacity>
             </>
           ) : (
-            <Pressable style={themed(styles.primaryButton)}>
+            <TouchableOpacity
+              style={themed(styles.primaryButton)}
+              onPress={handleContact}
+            >
               <Icon
                 name="chatbubble-outline"
                 size={moderateScale(20)}
                 color={theme.colors.onPrimary}
               />
               <Text style={themed(styles.primaryButtonText)}>
-                {t('caseDetail.contactLawyer')}
+                {isLawyer ? 'Contact Client' : t('caseDetail.contactLawyer')}
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           )}
         </View>
+
+        {/* Note Modal for Lawyers */}
+        <Modal
+          visible={showNoteModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowNoteModal(false)}
+        >
+          <View style={themed(styles.modalOverlay)}>
+            <View style={themed(styles.modalContent)}>
+              <View style={themed(styles.modalHeader)}>
+                <Text style={themed(styles.modalTitle)}>Add Note</Text>
+                <TouchableOpacity onPress={() => setShowNoteModal(false)}>
+                  <Icon
+                    name="close-outline"
+                    size={moderateScale(24)}
+                    color={theme.colors.onSurface}
+                  />
+                </TouchableOpacity>
+              </View>
+              <TextInput
+                style={themed(styles.modalTextInput)}
+                multiline
+                numberOfLines={6}
+                placeholder="Enter your note..."
+                value={noteText}
+                onChangeText={setNoteText}
+                placeholderTextColor={theme.colors.onSurface + '80'}
+              />
+              <View style={themed(styles.modalButtons)}>
+                <TouchableOpacity
+                  style={themed(styles.modalCancelButton)}
+                  onPress={() => {
+                    setShowNoteModal(false);
+                    setNoteText('');
+                  }}
+                >
+                  <Text style={themed(styles.modalCancelButtonText)}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={themed(styles.modalSaveButton)}
+                  onPress={handleAddNote}
+                  disabled={addingNote}
+                >
+                  {addingNote ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={theme.colors.onPrimary}
+                    />
+                  ) : (
+                    <Text style={themed(styles.modalSaveButtonText)}>Save</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );

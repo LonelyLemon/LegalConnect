@@ -76,6 +76,7 @@ export default function CasesScreen() {
 
   const renderCaseCard = ({ item }: { item: DisplayItem }) => {
     // Convert BookingRequest to Case format for display in card
+    // Pass the original status for pending requests so it displays correctly
     const caseData: Case = isBookingRequest(item)
       ? {
           id: item.id,
@@ -84,7 +85,11 @@ export default function CasesScreen() {
           client_id: item.client_id,
           title: item.title,
           description: item.short_description,
-          state: 'IN_PROGRESS', // Use IN_PROGRESS for pending bookings to show yellow badge
+          state: (item.status === 'PENDING' 
+            ? 'PENDING' 
+            : item.status === 'ACCEPTED' 
+            ? 'IN_PROGRESS' 
+            : 'CANCELLED') as Case['state'], // Map booking status to case state, including PENDING for display
           attachment_urls: [],
           lawyer_note: '',
           client_note: `Status: ${item.status}`,
