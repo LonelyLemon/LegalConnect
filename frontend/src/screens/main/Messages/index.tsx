@@ -12,13 +12,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
 import { MainStackNames } from '../../../navigation/routes';
 import { useAppDispatch, useAppSelector } from '../../../redux/hook';
-import { fetchConversations } from '../../../stores/message.slice';
+import { fetchConversations, messageActions } from '../../../stores/message.slice';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { Conversation } from '../../../types/message';
 import { getConversationTimeStatus } from '../../../utils/conversationTime.ts';
 import * as styles from './styles';
 import Header from '../../../components/layout/header/index.tsx';
 import { useTranslation } from 'react-i18next';
+import {
+  connectChatSocket,
+  subscribeChatEvents,
+} from '../../../services/message';
+import { store } from '../../../redux/store';
 
 function ChatConversation({
   conversation,
@@ -85,8 +90,36 @@ export default function MessagesScreen() {
   console.log('userId: ', userId);
 
   useEffect(() => {
+    // Fetch conversations on mount
     dispatch(fetchConversations());
-  }, [dispatch]);
+
+    // Ensure WebSocket connection
+    const token =
+      store.getState()?.user?.token?.replace(/^Bearer\s+/i, '') || '';
+    if (token) {
+      connectChatSocket(token);
+    }
+
+    // Subscribe to WebSocket events for real-time updates
+    const unsubscribe = subscribeChatEvents(evt => {
+      if (evt.type === 'message') {
+        const msg = evt.data;
+        // Update conversation list when a new message arrives
+        console.log('Incoming message in Messages screen:', msg);
+        dispatch(messageActions.updateConversationWithNewMessage(msg));
+      }
+    });
+
+    // Refresh conversations when screen comes into focus
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      dispatch(fetchConversations());
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeFocus();
+    };
+  }, [dispatch, navigation]);
 
   // const renderItem = ({ item }: { item: ChatItem }) => (
   //   <TouchableOpacity

@@ -91,7 +91,6 @@ export const updateUserInfo = async (data: any) => {
       address: data.address,
       gender: data.gender,
       dob: data.dob,
-      avatar_url: data.avatar_url,
     };
     const response = await axios.put('/users/update', body, {
       headers: { 'Content-Type': 'application/json' },
@@ -110,5 +109,41 @@ export const updateUserInfo = async (data: any) => {
       'Update user info failed';
     showError(t('toast.updateUserInfoFailed'), message);
     throw error;
+  }
+};
+
+export const uploadAvatar = async (avatar: {
+  uri: string;
+  type: string;
+  name: string;
+}): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('avatar', {
+      uri: avatar.uri,
+      type: avatar.type || 'image/jpeg',
+      name: avatar.name || 'avatar.jpg',
+    } as any);
+
+    const response = await axios.post('/users/avatar', formData, {
+      baseURL: envConfig.baseUrl,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    const payload = response?.data?.data ?? response?.data;
+    showSuccess('Avatar uploaded successfully');
+    return payload;
+  } catch (error: any) {
+    console.log('error upload avatar: ', error);
+    const errmsg = error?.response?.data;
+    const message =
+      errmsg?.message ||
+      errmsg?.detail ||
+      errmsg?.error ||
+      error?.message ||
+      'Upload avatar failed';
+    showError('Failed to upload avatar', message);
+    throw new Error(message);
   }
 };
