@@ -145,7 +145,7 @@ export default function CompleteProfileScreen({}) {
         title={t('auth.completeProfile.title')}
         showBackButton={true}
         navigation={
-          !(user?.phone_number && user?.address)
+          !(user?.phone_number && user?.address) && user.role !== 'admin'
             ? MainStackNames.Setting
             : undefined
         }
