@@ -1,16 +1,32 @@
-import React from 'react';
+import setupAxiosInterceptors from '../services/axiosConfig';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import MessagesScreen from '../screens/main/Messages';
-import ChatDetailScreen from '../screens/main/Messages/ChatDetail';
+import React from 'react';
+import { MainStackNames, MainStackRoutes } from './routes';
+import { useAppSelector } from '../redux/hook';
+import { selectUser } from '../stores/user.slice';
 
-const Stack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
+
+setupAxiosInterceptors();
 
 export default function LawyerStack() {
+  const user = useAppSelector(selectUser);
+  const needsProfile = !user?.phone_number || !user?.address;
+  const initial = needsProfile
+    ? MainStackNames.CompleteProfile
+    : MainStackNames.HomeTabs;
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name="LawyerHome" component={LawyerHome} /> */}
-      <Stack.Screen name="Messages" component={MessagesScreen} />
-      <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
-    </Stack.Navigator>
+    <AppStack.Navigator initialRouteName={initial}>
+      {MainStackRoutes.map(route => (
+        <AppStack.Screen
+          key={route.name}
+          name={route.name}
+          component={route.component}
+          options={route.options}
+        />
+      ))}
+    </AppStack.Navigator>
   );
 }
+

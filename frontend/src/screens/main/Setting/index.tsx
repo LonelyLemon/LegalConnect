@@ -118,6 +118,19 @@ export default function SettingScreen() {
   );
 
   const accountGroup = [
+    ...(user?.role === 'lawyer'
+      ? [
+          {
+            Father: TouchableOpacity,
+            iconName: 'calendar-outline',
+            title: 'Manage Schedule',
+            onPress: () => {
+              navigation.navigate(MainStackNames.ScheduleManagement);
+            },
+            hasArrow: true,
+          },
+        ]
+      : []),
     {
       Father: TouchableOpacity,
       iconName: 'lock-closed-outline',
