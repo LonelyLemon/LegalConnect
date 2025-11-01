@@ -17,22 +17,31 @@ import {
   selectError,
   selectIsLoading,
   signUpWithEmailPassword,
+  userActions,
 } from '../../../stores/user.slice';
 import { FormSignUp } from '../../../types/auth';
 import Logo from '../../../assets/imgs/Logo.png';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { verticalScale } from 'react-native-size-matters';
 import Header from '../../../components/layout/header';
+import { useTranslation } from 'react-i18next';
+import { AuthStackNames } from '../../../navigation/routes';
 
 export default function SignUpScreen() {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
+  const { t } = useTranslation();
   const control = useForm<FormSignUp>({
-    defaultValues: { email: '', password: '', repassword: '', name: '' },
+    defaultValues: {
+      email: 'user1@example.com',
+      password: 'string',
+      repassword: 'string',
+      name: 'user1',
+    },
   });
 
   const {
@@ -43,54 +52,65 @@ export default function SignUpScreen() {
   const loading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
 
+  // Clear stale error when entering/leaving this screen
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(userActions.clearError());
+      return () => dispatch(userActions.clearError());
+    }, [dispatch]),
+  );
+
   const fields = [
     {
       id: 'email',
       name: 'email',
-      label: 'Email',
+      label: t('auth.signUp.email'),
       type: 'input',
-      placeholder: 'Enter you email',
+      placeholder: t('auth.signUp.enterEmail'),
       icon: 'person-outline',
       error: errors?.email?.message,
       rules: {
-        required: { value: true, message: 'Email is required' },
+        required: { value: true, message: t('auth.signUp.emailRequired') },
         pattern: {
           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          message: 'Email is invalid',
+          message: t('auth.signUp.emailInvalid'),
         },
       },
     },
     {
       id: 'password',
       name: 'password',
-      label: 'Password',
+      label: t('auth.signUp.password'),
       type: 'input',
-      placeholder: 'Enter your password',
+      placeholder: t('auth.signUp.enterPassword'),
       secureTextEntry: true,
       icon: 'lock-closed-outline',
       error: errors?.password?.message,
       rules: {
-        required: { value: true, message: 'Password is required' },
+        required: { value: true, message: t('auth.signUp.passwordRequired') },
         minLength: {
-          value: 8,
-          message: 'Password must be at least 8 characters',
+          value: 4,
+          message: t('auth.signUp.passwordMinLength', { count: 4 }),
         },
       },
     },
     {
       id: 'repassword',
       name: 'repassword',
-      label: 'Confirm password',
+      label: t('auth.signUp.confirmPassword'),
       type: 'input',
-      placeholder: 'Enter your password',
+      placeholder: t('auth.signUp.enterPassword'),
       secureTextEntry: true,
       icon: 'lock-closed-outline',
       error: errors?.repassword?.message,
       rules: {
-        required: { value: true, message: 'Confirm password is required' },
+        required: {
+          value: true,
+          message: t('auth.signUp.confirmPasswordRequired'),
+        },
         validate: (value: string) => {
           if (value !== control.getValues('password')) {
-            return 'Passwords do not match';
+            return t('auth.signUp.passwordsDoNotMatch');
           }
           return true;
         },
@@ -99,17 +119,19 @@ export default function SignUpScreen() {
     {
       id: 'name',
       name: 'name',
-      label: 'Name',
+      label: t('auth.signUp.name'),
       type: 'input',
-      placeholder: 'Enter your name',
+      placeholder: t('auth.signUp.enterName'),
       icon: 'person-outline',
       error: errors?.name?.message,
-      rules: { required: { value: true, message: 'Name is required' } },
+      rules: {
+        required: { value: true, message: t('auth.signUp.nameRequired') },
+      },
     },
   ];
 
   const handleSignUp = (data: FormSignUp) => {
-    console.log(data);
+    dispatch(userActions.clearError());
     dispatch(
       signUpWithEmailPassword({
         email: data.email,
@@ -118,7 +140,7 @@ export default function SignUpScreen() {
         name: data.name,
       }),
     );
-    navigation.navigate('CompleteProfile');
+    navigation.navigate(AuthStackNames.SignIn);
   };
 
   const handleForgotPassword = () => {
@@ -145,7 +167,9 @@ export default function SignUpScreen() {
             />
           </View>
 
-          <Text style={themed(styles.welcomeTitle)}>{'Register'}</Text>
+          <Text style={themed(styles.welcomeTitle)}>
+            {t('auth.signUp.title')}
+          </Text>
 
           <View
             style={{
@@ -159,7 +183,7 @@ export default function SignUpScreen() {
           <View style={themed(styles.optionsContainer)}>
             <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={themed(styles.forgotPassword)}>
-                {'Forget password?'}
+                {t('auth.signUp.forgotPassword')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -175,15 +199,19 @@ export default function SignUpScreen() {
               !!errors.name
             }
           >
-            <Text style={themed(styles.signInButtonText)}>{'Register'}</Text>
+            <Text style={themed(styles.signInButtonText)}>
+              {t('auth.signUp.register')}
+            </Text>
           </TouchableOpacity>
 
           <View style={themed(styles.signUpRow)}>
             <Text style={themed(styles.signUpMuted)}>
-              {'Already have an account? '}
+              {t('auth.signUp.alreadyHaveAccount')}
             </Text>
             <TouchableOpacity onPress={handleNavigateToSignIn}>
-              <Text style={themed(styles.signUpLink)}>{'Sign in'}</Text>
+              <Text style={themed(styles.signUpLink)}>
+                {t('auth.signUp.signIn')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

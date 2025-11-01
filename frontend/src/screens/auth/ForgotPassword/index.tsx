@@ -15,12 +15,14 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
+import { useTranslation } from 'react-i18next';
 
 type FormForgot = { email: string };
 
 export default function ForgotPasswordScreen() {
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
+  const { t } = useTranslation();
   const control = useForm<FormForgot>({ defaultValues: { email: '' } });
 
   const {
@@ -36,16 +38,16 @@ export default function ForgotPasswordScreen() {
     {
       id: 'email',
       name: 'email',
-      label: 'Email',
+      label: t('auth.forgotPassword.email'),
       type: 'input',
-      placeholder: 'Enter your email',
+      placeholder: t('auth.forgotPassword.enterEmail'),
       icon: 'mail-outline',
       error: errors?.email?.message,
       rules: {
-        required: { value: true, message: 'Email is required' },
+        required: { value: true, message: t('auth.forgotPassword.emailRequired') },
         pattern: {
           value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // simple email regex
-          message: 'Email is invalid',
+          message: t('auth.forgotPassword.emailInvalid'),
         },
       },
     },
@@ -53,7 +55,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Forgot password" navigation="Welcome" />
+      <Header title={t('auth.forgotPassword.title')} navigation="Welcome" />
 
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
@@ -75,7 +77,7 @@ export default function ForgotPasswordScreen() {
             disabled={!!errors.email}
           >
             <Text style={themed(styles.primaryButtonText)}>
-              {'Reset password'}
+              {t('auth.forgotPassword.resetPassword')}
             </Text>
           </TouchableOpacity>
         </View>

@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { showError } from '../types/toast';
+import { t } from '../i18n';
 
 export const getUserCase = async () => {
   try {
-    const response = await axios.get('/api/cases');
-    return response.data.data;
+    const response = await axios.get('/booking/cases/me');
+    const payload = response?.data?.data ?? response?.data ?? [];
+    return payload;
   } catch (error: any) {
     const data = error?.response?.data;
     const message =
@@ -13,7 +15,7 @@ export const getUserCase = async () => {
       data?.error ||
       error?.message ||
       'Fetch cases failed';
-    showError('Failed to fetch cases', message);
+    showError(t('toast.fetchCasesFailed'), message);
     throw new Error(message);
   }
 };

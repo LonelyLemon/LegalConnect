@@ -5,22 +5,24 @@ import { moderateScale } from 'react-native-size-matters';
 import Icon from '@react-native-vector-icons/ionicons';
 import * as styles from './styles';
 interface LawyerCardProps {
-  id: number;
-  name: string;
-  description: string;
-  rating: number;
-  price: number;
-  imageUri: string;
+  id: string;
+  displayName: string;
+  officeAddress?: string;
+  education?: string;
+  averageRating?: number;
+  currentLevel?: string;
+  imageUrl?: string;
   onPress?: () => void;
 }
 
 export default function LawyerCard({
-  id,
-  name,
-  description,
-  rating,
-  price,
-  imageUri,
+  id: _id,
+  displayName,
+  officeAddress: _officeAddress,
+  education,
+  averageRating,
+  currentLevel,
+  imageUrl,
   onPress,
 }: LawyerCardProps) {
   const { themed, theme } = useAppTheme();
@@ -32,31 +34,56 @@ export default function LawyerCard({
       activeOpacity={0.8}
     >
       <View style={themed(styles.imageContainer)}>
-        <Image source={{ uri: imageUri }} style={themed(styles.profileImage)} />
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={themed(styles.profileImage)}
+          />
+        ) : (
+          <View style={themed(styles.profilePlaceholder)}>
+            <Icon
+              name="person-circle-outline"
+              size={moderateScale(theme.fontSizes.xl * 2)}
+              color={theme.colors.outline}
+            />
+          </View>
+        )}
       </View>
 
       <View style={themed(styles.contentContainer)}>
         <Text style={themed(styles.nameText)} numberOfLines={1}>
-          {name}
+          {displayName}
         </Text>
 
-        <Text style={themed(styles.descriptionText)} numberOfLines={2}>
-          {description}
-        </Text>
+        {education ? (
+          <Text style={themed(styles.descriptionText)} numberOfLines={2}>
+            {education}
+          </Text>
+        ) : null}
 
-        <View style={themed(styles.bottomRow)}>
-          <View style={themed(styles.ratingContainer)}>
+        {currentLevel ? (
+          <View style={themed(styles.bottomRow)}>
+            <Icon
+              name="briefcase-outline"
+              size={moderateScale(theme.fontSizes.sm)}
+              color={theme.colors.primary}
+            />
+            <Text style={themed(styles.ratingText)}>{currentLevel}</Text>
+          </View>
+        ) : null}
+
+        {typeof averageRating === 'number' ? (
+          <View style={themed(styles.bottomRow)}>
             <Icon
               name="star"
               size={moderateScale(theme.fontSizes.sm)}
               color={theme.colors.primary}
             />
-            <Text style={themed(styles.ratingText)}>{rating}</Text>
+            <Text style={themed(styles.ratingText)}>
+              {averageRating.toFixed(1)}
+            </Text>
           </View>
-          <Text style={themed(styles.priceText)}>
-            ${price.toLocaleString()}
-          </Text>
-        </View>
+        ) : null}
       </View>
     </TouchableOpacity>
   );

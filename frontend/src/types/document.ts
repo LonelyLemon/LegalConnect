@@ -1,13 +1,12 @@
 export interface Document {
   id: string;
-  code: string;
-  title: string;
-  description: string;
-  sumary: string;
-  category: string;
-  created_at: string;
+  display_name: string;
+  original_filename: string;
+  content_type: string;
+  uploaded_by_id: string;
+  create_at: string;
   updated_at: string;
-  url: string;
+  file_url: string;
 }
 
 export interface DocumentState {

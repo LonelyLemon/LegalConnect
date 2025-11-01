@@ -5,8 +5,9 @@ import ReviewCard from '../../../../components/common/reviewCard/index.tsx';
 import * as styles from './styles';
 import { getLawyerRatings } from '../../../../services/lawyer';
 import { Rating } from '../../../../types/rating';
+import { t } from '../../../../i18n';
 
-export default function Review({ lawyerId }: { lawyerId: number }) {
+export default function Review({ lawyerId }: { lawyerId: string }) {
   const { themed } = useAppTheme();
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export default function Review({ lawyerId }: { lawyerId: number }) {
   if (loading) {
     return (
       <View style={themed(styles.container)}>
-        <Text style={themed(styles.loadingText)}>Loading reviews...</Text>
+        <Text style={themed(styles.loadingText)}>{t('lawyerProfile.loadingReviews')}</Text>
       </View>
     );
   }
@@ -44,7 +45,7 @@ export default function Review({ lawyerId }: { lawyerId: number }) {
   if (ratings.length === 0) {
     return (
       <View style={themed(styles.container)}>
-        <Text style={themed(styles.noReviewsText)}>No reviews yet</Text>
+        <Text style={themed(styles.noReviewsText)}>{t('lawyerProfile.noReviewsYet')}</Text>
       </View>
     );
   }

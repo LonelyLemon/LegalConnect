@@ -1,98 +1,159 @@
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
-import { useAppTheme } from '../../../theme/theme.provider';
-import * as styles from './styles';
+import Ionicons from '@react-native-vector-icons/ionicons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { scale } from 'react-native-size-matters';
 import { MainStackNames } from '../../../navigation/routes';
+import { useAppDispatch, useAppSelector } from '../../../redux/hook';
+import { fetchConversations } from '../../../stores/message.slice';
+import { useAppTheme } from '../../../theme/theme.provider';
+import { Conversation } from '../../../types/message';
+import { getConversationTimeStatus } from '../../../utils/conversationTime.ts';
+import * as styles from './styles';
+import Header from '../../../components/layout/header/index.tsx';
+import { useTranslation } from 'react-i18next';
 
-type ChatItem = {
-  id: string;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  online?: boolean;
-};
+function ChatConversation({
+  conversation,
+  onPress,
+}: {
+  conversation: Conversation;
+  onPress: () => void;
+}) {
+  const { theme, themed } = useAppTheme();
 
-const mockChats: ChatItem[] = [
-  {
-    id: '1',
-    name: 'Henry Carvis',
-    avatar:
-      'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=200&h=200&fit=crop',
-    lastMessage: 'Good afternoon George, ...',
-    time: 'Just Now',
-    online: true,
-  },
-  {
-    id: '2',
-    name: 'Hank Slarry',
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop',
-    lastMessage: 'You: Hi!',
-    time: 'Just Now',
-  },
-  {
-    id: '3',
-    name: 'Miali Ibinis',
-    avatar:
-      'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&h=200&fit=crop',
-    lastMessage: "What's the procedure?",
-    time: 'Just Now',
-  },
-  {
-    id: '4',
-    name: 'George Sina',
-    avatar:
-      'https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&h=200&fit=crop',
-    lastMessage: "You: It's a pleasure meeting you!",
-    time: '2 hours ago',
-  },
-];
+  // Get receiver information
+  const userId = useAppSelector(state => state.user.user.id);
+  const receiver = conversation.participants.find(
+    p => p.user.id !== userId,
+  )?.user;
 
-export default function MessagesScreen() {
-  const { themed } = useAppTheme();
-  const navigation = useNavigation<NavigationProp<any>>();
-
-  const renderItem = ({ item }: { item: ChatItem }) => (
-    <TouchableOpacity
-      style={themed(styles.card)}
-      onPress={() =>
-        navigation.navigate(MainStackNames.ChatDetail, {
-          chatId: item.id,
-          name: item.name,
-          avatar: item.avatar,
-        })
-      }
-    >
+  return (
+    <TouchableOpacity style={themed(styles.card)} onPress={onPress}>
       <View style={themed(styles.avatarWrapper)}>
-        <Image source={{ uri: item.avatar }} style={themed(styles.avatar)} />
-        {item.online ? <View style={themed(styles.onlineDot)} /> : null}
+        {/* <Image source={{ uri: item.avatar }} style={themed(styles.avatar)} /> */}
+        {/* {item.online ? <View style={themed(styles.onlineDot)} /> : null} */}
+        <View style={themed(styles.avatarPlaceholder)}>
+          <Ionicons
+            name="person"
+            size={scale(20)}
+            color={theme.colors.onSurfaceVariant}
+          />
+        </View>
       </View>
       <View style={themed(styles.content)}>
         <View style={themed(styles.nameRow)}>
           <Text style={themed(styles.name)} numberOfLines={1}>
-            {item.name}
+            {/* Sau nhớ đổi thành tên người nhận, đừng để username */}
+            {receiver?.username || 'Luật sư giấu tên'}
           </Text>
-          <Text style={themed(styles.timeText)}>{item.time}</Text>
+          <Text style={themed(styles.timeText)}>
+            {getConversationTimeStatus(conversation.last_message_at)}
+          </Text>
         </View>
         <View style={themed(styles.messageRow)}>
           <Text style={themed(styles.lastMessage)} numberOfLines={1}>
-            {item.lastMessage}
+            {conversation?.last_message?.content || 'Không có tin nhắn nào'}
           </Text>
-          <Text style={themed(styles.ticks)}>✓✓</Text>
+          {/* <Text style={themed(styles.ticks)}>✓✓</Text> */}
         </View>
       </View>
     </TouchableOpacity>
   );
+}
+
+export default function MessagesScreen() {
+  const { theme, themed } = useAppTheme();
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation<NavigationProp<any>>();
+  const { t } = useTranslation();
+
+  const conversations = useAppSelector(
+    (state: any) => state?.message?.conversation,
+  );
+  const loadingConversations = useAppSelector(
+    (state: any) => state?.message?.loadingConversations,
+  );
+  const userId = useAppSelector((state: any) => state.user.user.id);
+  console.log('userId: ', userId);
+
+  useEffect(() => {
+    dispatch(fetchConversations());
+  }, [dispatch]);
+
+  // const renderItem = ({ item }: { item: ChatItem }) => (
+  //   <TouchableOpacity
+  //     style={themed(styles.card)}
+  //     onPress={() =>
+  //       navigation.navigate(MainStackNames.ChatDetail, {
+  //         chatId: item.id,
+  //         name: item.name,
+  //         avatar: item.avatar,
+  //       })
+  //     }
+  //   >
+  //     <View style={themed(styles.avatarWrapper)}>
+  //       <Image source={{ uri: item.avatar }} style={themed(styles.avatar)} />
+  //       {item.online ? <View style={themed(styles.onlineDot)} /> : null}
+  //     </View>
+  //     <View style={themed(styles.content)}>
+  //       <View style={themed(styles.nameRow)}>
+  //         <Text style={themed(styles.name)} numberOfLines={1}>
+  //           {item.name}
+  //         </Text>
+  //         <Text style={themed(styles.timeText)}>{item.time}</Text>
+  //       </View>
+  //       <View style={themed(styles.messageRow)}>
+  //         <Text style={themed(styles.lastMessage)} numberOfLines={1}>
+  //           {item.lastMessage}
+  //         </Text>
+  //         <Text style={themed(styles.ticks)}>✓✓</Text>
+  //       </View>
+  //     </View>
+  //   </TouchableOpacity>
+  // );
+  const handleConversationPress = (
+    conversation: Conversation,
+    userid: string,
+  ) => {
+    const receiver = conversations
+      .find((c: any) => c.id === conversation.id)
+      ?.participants.find((p: any) => p.user.id !== userid);
+
+    navigation.navigate(MainStackNames.ChatDetail, {
+      chatId: conversation.id,
+      name: receiver?.user.username || 'Luật sư giấu tên',
+      avatar: '', // Thêm avatar nếu có
+    });
+  };
+
+  if (loadingConversations) {
+    return (
+      <SafeAreaView style={themed(styles.loadingContainer)}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={themed(styles.container)}>
+      <Header title={t('messages.title')} showBackButton={false} />
       <FlatList
-        data={mockChats}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
+        data={conversations}
+        keyExtractor={(item: any) => item.id}
+        renderItem={({ item }) => (
+          <ChatConversation
+            conversation={item}
+            onPress={() => handleConversationPress(item, userId)}
+          />
+        )}
         contentContainerStyle={themed(styles.listContent)}
       />
     </SafeAreaView>

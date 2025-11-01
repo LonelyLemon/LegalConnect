@@ -17,8 +17,8 @@ const initialState: UserState = {
     username: '',
     phone_number: '',
     address: '',
+    role: '',
   },
-  permissions: [],
   token: '',
   refreshToken: '',
   isLoggedIn: false,
@@ -36,11 +36,19 @@ export const signInWithEmailPassword = createAsyncThunk(
       const accessToken: string = (response?.access_token || '') as string;
       const tokenType: string = (response?.token_type || 'Bearer') as string;
       const normalizedToken = accessToken ? `${tokenType} ${accessToken}` : '';
+      const builtUser: User | undefined = {
+        id: (response?.user_id as string) || '',
+        email: (response?.user_email as string) || '',
+        username: (response?.username as string) || '',
+        phone_number: (response?.phone_number as string) || '',
+        address: (response?.address as string) || '',
+        avatar: (response?.avatar_url as string) || '',
+        role: (response?.role as string) || '',
+      };
       return {
-        user: (response?.user as User) || undefined,
+        user: builtUser,
         token: normalizedToken,
         refreshToken: (response?.refresh_token as string) || '',
-        permissions: (response?.permissions as string[]) || [],
       };
     } catch (error: any) {
       if (error instanceof AxiosError) {
@@ -65,7 +73,6 @@ export const signUpWithEmailPassword = createAsyncThunk(
       return {
         user: response.user as User,
         token: response.access_token as string,
-        permissions: response.permissions as string[],
       };
     } catch (error: any) {
       if (error instanceof AxiosError) {
@@ -129,8 +136,12 @@ export const userSlice = createSlice({
         id: '',
         email: '',
         avatar: '',
-        name: '',
+        username: '',
+        phone_number: '',
+        address: '',
+        role: '',
       };
+      state.error = null;
     },
     setUser: (state: UserState, action: PayloadAction<User>) => {
       state.user = action.payload;
@@ -140,6 +151,9 @@ export const userSlice = createSlice({
     },
     setRefreshToken: (state: UserState, action: PayloadAction<string>) => {
       state.refreshToken = action.payload;
+    },
+    clearError: (state: UserState) => {
+      state.error = null;
     },
   },
   extraReducers: builder => {
@@ -157,7 +171,6 @@ export const userSlice = createSlice({
         if (action.payload.user) {
           state.user = action.payload.user;
         }
-        state.permissions = action.payload.permissions || [];
       })
       .addCase(signInWithEmailPassword.rejected, (state, action) => {
         state.isLoading = false;
@@ -167,12 +180,9 @@ export const userSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(signUpWithEmailPassword.fulfilled, (state, action) => {
+      .addCase(signUpWithEmailPassword.fulfilled, state => {
         state.isLoading = false;
-        state.isLoggedIn = true;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.permissions = action.payload.permissions;
+        state.error = null;
       })
       .addCase(signUpWithEmailPassword.rejected, (state, action) => {
         state.isLoading = false;
@@ -189,11 +199,13 @@ export const userSlice = createSlice({
           id: '',
           email: '',
           avatar: '',
-          name: '',
+          username: '',
+          phone_number: '',
+          address: '',
+          role: '',
         };
         state.token = '';
         state.refreshToken = '';
-        state.permissions = [];
       })
       .addCase(signOut.rejected, (state, action) => {
         state.isLoading = false;
@@ -235,8 +247,8 @@ export const selectIsLoggedIn = (state: { user: UserState }) =>
 export const selectIsLoading = (state: { user: UserState }) =>
   state?.user?.isLoading;
 export const selectError = (state: { user: UserState }) => state?.user?.error;
-export const selectPermissions = (state: { user: UserState }) =>
-  state?.user?.permissions;
+export const selectRole = (state: { user: UserState }) =>
+  state?.user?.user?.role;
 export const selectRefreshToken = (state: { user: UserState }) =>
   state?.user?.refreshToken;
 

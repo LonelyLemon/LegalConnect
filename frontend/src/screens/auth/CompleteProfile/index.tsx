@@ -2,42 +2,45 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute } from '@react-navigation/native';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
+import { useTranslation } from 'react-i18next';
 // @ts-ignore - React Native image module resolution
 import AvatarPlaceholder from '../../../assets/imgs/Logo.png';
+import { useAppDispatch, useAppSelector } from '../../../redux/hook.ts';
+import { selectUser, updateUserProfile } from '../../../stores/user.slice.ts';
+import { MainStackNames } from '../../../navigation/routes.ts';
+import { useNavigation } from '@react-navigation/native';
 
 type FormProfile = {
-  firstName: string;
-  lastName: string;
-  phone: string;
+  username: string;
+  email: string;
+  phone_number: string;
   address: string;
   gender: 'Male' | 'Female' | 'Other';
-  dob: Dayjs;
-  pob: string;
+  dob: string;
+  avatar_url: string;
 };
 
-export default function CompleteProfileScreen() {
-  const { themed } = useAppTheme();
-  const route = useRoute<any>();
-  const userData = route?.params?.userData as Partial<FormProfile> | undefined;
+export default function CompleteProfileScreen({}) {
+  const user = useAppSelector(selectUser);
+  const { t } = useTranslation();
 
-  const initialDefaults: FormProfile = {
-    firstName: userData?.firstName ?? '',
-    lastName: userData?.lastName ?? '',
-    phone: userData?.phone ?? '',
-    address: userData?.address ?? '',
-    gender: (userData?.gender as any) ?? 'Male',
-    dob: userData?.dob ? dayjs(userData.dob as any) : dayjs(),
-    pob: userData?.pob ?? '',
+  const userData: FormProfile = {
+    username: user?.username ?? '',
+    email: user?.email ?? '',
+    phone_number: user?.phone_number ?? '',
+    address: user?.address ?? '',
+    avatar_url: user?.avatar ?? '',
+    gender: 'Male',
+    dob: dayjs().format('YYYY-MM-DD'),
   };
-
+  const { themed } = useAppTheme();
   const control = useForm<FormProfile>({
-    defaultValues: initialDefaults,
+    defaultValues: userData,
   });
 
   const {
@@ -47,81 +50,106 @@ export default function CompleteProfileScreen() {
 
   const fields = [
     {
-      id: 'firstName',
-      name: 'firstName',
-      label: 'First name',
+      id: 'username',
+      name: 'username',
+      label: t('auth.completeProfile.username'),
       type: 'input',
-      placeholder: 'Enter your first name',
-      error: errors?.firstName?.message,
-      rules: { required: { value: true, message: 'First name is required' } },
+      placeholder: t('auth.completeProfile.enterUsername'),
+      error: errors?.username?.message,
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.userNameRequired'),
+        },
+      },
     },
     {
-      id: 'lastName',
-      name: 'lastName',
-      label: 'Last name',
+      id: 'phone_number',
+      name: 'phone_number',
+      label: t('auth.completeProfile.phone'),
       type: 'input',
-      placeholder: 'Enter your first name',
-      error: errors?.lastName?.message,
-      rules: { required: { value: true, message: 'Last name is required' } },
-    },
-    {
-      id: 'phone',
-      name: 'phone',
-      label: 'Phone number',
-      type: 'input',
-      placeholder: 'Enter your phone number',
-      error: errors?.phone?.message,
-      rules: { required: { value: true, message: 'Phone is required' } },
+      placeholder: t('auth.completeProfile.enterPhone'),
+      error: errors?.phone_number?.message,
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.phoneRequired'),
+        },
+      },
     },
     {
       id: 'address',
       name: 'address',
-      label: 'Address',
+      label: t('auth.completeProfile.address'),
       type: 'input',
-      placeholder: 'Enter your address',
+      placeholder: t('auth.completeProfile.enterAddress'),
       error: errors?.address?.message,
-      rules: { required: { value: true, message: 'Address is required' } },
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.addressRequired'),
+        },
+      },
     },
     {
       id: 'gender',
       name: 'gender',
-      label: 'Gender',
+      label: t('auth.completeProfile.gender'),
       type: 'radio',
       options: [
-        { label: 'Male', value: 'Male' },
-        { label: 'Female', value: 'Female' },
-        { label: 'Other', value: 'Other' },
+        { label: t('auth.completeProfile.male'), value: 'Male' },
+        { label: t('auth.completeProfile.female'), value: 'Female' },
+        { label: t('auth.completeProfile.other'), value: 'Other' },
       ],
       error: errors?.gender?.message,
-      rules: { required: { value: true, message: 'Gender is required' } },
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.genderRequired'),
+        },
+      },
     },
     {
       id: 'dob',
       name: 'dob',
-      label: 'Date of Birth',
+      label: t('auth.completeProfile.dateOfBirth'),
       type: 'date',
       placeholder: 'YYYY-MM-DD',
       error: errors?.dob?.message,
-      rules: { required: { value: true, message: 'DOB is required' } },
+      rules: {
+        required: {
+          value: true,
+          message: t('auth.completeProfile.dobRequired'),
+        },
+      },
     },
     {
-      id: 'pob',
-      name: 'pob',
-      label: 'Place of Birth',
-      type: 'input',
-      placeholder: 'Enter your place of birth',
-      error: errors?.pob?.message,
-      rules: { required: { value: true, message: 'Place is required' } },
+      id: 'avatar_url',
+      name: 'avatar_url',
+      label: t('auth.completeProfile.avatar'),
+      type: 'image',
+      placeholder: t('auth.completeProfile.enterAvatar'),
+      error: errors?.avatar_url?.message,
     },
   ];
-
-  const onSubmit = (_: FormProfile) => {
-    // Submit to API later
+  const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+  const onSubmit = (data: FormProfile) => {
+    dispatch(updateUserProfile(data));
+    navigation.navigate(MainStackNames.HomeTabs as never);
   };
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Complete your profile" showBackButton={true} />
+      <Header
+        title={t('auth.completeProfile.title')}
+        showBackButton={true}
+        navigation={
+          !(user?.phone_number && user?.address)
+            ? MainStackNames.Setting
+            : undefined
+        }
+      />
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
         keyboardShouldPersistTaps="handled"
@@ -137,16 +165,18 @@ export default function CompleteProfileScreen() {
             style={themed(styles.primaryButton)}
             onPress={handleSubmit(onSubmit)}
             disabled={
-              !!errors.firstName ||
-              !!errors.lastName ||
-              !!errors.phone ||
+              !!errors.username ||
+              !!errors.email ||
+              !!errors.phone_number ||
               !!errors.address ||
               !!errors.gender ||
               !!errors.dob ||
-              !!errors.pob
+              !!errors.avatar_url
             }
           >
-            <Text style={themed(styles.primaryButtonText)}>Continue</Text>
+            <Text style={themed(styles.primaryButtonText)}>
+              {t('auth.completeProfile.continue')}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -15,12 +15,14 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
+import { useTranslation } from 'react-i18next';
 
 type FormCode = { code: string };
 
 export default function VerifyCodeScreen() {
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
+  const { t } = useTranslation();
   const control = useForm<FormCode>({ defaultValues: { code: '' } });
   const {
     handleSubmit,
@@ -31,16 +33,16 @@ export default function VerifyCodeScreen() {
     {
       id: 'code',
       name: 'code',
-      label: 'Enter 6-digit code',
+      label: t('auth.verifyCode.enterCode'),
       type: 'input',
-      placeholder: 'Enter the verification code sent to your email',
+      placeholder: t('auth.verifyCode.codePlaceholder'),
       icon: 'keypad-outline',
       error: errors?.code?.message,
       rules: {
-        required: { value: true, message: 'Code is required' },
+        required: { value: true, message: t('auth.verifyCode.codeRequired') },
         pattern: {
           value: /^[0-9]{6}$/,
-          message: 'Code must be 6 digits',
+          message: t('auth.verifyCode.codeInvalid'),
         },
       },
       keyboardType: 'numeric',
@@ -53,7 +55,7 @@ export default function VerifyCodeScreen() {
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Verify Code" />
+      <Header title={t('auth.verifyCode.title')} />
 
       <ScrollView
         contentContainerStyle={themed(styles.scrollContainer)}
@@ -75,7 +77,7 @@ export default function VerifyCodeScreen() {
             disabled={!!errors.code}
           >
             <Text style={themed(styles.primaryButtonText)}>
-              {'Verify Code'}
+              {t('auth.verifyCode.verifyCode')}
             </Text>
           </TouchableOpacity>
         </View>
