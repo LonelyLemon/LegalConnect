@@ -1,66 +1,80 @@
 import asyncio
-from datetime import datetime, timedelta
-from src.core.database import SessionLocal, DATABASE_URL
-from src.auth.services import hash_password
-from src.user.models import User
-from src.lawyer.models import LawyerProfile
-from src.booking.models import LawyerScheduleSlot, BookingRequest, CaseHistory, LawyerRating
-from src.chat.models import ChatConversation, ChatParticipant, ChatMessage
 
-async def seed_data():
+from datetime import datetime, timedelta, timezone
+from typing import Final
+from sqlalchemy import select
+from src.auth.services import hash_password
+from src.booking.models import (
+    BookingRequest,
+    CaseHistory,
+    LawyerRating,
+    LawyerScheduleSlot,
+)
+from src.chat.models import ChatConversation, ChatMessage, ChatParticipant
+from src.core.database import DATABASE_URL, SessionLocal
+from src.lawyer.models import LawyerProfile
+from src.user.models import User
+
+# Demo constants ----------------------------------------------------------------
+CLIENT_EMAIL: Final[str] = "demo_client@example.com"
+LAWYER_EMAIL: Final[str] = "demo_lawyer@example.com"
+DEMO_PASSWORD: Final[str] = "Demo123!"
+
+
+async def seed_data() -> None:
+    """Seed demo data used during development."""
     print("=== SEED FILE VERSION: DEBUG2025 ===", flush=True)
-    print("DEBUG: DATABASE_URL =", DATABASE_URL, flush=True)
+    print("DATABASE_URL:", DATABASE_URL, flush=True)
     try:
         print("🌱 Seeding demo data...", flush=True)
         async with SessionLocal() as session:
-            # Kiểm tra record client demo đã có chưa
-            exists = await session.execute(User.__table__.select().where(User.email == "demo_client@example.com"))
-            row = exists.first()
-            print("DEBUG: row (existing demo client):", row, flush=True)
-            if row:
-                print("✅ Demo data already exists. Bỏ qua!", flush=True)
-                return
+            existing_users = await session.execute(
+                select(User.email).where(User.email.in_([CLIENT_EMAIL, LAWYER_EMAIL]))
+            )
+            existing_emails = {email for (email,) in existing_users}
 
-            # 1. Seed users
-            print("DEBUG: Tạo user demo_client", flush=True)
+            if {CLIENT_EMAIL, LAWYER_EMAIL}.issubset(existing_emails):
+                print("✅ Demo users already exist. Skipping seed.", flush=True)
+                return
+            
+            # ------------------------------------------------------------------
+            # 1. Create demo users
+            # ------------------------------------------------------------------
+            print("Creating demo users…", flush=True)
             client = User(
                 username="demo_client",
-                email="demo_client@example.com",
-                hashed_password=hash_password("Demo123!"),
+                email=CLIENT_EMAIL,
+                hashed_password=hash_password(DEMO_PASSWORD),
                 role="client",
                 is_email_verified=True,
             )
-
-            print("DEBUG: Tạo user demo_lawyer", flush=True)
             lawyer = User(
                 username="demo_lawyer",
-                email="demo_lawyer@example.com",
-                hashed_password=hash_password("Demo123!"),
+                email=LAWYER_EMAIL,
+                hashed_password=hash_password(DEMO_PASSWORD),
                 role="lawyer",
                 is_email_verified=True,
             )
             session.add_all([client, lawyer])
             await session.flush()
-            print(f"DEBUG: ID client={client.id}, lawyer={lawyer.id}", flush=True)
+            print(f"Demo user ids -> client: {client.id}, lawyer: {lawyer.id}", flush=True)
 
-            # 2. Lawyer profile
-            print("DEBUG: Thêm LawyerProfile", flush=True)
+            # ------------------------------------------------------------------
+            # 2. Create lawyer profile & availability
+            # ------------------------------------------------------------------
             profile = LawyerProfile(
                 user_id=lawyer.id,
                 display_name="Luật sư Nguyễn Văn A",
                 phone_number="0123456789",
-                office_address="123 Nguyễn Huệ, Q.1, TP.HCM",
+                office_address="123 Nguyễn Huệ, Quận 1, TP.HCM",
                 website_url="https://luatsunguyenvana.vn",
-                education="Cử nhân Luật - ĐH Luật TP.HCM",
+                education="Cử nhân Luật - Đại học Luật TP.HCM",
                 current_level="Luật sư cao cấp",
                 years_of_experience=10,
                 speaking_languages=["Tiếng Việt", "English"],
             )
             session.add(profile)
-
-            # 3. Schedule slot
-            now = datetime.utcnow()
-            print("DEBUG: Thêm LawyerScheduleSlot", flush=True)
+            now = datetime.now(timezone.utc)
             slot = LawyerScheduleSlot(
                 lawyer_id=lawyer.id,
                 start_time=now + timedelta(hours=2),
@@ -69,10 +83,10 @@ async def seed_data():
             )
             session.add(slot)
             await session.flush()
-            print(f"DEBUG: slot.id={slot.id}", flush=True)
 
-            # 4. Booking request
-            print("DEBUG: Thêm BookingRequest", flush=True)
+            # ------------------------------------------------------------------
+            # 3. Create booking request & case history
+            # ------------------------------------------------------------------
             booking = BookingRequest(
                 client_id=client.id,
                 lawyer_id=lawyer.id,
@@ -85,10 +99,6 @@ async def seed_data():
             )
             session.add(booking)
             await session.flush()
-            print(f"DEBUG: booking.id={booking.id}", flush=True)
-
-            # 5. Case history
-            print("DEBUG: Thêm CaseHistory", flush=True)
             case = CaseHistory(
                 booking_request_id=booking.id,
                 lawyer_id=lawyer.id,
@@ -104,10 +114,6 @@ async def seed_data():
             )
             session.add(case)
             await session.flush()
-            print(f"DEBUG: case.id={case.id}", flush=True)
-
-            # 6. Rating
-            print("DEBUG: Thêm LawyerRating", flush=True)
             rating = LawyerRating(
                 case_history_id=case.id,
                 lawyer_id=lawyer.id,
@@ -116,40 +122,31 @@ async def seed_data():
             )
             session.add(rating)
 
-            # 7. Chat
-            print("DEBUG: Thêm ChatConversation", flush=True)
-            conv = ChatConversation(last_message_at=now)
-            session.add(conv)
+            # ------------------------------------------------------------------
+            # 4. Create chat conversation between client and lawyer
+            # ------------------------------------------------------------------
+            conversation = ChatConversation(last_message_at=now)
+            session.add(conversation)
             await session.flush()
-            print(f"DEBUG: conv.id={conv.id}", flush=True)
-
-            print("DEBUG: Thêm ChatParticipant", flush=True)
-            part1 = ChatParticipant(conversation_id=conv.id, user_id=client.id)
-            part2 = ChatParticipant(conversation_id=conv.id, user_id=lawyer.id)
-            session.add_all([part1, part2])
-
-            print("DEBUG: Thêm ChatMessage", flush=True)
-            msg = ChatMessage(
-                conversation_id=conv.id,
-                sender_id=client.id,
-                content="Xin chào luật sư, tôi muốn hỏi về hợp đồng lao động.",
+            session.add_all(
+                [
+                    ChatParticipant(conversation_id=conversation.id, user_id=client.id),
+                    ChatParticipant(conversation_id=conversation.id, user_id=lawyer.id),
+                ]
             )
-            session.add(msg)
 
+            session.add(
+                ChatMessage(
+                    conversation_id=conversation.id,
+                    sender_id=client.id,
+                    content="Xin chào luật sư, tôi muốn hỏi về hợp đồng lao động.",
+                )
+            )
             await session.commit()
             print("✅ Demo data inserted successfully!", flush=True)
-    except Exception as e:
-        print("SEED ERROR:", e, flush=True)
-        import traceback
-        traceback.print_exc()
+    except Exception as exc:
+        print("SEED ERROR:", exc, flush=True)
         raise
 
-def _entry():
-    asyncio.run(seed_data())
-
-# GỌI HÀM ENTRY ngay cả khi runpy.run_path
-_entry()
-
-
 if __name__ == "__main__":
-    pass # đã gọi _entry() phía trên
+    asyncio.run(seed_data())
