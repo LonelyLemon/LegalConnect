@@ -79,7 +79,7 @@ export default function HomeScreen() {
     <CaseCard
       caseData={item}
       onPress={() => {
-        navigation.navigate(MainStackNames.CaseDetail, { id: item.id });
+        navigation.navigate(MainStackNames.CaseDetail, { caseData: item });
       }}
     />
   );

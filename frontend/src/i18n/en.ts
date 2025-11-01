@@ -197,7 +197,8 @@ const en = {
   },
   chatbot: {
     title: 'Legal AI Chatbot',
-    emptyMessage: 'Hello! I am a legal AI assistant.\nAsk questions about Vietnamese law.',
+    emptyMessage:
+      'Hello! I am a legal AI assistant.\nAsk questions about Vietnamese law.',
     placeholder: 'Ask questions about law...',
     confidence: 'confidence',
   },
@@ -217,16 +218,19 @@ const en = {
   },
   caseDetail: {
     description: 'Description',
+    requestDetails: 'Request Details',
     caseInformation: 'Case Information',
+    requestInformation: 'Request Information',
     startedAt: 'Started At',
     expectedEnd: 'Expected End',
+    desiredStartTime: 'Desired Start Time',
+    desiredEndTime: 'Desired End Time',
     lastUpdated: 'Last Updated',
     lawyersNote: "Lawyer's Note",
     yourNote: 'Your Note',
     attachments: 'Attachments',
     attachmentNumber: 'Attachment {{number}}',
     contactLawyer: 'Contact Lawyer',
-    viewDocuments: 'View Documents',
   },
   schedule: {
     title: 'Schedule',
@@ -240,10 +244,12 @@ const en = {
     hours: 'hours',
     selectSlot: 'Select this slot',
     noAvailableSlots: 'No Available Slots',
-    noAvailableSlotsMessage: 'This lawyer has no available time slots at the moment. Please check back later or contact them directly.',
+    noAvailableSlotsMessage:
+      'This lawyer has no available time slots at the moment. Please check back later or contact them directly.',
     loadingSchedule: 'Loading schedule...',
     availableTimeSlots: 'Available Time Slots',
-    selectTimeSlot: 'Select a time slot to book a consultation (Times shown in UTC)',
+    selectTimeSlot:
+      'Select a time slot to book a consultation (Times shown in UTC)',
   },
   toast: {
     loginSuccessful: 'Login successful',
@@ -288,7 +294,8 @@ const en = {
     displayName: 'Display Name',
     enterDocumentName: 'Enter document name',
     pdfDocument: 'PDF Document',
-    pdfDocumentOptional: 'PDF Document (Optional - leave empty to keep current file)',
+    pdfDocumentOptional:
+      'PDF Document (Optional - leave empty to keep current file)',
     currentFile: 'Current file',
     displayNameRequired: 'Display name is required',
     displayNameLength: 'Display name must be 1-255 characters',
