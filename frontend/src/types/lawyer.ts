@@ -1,16 +1,19 @@
 export interface Lawyer {
-  id: number;
-  user_id: number;
-  name: string;
-  bio: string;
-  years_experience: number;
-  price_per_session_cents: number;
-  currency: string;
-  province: string;
-  rating_avg: number;
-  rating_count: number;
-  imageUri: string;
-  updated_at: string;
+  id: string;
+  user_id: string;
+  display_name: string;
+  email: string;
+  phone_number: string;
+  website_url: string;
+  office_address: string;
+  speaking_languages: string[];
+  image_url?: string;
+  education?: string;
+  current_level?: string;
+  years_of_experience?: number;
+  average_rating?: number;
+  create_at?: string;
+  updated_at?: string;
 }
 
 export interface LawyerState {

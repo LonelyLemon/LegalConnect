@@ -4,6 +4,7 @@ import { StyleSheet, Switch, View } from 'react-native';
 import Input from '../input';
 import RadioGroup from '../radio';
 import DatePicker from '../datePicker';
+import FilePicker from '../filePicker';
 
 export default function ControllerForm({
   fields,
@@ -105,14 +106,14 @@ export default function ControllerForm({
                       onChange={onChange}
                     />
                   );
-                // case 'file':
-                //   return (
-                //     <FilePicker
-                //       {...restProps}
-                //       value={value}
-                //       onChange={onChange}
-                //     />
-                //   );
+                case 'file':
+                  return (
+                    <FilePicker
+                      {...restProps}
+                      value={value}
+                      onChange={onChange}
+                    />
+                  );
                 case 'customRender':
                   return customRender(value, onChange, { ...restProps });
                 default:

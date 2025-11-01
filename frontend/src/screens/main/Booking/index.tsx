@@ -15,41 +15,65 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
 import Header from '../../../components/layout/header/index.tsx';
 import ControllerForm from '../../../components/common/controllerForm/index.tsx';
-import DatePicker from '../../../components/common/datePicker/index.tsx';
-import { RouteProp, useNavigation } from '@react-navigation/native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
 import { Lawyer } from '../../../types/lawyer.ts';
 import { createBookingRequest } from '../../../services/booking.ts';
 import { fetchLawyerById } from '../../../stores/lawyer.slices.ts';
 import { useAppDispatch } from '../../../redux/hook';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
+import { showError, showSuccess } from '../../../types/toast.ts';
+import { MainStackNames } from '../../../navigation/routes.ts';
 
 type FormBooking = {
   title: string;
-  description: string;
-  startTime: Date | null;
-  endTime: Date | null;
+  short_description: string;
+  desired_start_time: Date | null;
+  desired_end_time: Date | null;
+  attachment?: {
+    uri: string;
+    type: string;
+    name: string;
+  };
 };
 
 export default function BookingScreen({
   route,
 }: {
-  route: RouteProp<{ params: { lawyerId: number } }, 'params'>;
+  route: RouteProp<
+    {
+      params: {
+        lawyerId: string;
+        scheduleId?: string;
+        startTime?: string;
+        endTime?: string;
+      };
+    },
+    'params'
+  >;
 }) {
-  const { lawyerId } = route.params;
+  const { lawyerId, startTime, endTime } = route.params;
+  // scheduleId can be used later for tracking which schedule slot was selected
   const [lawyer, setLawyer] = useState<Lawyer | null>(null);
   const [loading, setLoading] = useState(false);
   const [lawyerLoading, setLawyerLoading] = useState(true);
 
   const { themed, theme } = useAppTheme();
   const dispatch = useAppDispatch();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<any>>();
+  const { t } = useTranslation();
 
   const control = useForm<FormBooking>({
     defaultValues: {
       title: '',
-      description: '',
-      startTime: null,
-      endTime: null,
+      short_description: '',
+      desired_start_time: startTime ? new Date(startTime) : null,
+      desired_end_time: endTime ? new Date(endTime) : null,
+      attachment: undefined,
     },
   });
 
@@ -57,7 +81,6 @@ export default function BookingScreen({
     handleSubmit,
     formState: { errors },
   } = control;
-
 
   useEffect(() => {
     const fetchLawyer = async () => {
@@ -72,62 +95,64 @@ export default function BookingScreen({
       }
     };
     fetchLawyer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lawyerId]);
 
   const fields = [
     {
       id: 'title',
       name: 'title',
-      label: 'Title',
+      label: t('booking.titleLabel'),
       type: 'input',
-      placeholder: 'Enter booking title',
+      placeholder: t('booking.titlePlaceholder'),
       error: errors?.title?.message,
       rules: {
-        required: { value: true, message: 'Title is required' },
+        required: { value: true, message: t('booking.titleRequired') },
       },
     },
     {
-      id: 'description',
-      name: 'description',
-      label: 'Short Description',
+      id: 'short_description',
+      name: 'short_description',
+      label: t('booking.shortDescription'),
       type: 'customRender',
-      error: errors?.description?.message,
+      error: errors?.short_description?.message,
       rules: {
-        required: { value: true, message: 'Short description is required' },
+        required: { value: true, message: t('booking.descriptionRequired') },
       },
+      // eslint-disable-next-line react/no-unstable-nested-components
       customRender: (value: string, onChange: (text: string) => void) => (
         <View style={themed(styles.textAreaContainer)}>
-          <Text style={themed(styles.textAreaLabel)}>Short Description</Text>
+          <Text style={themed(styles.textAreaLabel)}>
+            {t('booking.shortDescription')}
+          </Text>
           <TextInput
             style={[
               themed(styles.textArea),
-              errors.description && themed(styles.textAreaError),
+              errors.short_description && themed(styles.textAreaError),
             ]}
             value={value}
             onChangeText={onChange}
-            placeholder="Describe your legal needs..."
+            placeholder={t('booking.shortDescriptionPlaceholder')}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             multiline
             numberOfLines={4}
             textAlignVertical="top"
           />
-          {errors.description && (
+          {errors.short_description && (
             <Text style={themed(styles.errorText)}>
-              {errors.description.message}
+              {errors.short_description.message}
             </Text>
           )}
         </View>
       ),
     },
     {
-      id: 'startTime',
-      name: 'startTime',
-      label: 'Start Date',
-      type: 'customRender',
-      error: errors?.startTime?.message,
+      id: 'desired_start_time',
+      name: 'desired_start_time',
+      label: t('booking.startDate'),
+      type: 'date',
+      error: errors?.desired_start_time?.message,
       rules: {
-        required: { value: true, message: 'Start date is required' },
+        required: { value: true, message: t('booking.startDateRequired') },
         validate: (value: Date | null) => {
           if (!value) return true;
           const today = new Date();
@@ -135,59 +160,52 @@ export default function BookingScreen({
           const selectedDate = new Date(value);
           selectedDate.setHours(0, 0, 0, 0);
           if (selectedDate < today) {
-            return 'Start date must be today or in the future';
+            return t('booking.startDateInvalid');
           }
           return true;
         },
       },
-      customRender: (value: Date | null, onChange: (date: Date) => void) => (
-        <DatePicker
-          label="Start Date"
-          value={value}
-          onChange={onChange}
-          placeholder="Select start date"
-          error={errors?.startTime?.message}
-          minimumDate={new Date()}
-        />
-      ),
+      disabled: true,
     },
     {
-      id: 'endTime',
-      name: 'endTime',
-      label: 'End Date',
-      type: 'customRender',
-      error: errors?.endTime?.message,
+      id: 'desired_end_time',
+      name: 'desired_end_time',
+      label: t('booking.endDate'),
+      type: 'date',
+      error: errors?.desired_end_time?.message,
       rules: {
-        required: { value: true, message: 'End date is required' },
+        required: { value: true, message: t('booking.endDateRequired') },
         validate: (value: Date | null) => {
           if (!value) return true;
-          const startTime = control.getValues('startTime');
+          const startTime = control.getValues('desired_start_time');
           if (startTime) {
             const startDate = new Date(startTime);
             startDate.setHours(0, 0, 0, 0);
             const endDate = new Date(value);
             endDate.setHours(0, 0, 0, 0);
             if (endDate < startDate) {
-              return 'End date must be after or equal to start date';
+              return t('booking.endDateAfterStart');
             }
           }
           return true;
         },
       },
-      customRender: (value: Date | null, onChange: (date: Date) => void) => (
-        <DatePicker
-          label="End Date"
-          value={value}
-          onChange={onChange}
-          placeholder="Select end date"
-          error={errors?.endTime?.message}
-        />
-      ),
+      disabled: true,
+    },
+    {
+      id: 'attachment',
+      name: 'attachment',
+      label: t('booking.attachment'),
+      type: 'file',
+      error: errors?.attachment?.message,
+      rules: {
+        required: { value: true, message: t('booking.attachmentRequired') },
+      },
     },
   ];
 
   const onSubmit = async (data: FormBooking) => {
-    if (!data.startTime || !data.endTime) {
+    if (!data.desired_start_time || !data.desired_end_time) {
       return;
     }
 
@@ -196,23 +214,18 @@ export default function BookingScreen({
       await createBookingRequest({
         lawyer_id: lawyerId.toString(),
         title: data.title.trim(),
-        short_description: data.description.trim(),
-        desired_start_time: dayjs(data.startTime).toISOString(),
-        desired_end_time: dayjs(data.endTime).toISOString(),
+        short_description: data.short_description.trim(),
+        desired_start_time: dayjs(data.desired_start_time).toISOString(),
+        desired_end_time: dayjs(data.desired_end_time).toISOString(),
       });
-
-      Alert.alert(
-        'Success',
-        'Booking request created successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ],
-      );
+      showSuccess(t('toast.bookingCreated'));
+      navigation.navigate(MainStackNames.HomeTabs);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create booking request');
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to create booking request';
+      showError(t('toast.bookingFailed'), message);
     } finally {
       setLoading(false);
     }
@@ -221,7 +234,7 @@ export default function BookingScreen({
   if (lawyerLoading) {
     return (
       <SafeAreaView style={themed(styles.container)}>
-        <Header title="Book a Session" showBackButton={true} />
+        <Header title={t('booking.title')} showBackButton={true} />
         <View style={themed(styles.loadingContainer)}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
@@ -231,7 +244,7 @@ export default function BookingScreen({
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Book a Session" showBackButton={true} />
+      <Header title={t('booking.title')} showBackButton={true} />
       <ScrollView
         style={themed(styles.scrollContainer)}
         contentContainerStyle={themed(styles.contentContainer)}
@@ -240,11 +253,11 @@ export default function BookingScreen({
         {lawyer && (
           <View style={themed(styles.lawyerInfo)}>
             <Image
-              source={{ uri: lawyer.imageUri }}
+              source={{ uri: lawyer.image_url }}
               style={themed(styles.lawyerAvatar)}
             />
-            <Text style={themed(styles.lawyerName)}>{lawyer.name}</Text>
-            <Text style={themed(styles.lawyerBio)}>{lawyer.bio}</Text>
+            <Text style={themed(styles.lawyerName)}>{lawyer.display_name}</Text>
+            <Text style={themed(styles.lawyerBio)}>{lawyer.email}</Text>
           </View>
         )}
 
@@ -263,7 +276,7 @@ export default function BookingScreen({
               <ActivityIndicator color={theme.colors.onPrimary} />
             ) : (
               <Text style={themed(styles.submitButtonText)}>
-                Submit Booking Request
+                {t('booking.submitBookingRequest')}
               </Text>
             )}
           </TouchableOpacity>

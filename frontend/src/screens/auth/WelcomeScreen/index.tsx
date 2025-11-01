@@ -5,10 +5,12 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import Logo from '../../../assets/imgs/Logo.png'; // logo bạn đã có
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
   const { themed } = useAppTheme();
   const navigation = useNavigation<any>();
+  const { t } = useTranslation();
 
   const handleCreateAccount = () => {
     navigation.navigate('SignUp');
@@ -25,7 +27,7 @@ export default function WelcomeScreen() {
 
         <Text style={themed(styles.appName)}>{'LegalConnect'}</Text>
         <Text style={themed(styles.slogan)}>
-          {'Connecting you to the right lawyer, every time.'}
+          {t('welcomeScreen.slogan')}
         </Text>
 
         <View style={themed(styles.buttonGroup)}>
@@ -33,14 +35,14 @@ export default function WelcomeScreen() {
             style={themed(styles.primaryButton)}
             onPress={handleCreateAccount}
           >
-            <Text style={themed(styles.buttonText)}>{'Create my Account'}</Text>
+            <Text style={themed(styles.buttonText)}>{t('welcomeScreen.createAccount')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={themed(styles.primaryButton)}
             onPress={handleHaveAccount}
           >
-            <Text style={themed(styles.buttonText)}>{'I have an Account'}</Text>
+            <Text style={themed(styles.buttonText)}>{t('welcomeScreen.haveAccount')}</Text>
           </TouchableOpacity>
         </View>
       </View>

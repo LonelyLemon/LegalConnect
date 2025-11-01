@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { showError, showSuccess } from '../types/toast';
+import { showError } from '../types/toast';
+import { t } from '../i18n';
 
 export interface BookingRequestPayload {
   lawyer_id: string;
@@ -23,16 +24,6 @@ export interface ScheduleSlot {
   create_at: string;
   updated_at: string;
 }
-
-export const getLawyerSchedule = async (lawyerId: string): Promise<ScheduleSlot[]> => {
-  try {
-    const response = await axios.get(`/booking/lawyers/${lawyerId}/schedule`);
-    return response.data;
-  } catch (error: any) {
-    console.log('error getting schedule: ', error);
-    throw error;
-  }
-};
 
 export const createBookingRequest = async (
   data: BookingRequestPayload,
@@ -59,7 +50,6 @@ export const createBookingRequest = async (
       },
     });
 
-    showSuccess('Booking request created successfully');
     return response.data;
   } catch (error: any) {
     const errmsg = error?.response?.data;
@@ -69,8 +59,23 @@ export const createBookingRequest = async (
       errmsg?.error ||
       error?.message ||
       'Failed to create booking request';
-    showError('Failed to create booking', message);
     throw new Error(message);
   }
 };
 
+export const getPersonalBookingRequest = async (): Promise<any> => {
+  try {
+    const response = await axios.get('/booking/requests/me');
+    return response.data;
+  } catch (error: any) {
+    const errmsg = error?.response?.data;
+    const message =
+      errmsg?.message ||
+      errmsg?.detail ||
+      errmsg?.error ||
+      error?.message ||
+      'Failed to create booking request';
+    showError(t('toast.getBookingRequestFailed'), message);
+    throw new Error(message);
+  }
+};

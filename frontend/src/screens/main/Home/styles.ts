@@ -99,14 +99,26 @@ export const searchInputContainer: ThemedStyle<any> = () => ({
 
 export const searchInputWrapper: ThemedStyle<any> = ({ colors }) => ({
   backgroundColor: colors.surfaceContainerLowest,
-  borderWidth: 0,
+  borderWidth: 1,
 });
 
-export const profileButton: ThemedStyle<any> = ({ colors, spacing }) => ({
+export const profileButton: ThemedStyle<any> = ({ colors }) => ({
   width: moderateScale(44),
   height: moderateScale(44),
   borderRadius: moderateScale(22),
   backgroundColor: colors.primary,
   justifyContent: 'center',
   alignItems: 'center',
+});
+
+export const noDataContainer: ThemedStyle<any> = ({ spacing }) => ({
+  paddingTop: verticalScale(spacing.xl),
+  paddingHorizontal: moderateScale(spacing.sm),
+  paddingBottom: verticalScale(spacing.xl),
+});
+
+export const noDataText: ThemedStyle<any> = ({ colors }) => ({
+  fontSize: moderateScale(16),
+  color: colors.onSurfaceVariant,
+  textAlign: 'center',
 });

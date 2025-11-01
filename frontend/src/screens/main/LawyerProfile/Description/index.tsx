@@ -1,57 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
 import { useAppTheme } from '../../../../theme/theme.provider';
 import * as styles from '../styles';
-import { getLawyerById } from '../../../../services/lawyer';
 import { Lawyer } from '../../../../types/lawyer';
 
-const Description = ({ lawyerId }: { lawyerId: number }) => {
+const Description = ({ lawyer }: { lawyer: Lawyer }) => {
   const { themed } = useAppTheme();
-  const [lawyer, setLawyer] = useState<Lawyer | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchData = async () => {
-      try {
-        const data = await getLawyerById(lawyerId);
-        if (isMounted) setLawyer(data);
-      } catch (e) {
-        // noop
-      }
-    };
-    fetchData();
-    return () => {
-      isMounted = false;
-    };
-  }, [lawyerId]);
-
   return (
     <View style={themed(styles.content)}>
       <View style={themed(styles.infoSection)}>
         <Text style={themed(styles.infoLabel)}>Name:</Text>
-        <Text style={themed(styles.infoValue)}>{lawyer?.name || '-'}</Text>
+        <Text style={themed(styles.infoValue)}>
+          {lawyer?.display_name || '-'}
+        </Text>
       </View>
       <View style={themed(styles.infoSection)}>
         <Text style={themed(styles.infoLabel)}>Experience:</Text>
         <Text style={themed(styles.infoValue)}>
-          {lawyer?.years_experience != null
-            ? `${lawyer.years_experience} years`
+          {lawyer?.years_of_experience != null
+            ? `${lawyer.years_of_experience} years`
             : '-'}
         </Text>
       </View>
-      {!!lawyer?.province && (
+      {!!lawyer?.office_address && (
         <View style={themed(styles.infoSection)}>
           <Text style={themed(styles.infoLabel)}>Province:</Text>
-          <Text style={themed(styles.infoValue)}>{lawyer.province}</Text>
+          <Text style={themed(styles.infoValue)}>{lawyer.office_address}</Text>
         </View>
       )}
 
-      {!!lawyer?.bio && (
+      {!!lawyer?.education && (
         <View style={themed(styles.paragraphSection)}>
           <Text style={themed(styles.paragraphTitle)}>
             Professional Summary
           </Text>
-          <Text style={themed(styles.paragraphText)}>{lawyer.bio}</Text>
+          <Text style={themed(styles.paragraphText)}>{lawyer.education}</Text>
         </View>
       )}
     </View>

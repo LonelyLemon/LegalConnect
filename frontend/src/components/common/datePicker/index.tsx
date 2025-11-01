@@ -14,6 +14,7 @@ interface DatePickerProps {
   error?: string;
   minimumDate?: Date;
   maximumDate?: Date;
+  disabled?: boolean;
 }
 
 const DatePicker = ({
@@ -24,6 +25,7 @@ const DatePicker = ({
   error,
   minimumDate,
   maximumDate,
+  disabled = false,
 }: DatePickerProps) => {
   const [showPicker, setShowPicker] = useState(false);
   const { themed } = useAppTheme();
@@ -57,10 +59,22 @@ const DatePicker = ({
     <View style={themed(styles.container)}>
       <Text style={themed(styles.fieldName)}>{label}</Text>
       <TouchableOpacity
-        style={[themed(styles.input), error && themed(styles.inputError)]}
+        style={[
+          themed(styles.input),
+          error && themed(styles.inputError),
+          disabled && themed(styles.inputDisabled),
+        ]}
         onPress={() => setShowPicker(true)}
+        disabled={disabled}
       >
-        <Text style={themed(styles.dateText)}>{getDisplayDate()}</Text>
+        <Text
+          style={[
+            themed(styles.dateText),
+            disabled && themed(styles.dateTextDisabled),
+          ]}
+        >
+          {getDisplayDate()}
+        </Text>
         {/* <Icon name="calendar-outline" size={20} color="#666" /> */}
       </TouchableOpacity>
       {error && (

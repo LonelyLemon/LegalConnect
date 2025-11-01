@@ -21,7 +21,7 @@ export const backButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginRight: moderateScale(spacing.sm),
 });
 
-export const headerInfo: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+export const headerInfo: ThemedStyle<ViewStyle> = ({}) => ({
   flexDirection: 'row',
   alignItems: 'center',
   flex: 1,
@@ -31,6 +31,16 @@ export const headerAvatar: ThemedStyle<ImageStyle> = () => ({
   width: scale(32),
   height: scale(32),
   borderRadius: scale(16),
+  marginRight: moderateScale(8),
+});
+
+export const avatarPlaceholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: scale(32),
+  height: scale(32),
+  borderRadius: 100,
+  backgroundColor: colors.surfaceVariant,
+  alignItems: 'center',
+  justifyContent: 'center',
   marginRight: moderateScale(8),
 });
 
@@ -87,12 +97,12 @@ export const messageBubble: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   borderRadius: moderateScale(18),
 });
 
-export const myBubble: ThemedStyle<ViewStyle> = ({ colors }) => ({
+export const myBubble: ThemedStyle<ViewStyle> = ({}) => ({
   backgroundColor: '#007AFF',
   borderBottomRightRadius: moderateScale(4),
 });
 
-export const otherBubble: ThemedStyle<ViewStyle> = ({ colors }) => ({
+export const otherBubble: ThemedStyle<ViewStyle> = ({}) => ({
   backgroundColor: '#E5E5EA',
   borderBottomLeftRadius: moderateScale(4),
 });
@@ -137,7 +147,7 @@ export const inputContainer: ThemedStyle<ViewStyle> = ({
 
 export const inputRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: 'row',
-  alignItems: 'flex-end',
+  alignItems: 'center',
   gap: moderateScale(spacing.sm),
 });
 

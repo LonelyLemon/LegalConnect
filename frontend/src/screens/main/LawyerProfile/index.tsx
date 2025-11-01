@@ -17,13 +17,15 @@ import Icon from '@react-native-vector-icons/ionicons';
 import { moderateScale } from 'react-native-size-matters';
 import Description from './Description/index.tsx';
 import Review from './Review/index.tsx';
+import { createNewConversation } from '../../../stores/message.slice.ts';
+import { t } from '../../../i18n';
 
 type TabType = 'description' | 'review' | 'cases';
 
 export default function LawyerProfileScreen({
   route,
 }: {
-  route: RouteProp<{ params: { id: number } }, 'params'>;
+  route: RouteProp<{ params: { id: string } }, 'params'>;
 }) {
   const { id } = route.params;
   const [lawyer, setLawyer] = useState<Lawyer | null>(null);
@@ -35,30 +37,31 @@ export default function LawyerProfileScreen({
   useEffect(() => {
     const fetchLawyer = async () => {
       const response = await dispatch(fetchLawyerById(id));
-      setLawyer(response.payload);
-      console.log('lawyer: ', lawyer);
+      console.log('response: ', response.payload);
+      if (response.payload && typeof response.payload === 'object') {
+        setLawyer(response.payload as Lawyer);
+      }
     };
     fetchLawyer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, id]);
 
   const tabs = [
-    { key: 'description', label: 'Description' },
-    { key: 'review', label: 'Review (30)' },
-    { key: 'cases', label: 'Featured cases' },
+    { key: 'description', label: t('lawyerProfile.description') },
+    { key: 'review', label: t('lawyerProfile.review') },
+    { key: 'cases', label: t('lawyerProfile.featuredCases') },
   ];
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'description':
-        return <Description lawyerId={id} />;
+        return <Description lawyer={lawyer as Lawyer} />;
       case 'review':
         return <Review lawyerId={id} />;
       case 'cases':
         return (
           <View style={themed(styles.content)}>
             <Text style={themed(styles.placeholderText)}>
-              Featured cases will be displayed here
+              {t('lawyerProfile.featuredCasesPlaceholder')}
             </Text>
           </View>
         );
@@ -67,51 +70,127 @@ export default function LawyerProfileScreen({
     }
   };
 
+  const handleChatPress = async () => {
+    try {
+      const response = await dispatch(
+        createNewConversation({ receiverId: lawyer?.user_id || '' }),
+      );
+      console.log('Full response:', JSON.stringify(response, null, 2));
+
+      if (response?.payload) {
+        const payload: any = response.payload;
+        console.log('Payload:', payload);
+
+        // Lấy conversation_id từ response (có thể là top-level hoặc trong participants)
+        const conversationId =
+          payload.id ||
+          payload.conversation_id ||
+          payload.participants?.[0]?.conversation_id;
+
+        console.log('Conversation ID:', conversationId);
+
+        if (!conversationId) {
+          console.error('No conversation ID found in response');
+          return;
+        }
+
+        // Tìm thông tin lawyer từ participants hoặc dùng từ state
+        const lawyerParticipant = payload.participants?.find(
+          (p: any) => p.user_id === lawyer?.user_id,
+        );
+
+        navigation.navigate(MainStackNames.ChatDetail, {
+          chatId: conversationId,
+          name:
+            lawyerParticipant?.user?.username ||
+            lawyer?.display_name ||
+            t('lawyerProfile.lawyer'),
+          avatar: lawyerParticipant?.user?.image_url || lawyer?.image_url || '',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={themed(styles.container)}>
       <Header />
       <View style={themed(styles.HeaderTitle)}>
-        <Image
-          source={{
-            uri: lawyer?.imageUri,
-          }}
-          style={themed(styles.avatar)}
-        />
-        <Text style={themed(styles.name)}>{lawyer?.name}</Text>
-        <Text style={themed(styles.tagline)}>{lawyer?.bio}</Text>
+        {lawyer?.image_url ? (
+          <Image
+            source={{
+              uri: lawyer.image_url,
+            }}
+            style={themed(styles.avatar)}
+          />
+        ) : (
+          <View style={themed(styles.avatar)}>
+            <Icon
+              name="person-circle-outline"
+              size={moderateScale(theme.spacing.xxxxxxxxxl)}
+              color={theme.colors.onPrimary}
+            />
+          </View>
+        )}
+        <Text style={themed(styles.name)}>{lawyer?.display_name}</Text>
+        <Text style={themed(styles.tagline)}>
+          {lawyer?.current_level || lawyer?.education}
+        </Text>
 
         <View style={themed(styles.statsContainer)}>
           <View style={themed(styles.statItem)}>
-            <Text style={themed(styles.statValue)}>{lawyer?.rating_avg} ★</Text>
-            <Text style={themed(styles.statLabel)}>Customer reviews</Text>
+            <Text style={themed(styles.statValue)}>
+              {lawyer?.average_rating
+                ? `${lawyer.average_rating.toFixed(1)} ★`
+                : 'N/A'}
+            </Text>
+            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.customerReviews')}</Text>
           </View>
           <View style={themed(styles.statItem)}>
-            <Text style={themed(styles.statValue)}>{lawyer?.rating_count}</Text>
-            <Text style={themed(styles.statLabel)}>Successful cases</Text>
+            <Text style={themed(styles.statValue)}>-</Text>
+            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.successfulCases')}</Text>
           </View>
           <View style={themed(styles.statItem)}>
             <Text style={themed(styles.statValue)}>
-              {lawyer?.years_experience}
+              {lawyer?.years_of_experience || 0}
             </Text>
-            <Text style={themed(styles.statLabel)}>Years of experience</Text>
+            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.yearsOfExperience')}</Text>
           </View>
         </View>
 
-        <TouchableOpacity
-          style={themed(styles.editButton)}
-          onPress={() => {
-            navigation.navigate(MainStackNames.Booking, {
-              lawyerId: id,
-            });
-          }}
-        >
-          <Text style={themed(styles.editButtonText)}>Order a session</Text>
-          <Icon
-            name="chevron-forward"
-            size={moderateScale(theme.fontSizes.xl)}
-            color={theme.colors.primary}
-          />
-        </TouchableOpacity>
+        <View style={themed(styles.buttonContainer)}>
+          <TouchableOpacity
+            style={themed(styles.secondaryButton)}
+            onPress={() => {
+              handleChatPress();
+            }}
+          >
+            <Icon
+              name="chatbubble-outline"
+              size={moderateScale(theme.fontSizes.lg)}
+              color={theme.colors.onPrimary}
+            />
+            <Text style={themed(styles.secondaryButtonText)}>{t('lawyerProfile.chat')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={themed(styles.primaryButton)}
+            onPress={() => {
+              navigation.navigate(MainStackNames.Schedule, {
+                lawyerId: id,
+                lawyerName: lawyer?.display_name,
+              });
+            }}
+          >
+            <Icon
+              name="calendar-outline"
+              size={moderateScale(theme.fontSizes.lg)}
+              color={theme.colors.primary}
+            />
+            <Text style={themed(styles.primaryButtonText)}>{t('lawyerProfile.book')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={themed(styles.tabContainer)}>

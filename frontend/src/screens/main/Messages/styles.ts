@@ -36,6 +36,15 @@ export const avatar: ThemedStyle<ImageStyle> = () => ({
   borderRadius: scale(22),
 });
 
+export const avatarPlaceholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  width: scale(44),
+  height: scale(44),
+  borderRadius: 100,
+  backgroundColor: colors.surfaceVariant,
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
 export const onlineDot: ThemedStyle<ViewStyle> = ({ colors }) => ({
   position: 'absolute',
   right: 0,
@@ -86,4 +95,11 @@ export const lastMessage: ThemedStyle<TextStyle> = ({ colors, fontSizes }) => ({
 export const ticks: ThemedStyle<TextStyle> = ({ colors }) => ({
   marginLeft: scale(8),
   color: colors.primary,
+});
+
+export const loadingContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: colors.background,
 });

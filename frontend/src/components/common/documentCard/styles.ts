@@ -23,6 +23,8 @@ export const image: ThemedStyle<ImageStyle> = () => ({
 export const placeholder: ThemedStyle<ViewStyle> = ({ colors }) => ({
   flex: 1,
   backgroundColor: colors.surfaceVariant,
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
 export const title: ThemedStyle<TextStyle> = ({ colors, fontSizes }) => ({

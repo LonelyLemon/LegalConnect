@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { colors } from '../../../theme';
-import { fontSizes } from '../../../theme/spacing';
-import { spacing } from '../../../theme/spacing';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
@@ -43,7 +40,7 @@ export default function Input({
   ...props
 }: InputProps) {
   const [hideText, setHideText] = useState(!!secureTextEntry);
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
   return (
     <View
       style={[themed(localStyles.container), themed(styleOverrides?.container)]}
@@ -70,7 +67,7 @@ export default function Input({
           <Ionicons
             name={icon as any}
             size={20}
-            color={error ? colors.error : colors.onSurface}
+            color={error ? theme.colors.error : theme.colors.onSurface}
             style={[
               themed(localStyles.leftIcon),
               themed(styleOverrides?.leftIcon),
@@ -88,7 +85,7 @@ export default function Input({
             themed(localStyles.textInput),
             themed(styleOverrides?.textInput),
           ]}
-          placeholderTextColor={colors.onSurface}
+          placeholderTextColor={theme.colors.onSurfaceVariant}
           {...props}
         />
 
@@ -104,7 +101,7 @@ export default function Input({
             <Ionicons
               name={hideText ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color={colors.onSurface}
+              color={theme.colors.onSurface}
             />
           </Pressable>
         ) : null}
@@ -124,45 +121,44 @@ export default function Input({
   );
 }
 
-const localStyles = StyleSheet.create({
-  container: {
+const localStyles = {
+  container: (_theme: any) => ({
     width: '100%',
-  },
-  fieldName: {
-    marginBottom: scale(spacing.xs),
-    color: colors.onSurface,
-    fontSize: moderateScale(fontSizes.md),
-    fontWeight: '600',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: scale(spacing.xxxxs),
-    borderColor: colors.outline,
-    borderRadius: scale(spacing.sm),
-    backgroundColor: colors.surfaceContainer,
-    // height: spacing.xxxxxl,
-    paddingHorizontal: scale(spacing.md),
-    paddingVertical: verticalScale(spacing.xs),
-  },
-  inputWrapperError: {
-    borderColor: colors.error,
-  },
-  leftIcon: {
-    marginRight: scale(spacing.sm),
-  },
-  rightIcon: {
-    marginLeft: scale(spacing.sm),
-  },
-  textInput: {
+  }),
+  fieldName: (theme: any) => ({
+    marginBottom: scale(theme.spacing.xs),
+    color: theme.colors.onSurface,
+    fontSize: moderateScale(theme.fontSizes.md),
+    fontWeight: '600' as const,
+  }),
+  inputWrapper: (theme: any) => ({
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    borderWidth: scale(theme.spacing.xxxxs),
+    borderColor: theme.colors.outline,
+    borderRadius: scale(theme.spacing.sm),
+    backgroundColor: theme.colors.surfaceContainer,
+    paddingHorizontal: scale(theme.spacing.md),
+    paddingVertical: verticalScale(theme.spacing.xs),
+  }),
+  inputWrapperError: (theme: any) => ({
+    borderColor: theme.colors.error,
+  }),
+  leftIcon: (theme: any) => ({
+    marginRight: scale(theme.spacing.sm),
+  }),
+  rightIcon: (theme: any) => ({
+    marginLeft: scale(theme.spacing.sm),
+  }),
+  textInput: (theme: any) => ({
     flex: 1,
-    color: colors.onSurface,
-    fontSize: moderateScale(fontSizes.md),
+    color: theme.colors.onSurface,
+    fontSize: moderateScale(theme.fontSizes.md),
     paddingVertical: 0,
-  },
-  errorText: {
-    marginTop: scale(spacing.xs),
-    color: colors.error,
-    fontSize: moderateScale(fontSizes.sm),
-  },
-});
+  }),
+  errorText: (theme: any) => ({
+    marginTop: scale(theme.spacing.xs),
+    color: theme.colors.error,
+    fontSize: moderateScale(theme.fontSizes.sm),
+  }),
+};
