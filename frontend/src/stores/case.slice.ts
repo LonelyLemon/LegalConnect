@@ -1,10 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { CaseState, Case } from '../types/case';
-import { getUserCase } from '../services/case';
+import { getPendingCase, getUserCase } from '../services/case';
 import { AxiosError } from 'axios';
 
 const initialState: CaseState = {
   cases: [],
+  pendingCase: [],
   isLoading: false,
   error: null,
   currentCase: null,
@@ -15,6 +16,28 @@ export const fetchUserCases = createAsyncThunk(
   async (_, thunkApi) => {
     try {
       const response = await getUserCase();
+      return response;
+    } catch (error: any) {
+      if (error instanceof AxiosError) {
+        const data: any = error.response?.data;
+        const message =
+          data?.message ||
+          data?.detail ||
+          data?.error ||
+          error.message ||
+          'Fetch cases failed';
+        return thunkApi.rejectWithValue(message);
+      }
+      return thunkApi.rejectWithValue(error?.message || 'Fetch cases failed');
+    }
+  },
+);
+
+export const fetchPendingCase = createAsyncThunk(
+  'case/fetchPendingCases',
+  async (_, thunkApi) => {
+    try {
+      const response = await getPendingCase();
       return response;
     } catch (error: any) {
       if (error instanceof AxiosError) {
@@ -63,6 +86,19 @@ export const caseSlice = createSlice({
       .addCase(fetchUserCases.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(fetchPendingCase.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchPendingCase.fulfilled, (state, action) => {
+        state.pendingCase = action.payload;
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(fetchPendingCase.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
@@ -79,3 +115,5 @@ export const selectCurrentCase = (state: { case: CaseState }) =>
   state.case.currentCase;
 export const selectCaseById = (state: { case: CaseState }, id: string) =>
   state.case.cases.find(c => c.id === id);
+export const selectPendingCases = (state: { case: CaseState }) =>
+  state.case.pendingCase;

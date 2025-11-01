@@ -199,7 +199,8 @@ const vi: Translations = {
   },
   chatbot: {
     title: 'Trợ lý AI Pháp lý',
-    emptyMessage: 'Xin chào! Tôi là trợ lý AI pháp lý.\nHãy đặt câu hỏi về luật pháp Việt Nam.',
+    emptyMessage:
+      'Xin chào! Tôi là trợ lý AI pháp lý.\nHãy đặt câu hỏi về luật pháp Việt Nam.',
     placeholder: 'Đặt câu hỏi về luật pháp...',
     confidence: 'tin cậy',
   },
@@ -219,16 +220,19 @@ const vi: Translations = {
   },
   caseDetail: {
     description: 'Mô tả',
+    requestDetails: 'Chi tiết yêu cầu',
     caseInformation: 'Thông tin vụ án',
+    requestInformation: 'Thông tin yêu cầu',
     startedAt: 'Bắt đầu',
     expectedEnd: 'Kết thúc dự kiến',
+    desiredStartTime: 'Thời gian bắt đầu mong muốn',
+    desiredEndTime: 'Thời gian kết thúc mong muốn',
     lastUpdated: 'Cập nhật lần cuối',
     lawyersNote: 'Ghi chú của luật sư',
     yourNote: 'Ghi chú của bạn',
     attachments: 'Tệp đính kèm',
     attachmentNumber: 'Tệp đính kèm {{number}}',
     contactLawyer: 'Liên hệ luật sư',
-    viewDocuments: 'Xem tài liệu',
   },
   schedule: {
     title: 'Lịch trình',
@@ -242,10 +246,12 @@ const vi: Translations = {
     hours: 'giờ',
     selectSlot: 'Chọn khung giờ này',
     noAvailableSlots: 'Không có khung giờ khả dụng',
-    noAvailableSlotsMessage: 'Luật sư này hiện không có khung giờ khả dụng. Vui lòng quay lại sau hoặc liên hệ trực tiếp.',
+    noAvailableSlotsMessage:
+      'Luật sư này hiện không có khung giờ khả dụng. Vui lòng quay lại sau hoặc liên hệ trực tiếp.',
     loadingSchedule: 'Đang tải lịch trình...',
     availableTimeSlots: 'Khung giờ khả dụng',
-    selectTimeSlot: 'Chọn khung giờ để đặt lịch tư vấn (Thời gian hiển thị theo UTC)',
+    selectTimeSlot:
+      'Chọn khung giờ để đặt lịch tư vấn (Thời gian hiển thị theo UTC)',
   },
   toast: {
     loginSuccessful: 'Đăng nhập thành công',
@@ -290,7 +296,8 @@ const vi: Translations = {
     displayName: 'Tên hiển thị',
     enterDocumentName: 'Nhập tên tài liệu',
     pdfDocument: 'Tài liệu PDF',
-    pdfDocumentOptional: 'Tài liệu PDF (Tùy chọn - để trống để giữ file hiện tại)',
+    pdfDocumentOptional:
+      'Tài liệu PDF (Tùy chọn - để trống để giữ file hiện tại)',
     currentFile: 'File hiện tại',
     displayNameRequired: 'Tên hiển thị là bắt buộc',
     displayNameLength: 'Tên hiển thị phải có từ 1-255 ký tự',

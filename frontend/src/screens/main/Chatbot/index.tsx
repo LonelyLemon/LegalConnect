@@ -85,7 +85,7 @@ function MessageItemComponent({ item }: { item: ChatbotMessage }) {
           <View style={themed(styles.linksContainer)}>
             {item.links.map((link, index) => (
               <TouchableOpacity
-                key={index}
+                key={`${item.id}-link-${index}-${link}`}
                 onPress={() => Linking.openURL(link)}
               >
                 <Text style={themed(styles.linkText)} numberOfLines={1}>
@@ -101,7 +101,10 @@ function MessageItemComponent({ item }: { item: ChatbotMessage }) {
           <View style={themed(styles.suggestionsContainer)}>
             {item.suggestions.slice(0, 3).map((suggestion, index) => (
               <TouchableOpacity
-                key={index}
+                key={`${item.id}-suggestion-${index}-${suggestion.substring(
+                  0,
+                  20,
+                )}`}
                 style={themed(styles.suggestionChip)}
                 onPress={() => {
                   // Handle suggestion click - send it as a new message
@@ -175,9 +178,7 @@ export default function ChatbotScreen() {
         size={moderateScale(80)}
         color={theme.colors.onSurfaceVariant}
       />
-      <Text style={themed(styles.emptyText)}>
-        {t('chatbot.emptyMessage')}
-      </Text>
+      <Text style={themed(styles.emptyText)}>{t('chatbot.emptyMessage')}</Text>
     </View>
   );
 
