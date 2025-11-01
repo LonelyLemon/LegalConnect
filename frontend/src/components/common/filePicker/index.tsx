@@ -12,7 +12,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { scale } from 'react-native-size-matters';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import React from 'react';
@@ -55,6 +55,7 @@ export default function FilePicker({
   styles: styleOverride,
 }: FilePickerProps) {
   const { theme, themed } = useAppTheme();
+  const { t } = useTranslation();
 
   const pickFile = async () => {
     try {
@@ -105,15 +106,15 @@ export default function FilePicker({
 
   const onDeletePress = () => {
     Alert.alert(
-      t('common_mobile:delete_file'),
-      t('common_mobile:delete_file_confirmation'),
+      t('common.deleteFile'),
+      t('common.deleteFileConfirmation'),
       [
         {
-          text: t('common_mobile:cancel'),
+          text: t('common.cancel'),
           style: 'cancel',
         },
         {
-          text: t('common_mobile:delete'),
+          text: t('common.delete'),
           onPress: () => {
             if (mode === 'single') {
               onChange(null);
@@ -143,7 +144,7 @@ export default function FilePicker({
           <Text
             style={[themed(styles.chooseFileText), styleOverride?.buttonText]}
           >
-            {t('common_mobile:choose_file')}
+            {t('common.chooseFile')}
           </Text>
         </TouchableOpacity>
         {!value ||

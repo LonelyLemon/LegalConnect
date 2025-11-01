@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { showError } from '../types/toast';
+import { t } from '../i18n';
 
 export const getPopularLawyers = async () => {
   try {
@@ -15,7 +16,7 @@ export const getPopularLawyers = async () => {
       data?.error ||
       error?.message ||
       'Fetch lawyers failed';
-    showError('Failed to load lawyers', message);
+    showError(t('toast.loadLawyersFailed'), message);
     throw new Error(message);
   }
 };
@@ -32,7 +33,7 @@ export const getLawyerById = async (id: string) => {
       data?.error ||
       error?.message ||
       'Fetch lawyer failed';
-    showError('Failed to load lawyer', message);
+    showError(t('toast.loadLawyerFailed'), message);
     throw new Error(message);
   }
 };
@@ -49,7 +50,7 @@ export const getLawyerByCategory = async (category: string) => {
       data?.error ||
       error?.message ||
       'Fetch lawyers by category failed';
-    showError('Failed to load lawyers', message);
+    showError(t('toast.loadLawyersFailed'), message);
     throw new Error(message);
   }
 };
@@ -66,7 +67,7 @@ export const getLawyerByPage = async (page: number) => {
       data?.error ||
       error?.message ||
       'Fetch lawyers by page failed';
-    showError('Failed to load lawyers', message);
+    showError(t('toast.loadLawyersFailed'), message);
     throw new Error(message);
   }
 };
@@ -83,7 +84,7 @@ export const getLawyerRatings = async (lawyerId: string) => {
       data?.error ||
       error?.message ||
       'Fetch ratings failed';
-    showError('Failed to load ratings', message);
+    showError(t('toast.loadRatingsFailed'), message);
     throw new Error(message);
   }
 };
@@ -100,7 +101,7 @@ export const getLawyerSchedule = async (lawyerId: string) => {
       data?.error ||
       error?.message ||
       'Fetch ratings failed';
-    showError('Failed to load ratings', message);
+    showError(t('toast.loadRatingsFailed'), message);
     throw new Error(message);
   }
 };

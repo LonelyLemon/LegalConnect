@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { showError } from '../types/toast';
+import { t } from '../i18n';
 
 export interface BookingRequestPayload {
   lawyer_id: string;
@@ -74,7 +75,7 @@ export const getPersonalBookingRequest = async (): Promise<any> => {
       errmsg?.error ||
       error?.message ||
       'Failed to create booking request';
-    showError('Failed to get personal booking request', message);
+    showError(t('toast.getBookingRequestFailed'), message);
     throw new Error(message);
   }
 };

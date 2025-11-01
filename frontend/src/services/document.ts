@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { showError } from '../types/toast';
 import { File } from '../components/common/filePicker';
+import { t } from '../i18n';
 export const getPopularDocuments = async () => {
   try {
     const page = 1;
@@ -18,7 +19,7 @@ export const getPopularDocuments = async () => {
       data?.error ||
       error?.message ||
       'Fetch documents failed';
-    showError('Failed to load documents', message);
+    showError(t('toast.loadDocumentsFailed'), message);
     throw new Error(message);
   }
 };
@@ -35,7 +36,7 @@ export const getDocumentById = async (id: string) => {
       data?.error ||
       error?.message ||
       'Fetch document failed';
-    showError('Failed to load document', message);
+    showError(t('toast.loadDocumentFailed'), message);
     throw new Error(message);
   }
 };
@@ -54,7 +55,7 @@ export const getDocumentByCategory = async (category: string) => {
       data?.error ||
       error?.message ||
       'Fetch documents by category failed';
-    showError('Failed to load documents', message);
+    showError(t('toast.loadDocumentsFailed'), message);
     throw new Error(message);
   }
 };
@@ -73,7 +74,7 @@ export const getDocumentByPage = async (page: number) => {
       data?.error ||
       error?.message ||
       'Fetch documents by page failed';
-    showError('Failed to load documents', message);
+    showError(t('toast.loadDocumentsFailed'), message);
     throw new Error(message);
   }
 };
@@ -90,7 +91,7 @@ export const getAllDocuments = async () => {
       data?.error ||
       error?.message ||
       'Fetch all documents failed';
-    showError('Failed to load documents', message);
+    showError(t('toast.loadDocumentsFailed'), message);
     throw new Error(message);
   }
 };
@@ -122,7 +123,7 @@ export const createDocument = async ({
       data?.error ||
       error?.message ||
       'Create document failed';
-    showError('Failed to create document', message);
+    showError(t('toast.createDocumentFailed'), message);
     throw new Error(message);
   }
 };
@@ -165,7 +166,7 @@ export const updateDocument = async (
       data?.error ||
       error?.message ||
       'Update document failed';
-    showError('Failed to update document', message);
+    showError(t('toast.updateDocumentFailed'), message);
     throw new Error(message);
   }
 };
@@ -182,7 +183,7 @@ export const deleteDocument = async (id: string) => {
       data?.error ||
       error?.message ||
       'Delete document failed';
-    showError('Failed to delete document', message);
+    showError(t('toast.deleteDocumentFailed'), message);
     throw new Error(message);
   }
 };

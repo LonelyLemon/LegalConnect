@@ -13,21 +13,23 @@ import { useNavigation } from '@react-navigation/native';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import Header from '../../../components/layout/header';
+import { useTranslation } from 'react-i18next';
 
 export default function ResetSuccessScreen() {
   const navigation = useNavigation<any>();
   const { themed } = useAppTheme();
+  const { t } = useTranslation();
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Password reset" />
+      <Header title={t('auth.resetSuccess.title')} />
       <ScrollView contentContainerStyle={themed(styles.scrollContainer)}>
         <View style={themed(styles.formContainer)}>
           <TouchableOpacity
             style={themed(styles.primaryButton)}
             onPress={() => navigation.navigate('SetNewPassword')}
           >
-            <Text style={themed(styles.primaryButtonText)}>{'Confirm'}</Text>
+            <Text style={themed(styles.primaryButtonText)}>{t('auth.resetSuccess.confirm')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

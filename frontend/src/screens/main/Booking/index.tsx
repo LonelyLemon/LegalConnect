@@ -148,7 +148,7 @@ export default function BookingScreen({
     {
       id: 'desired_start_time',
       name: 'desired_start_time',
-      label: 'Start Date',
+      label: t('booking.startDate'),
       type: 'date',
       error: errors?.desired_start_time?.message,
       rules: {
@@ -170,7 +170,7 @@ export default function BookingScreen({
     {
       id: 'desired_end_time',
       name: 'desired_end_time',
-      label: 'End Date',
+      label: t('booking.endDate'),
       type: 'date',
       error: errors?.desired_end_time?.message,
       rules: {
@@ -195,7 +195,7 @@ export default function BookingScreen({
     {
       id: 'attachment',
       name: 'attachment',
-      label: 'Attachment',
+      label: t('booking.attachment'),
       type: 'file',
       error: errors?.attachment?.message,
       rules: {
@@ -218,14 +218,14 @@ export default function BookingScreen({
         desired_start_time: dayjs(data.desired_start_time).toISOString(),
         desired_end_time: dayjs(data.desired_end_time).toISOString(),
       });
-      showSuccess('Booking request created successfully');
+      showSuccess(t('toast.bookingCreated'));
       navigation.navigate(MainStackNames.HomeTabs);
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
         'Failed to create booking request';
-      showError('Failed to create booking request', message);
+      showError(t('toast.bookingFailed'), message);
     } finally {
       setLoading(false);
     }
@@ -244,7 +244,7 @@ export default function BookingScreen({
 
   return (
     <SafeAreaView style={themed(styles.container)}>
-      <Header title="Book a Session" showBackButton={true} />
+      <Header title={t('booking.title')} showBackButton={true} />
       <ScrollView
         style={themed(styles.scrollContainer)}
         contentContainerStyle={themed(styles.contentContainer)}

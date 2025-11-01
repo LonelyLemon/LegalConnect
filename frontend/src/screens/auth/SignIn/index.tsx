@@ -28,13 +28,14 @@ import ControllerForm from '../../../components/common/controllerForm';
 import { useAppTheme } from '../../../theme/theme.provider';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { verticalScale } from 'react-native-size-matters';
-import { t } from '../../../i18n';
+import { useTranslation } from 'react-i18next';
 import Header from '../../../components/layout/header';
 
 export default function SignInScreen() {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
+  const { t } = useTranslation();
   const control = useForm<FormLogin>({
     defaultValues: { email: 'user1@example.com', password: 'string' },
   });

@@ -10,12 +10,14 @@ import { NavigationProp } from '@react-navigation/native';
 import CreateDocumentModal from './CreateDocumentModal';
 import { useAppDispatch } from '../../../redux/hook';
 import { fetchDocuments } from '../../../stores/document.slice';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminDashboardScreen() {
   const { themed, theme } = useAppTheme();
   const navigation = useNavigation<NavigationProp<any>>();
   const [showModal, setShowModal] = useState(false);
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const handleProfilePress = () => {
     navigation.navigate('Setting');
   };
@@ -24,7 +26,7 @@ export default function AdminDashboardScreen() {
     <SafeAreaView style={themed(styles.simpleContainer)}>
       <View style={themed(styles.headerContainer)}>
         <View style={themed(styles.searchContainer)}>
-          <Text style={themed(styles.simpleTitle)}>Admin – Dashboard</Text>
+          <Text style={themed(styles.simpleTitle)}>{t('admin.dashboard')}</Text>
         </View>
         <TouchableOpacity
           onPress={handleProfilePress}
@@ -39,29 +41,29 @@ export default function AdminDashboardScreen() {
       </View>
       <ScrollView>
         <View style={themed(styles.simpleCard)}>
-          <Text style={themed(styles.simpleCardTitle)}>Approval Requests</Text>
+          <Text style={themed(styles.simpleCardTitle)}>{t('admin.approvalRequests')}</Text>
           <Text style={themed(styles.simpleLargeNumber)}>3</Text>
           <TouchableOpacity style={themed(styles.simpleButton)}>
-            <Text style={themed(styles.simpleButtonText)}>View Pending</Text>
+            <Text style={themed(styles.simpleButtonText)}>{t('admin.viewPending')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Document Management Card */}
         <View style={themed(styles.simpleCard)}>
           <Text style={themed(styles.simpleCardTitle)}>
-            Document Management
+            {t('admin.documentManagement')}
           </Text>
           <TouchableOpacity
             style={themed(styles.simpleButton)}
             onPress={() => setShowModal(true)}
           >
-            <Text style={themed(styles.simpleButtonText)}>Create Document</Text>
+            <Text style={themed(styles.simpleButtonText)}>{t('admin.createDocument')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={themed(styles.simpleButton)}
             onPress={() => navigation.navigate('DocumentList')}
           >
-            <Text style={themed(styles.simpleButtonText)}>View Documents</Text>
+            <Text style={themed(styles.simpleButtonText)}>{t('admin.viewDocuments')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -13,6 +13,7 @@ import FilePicker, {
 } from '../../../../components/common/filePicker';
 import { showError, showSuccess } from '../../../../types/toast';
 import * as styles from './styles';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch } from '../../../../redux/hook';
 import { addDocument, updateDoc } from '../../../../stores/document.slice';
 import { Document } from '../../../../types/document';
@@ -28,6 +29,7 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
   const { visible, onClose, onSuccess, document } = props;
   const { themed, theme } = useAppTheme();
   const isEditMode = !!document;
+  const { t } = useTranslation();
 
   const [displayName, setDisplayName] = useState('');
   const [file, setFileState] = useState<PickedFile | null>(null);
@@ -48,24 +50,24 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
   }, [document, visible]);
   const validateForm = () => {
     if (!displayName.trim()) {
-      setError('Display name is required');
+      setError(t('admin.displayNameRequired'));
       return false;
     }
     if (displayName.length > 255 || displayName.length < 1) {
-      setError('Display name must be 1-255 characters');
+      setError(t('admin.displayNameLength'));
       return false;
     }
 
     // Khi tạo mới: bắt buộc phải có file
     // Khi edit: file là optional (nếu không đổi file thì giữ nguyên)
     if (!isEditMode && !file) {
-      setError('Please select a PDF file');
+      setError(t('admin.selectPdfFile'));
       return false;
     }
 
     // Nếu có chọn file mới thì validate
     if (file && file.type && !file.type.includes('pdf')) {
-      setError('Only PDF files are allowed');
+      setError(t('admin.onlyPdfAllowed'));
       return false;
     }
 
@@ -88,17 +90,17 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
             document: file ? (file as unknown as File) : undefined, // Chỉ gửi file nếu có chọn file mới
           }),
         ).unwrap();
-        showSuccess('Document updated successfully!');
+        showSuccess(t('toast.updateDocumentSuccessful'));
       } else {
         // Create mode: add new document
         if (!file) {
-          setError('Please select a PDF file');
+          setError(t('admin.selectPdfFile'));
           return;
         }
         await dispatch(
           addDocument({ title: displayName, document: file }),
         ).unwrap();
-        showSuccess('Document created successfully!');
+        showSuccess(t('toast.createDocumentSuccessful'));
       }
 
       setDisplayName('');
@@ -110,7 +112,7 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
         err?.response?.data?.message ||
         err.message ||
         `Error ${isEditMode ? 'updating' : 'uploading'} document`;
-      showError(`${isEditMode ? 'Update' : 'Upload'} failed`, message);
+      showError(t('toast.uploadFailed'), message);
       setError(message);
     } finally {
       setLoading(false);
@@ -129,12 +131,12 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
       <View style={themed(styles.modalOverlay)}>
         <View style={themed(styles.modalBox)}>
           <Text style={themed(styles.modalTitle)}>
-            {isEditMode ? 'Edit document' : 'Create a new document'}
+            {isEditMode ? t('admin.editDocument') : t('admin.createNewDocument')}
           </Text>
 
-          <Text style={themed(styles.fieldLabel)}>Display Name *</Text>
+          <Text style={themed(styles.fieldLabel)}>{t('admin.displayName')} *</Text>
           <TextInput
-            placeholder="Enter document name"
+            placeholder={t('admin.enterDocumentName')}
             value={displayName}
             onChangeText={setDisplayName}
             style={themed(styles.input)}
@@ -146,16 +148,14 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
             fileType="file"
             value={file}
             onChange={v => setFileState(v as PickedFile | null)}
-            label={`PDF Document ${
-              isEditMode ? '(Optional - leave empty to keep current file)' : '*'
-            }`}
+            label={isEditMode ? t('admin.pdfDocumentOptional') : `${t('admin.pdfDocument')} *`}
             required={!isEditMode}
             error={error && !file && !isEditMode ? error : undefined}
           />
 
           {isEditMode && document?.file_url && !file && (
             <Text style={themed(styles.fieldLabel)}>
-              Current file: {document.original_filename || 'Document.pdf'}
+              {t('admin.currentFile')}: {document.original_filename || 'Document.pdf'}
             </Text>
           )}
 
@@ -166,7 +166,7 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
               onPress={resetAndClose}
               style={themed(styles.cancelButton)}
             >
-              <Text style={themed(styles.cancelButtonText)}>Cancel</Text>
+              <Text style={themed(styles.cancelButtonText)}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onSubmit}
@@ -180,7 +180,7 @@ export default function CreateDocumentModal(props: CreateDocumentModalProps) {
                 />
               ) : (
                 <Text style={themed(styles.submitBtnText)}>
-                  {isEditMode ? 'Update' : 'Submit'}
+                  {isEditMode ? t('admin.update') : t('admin.submit')}
                 </Text>
               )}
             </TouchableOpacity>

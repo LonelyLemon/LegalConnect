@@ -2,6 +2,7 @@ import envConfig from '../config/env';
 import { FormLogin, FormSignUp } from '../types/auth';
 import axios from 'axios';
 import { showError, showSuccess } from '../types/toast';
+import { t } from '../i18n';
 
 export const signIn = async (data: FormLogin) => {
   const formData = new FormData();
@@ -17,7 +18,7 @@ export const signIn = async (data: FormLogin) => {
     if (response.data?.status === 'error') {
       throw new Error(response.data?.message || 'Login failed');
     }
-    showSuccess('Login successful');
+    showSuccess(t('toast.loginSuccessful'));
     return payload;
   } catch (err: any) {
     const errmsg = err?.response?.data;
@@ -27,7 +28,7 @@ export const signIn = async (data: FormLogin) => {
       errmsg?.error ||
       err?.message ||
       'Login failed';
-    showError('Failed to login', message);
+    showError(t('toast.loginFailed'), message);
     throw new Error(message);
   }
 };
@@ -48,7 +49,7 @@ export const signUp = async (data: FormSignUp) => {
     if (payload?.status === 'error') {
       throw new Error(payload?.message || 'Sign up failed');
     }
-    showSuccess('Sign up successful');
+    showSuccess(t('toast.signUpSuccessful'));
     return payload;
   } catch (err: any) {
     const errmsg = err?.response?.data;
@@ -58,7 +59,7 @@ export const signUp = async (data: FormSignUp) => {
       errmsg?.error ||
       err?.message ||
       'Sign up failed';
-    showError('Failed to sign up', message);
+    showError(t('toast.signUpFailed'), message);
     throw new Error(message);
   }
 };
@@ -78,7 +79,7 @@ export const fetchUserInfo = async () => {
       errmsg?.error ||
       error?.message ||
       'Fetch user info failed';
-    showError('Failed to fetch user info', message);
+    showError(t('toast.fetchUserInfoFailed'), message);
     throw error;
   }
 };
@@ -96,7 +97,7 @@ export const updateUserInfo = async (data: any) => {
       headers: { 'Content-Type': 'application/json' },
       baseURL: envConfig.baseUrl,
     });
-    showSuccess('Update user info successful');
+    showSuccess(t('toast.updateUserInfoSuccessful'));
     return response?.data?.data ?? response?.data;
   } catch (error: any) {
     console.log('error update user info: ', error);
@@ -107,7 +108,7 @@ export const updateUserInfo = async (data: any) => {
       errmsg?.error ||
       error?.message ||
       'Update user info failed';
-    showError('Failed to update user info', message);
+    showError(t('toast.updateUserInfoFailed'), message);
     throw error;
   }
 };

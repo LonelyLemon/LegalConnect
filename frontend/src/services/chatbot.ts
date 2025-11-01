@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { LegalAIQueryRequest, LegalAIResponse } from '../types/chatbot';
 import { showError } from '../types/toast';
+import { t } from '../i18n';
 
 export const sendChatbotMessage = async (
   question: string,
@@ -26,7 +27,7 @@ export const sendChatbotMessage = async (
       data?.error ||
       error?.message ||
       'Failed to send message';
-    showError('Chatbot Error', message);
+    showError(t('toast.chatbotError'), message);
     throw new Error(message);
   }
 };

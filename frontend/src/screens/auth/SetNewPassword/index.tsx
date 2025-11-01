@@ -16,13 +16,14 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
-import { t } from '../../../i18n';
+import { useTranslation } from 'react-i18next';
 
 type FormNewPass = { password: string; repassword: string };
 
 export default function SetNewPasswordScreen() {
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
+  const { t } = useTranslation();
   const control = useForm<FormNewPass>({
     defaultValues: { password: '', repassword: '' },
   });

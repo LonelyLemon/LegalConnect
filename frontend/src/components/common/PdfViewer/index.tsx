@@ -8,6 +8,7 @@ import Header from '../../layout/header';
 import * as styles from './styles';
 import RNFS from 'react-native-fs';
 import { showError } from '../../../types/toast';
+import { t } from '../../../i18n';
 export default function PdfViewerScreen() {
   const route = useRoute<any>();
   const { themed, theme } = useAppTheme();
@@ -50,7 +51,7 @@ export default function PdfViewerScreen() {
       } catch (e: any) {
         if (!cancelled) {
           setLocalUri(undefined);
-          showError('PDF load failed', e?.message || 'Unable to download PDF');
+          showError(t('toast.pdfLoadFailed'), e?.message || t('toast.pdfDownloadFailed'));
         }
       } finally {
         if (!cancelled) setDownloading(false);
@@ -78,7 +79,7 @@ export default function PdfViewerScreen() {
               const msg = String(err?.message || err || 'Unknown error');
               // Bỏ qua lỗi nền khi file vẫn render được
               if (!loaded && !/IllegalState/i.test(msg)) {
-                showError('PDF render error', msg);
+                showError(t('toast.pdfRenderError'), msg);
               }
             }}
             renderActivityIndicator={() => (

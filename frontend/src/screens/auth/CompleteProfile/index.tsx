@@ -7,7 +7,7 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
 import ControllerForm from '../../../components/common/controllerForm';
 import Header from '../../../components/layout/header';
-import { t } from '../../../i18n';
+import { useTranslation } from 'react-i18next';
 // @ts-ignore - React Native image module resolution
 import AvatarPlaceholder from '../../../assets/imgs/Logo.png';
 import { useAppDispatch, useAppSelector } from '../../../redux/hook.ts';
@@ -27,6 +27,7 @@ type FormProfile = {
 
 export default function CompleteProfileScreen({}) {
   const user = useAppSelector(selectUser);
+  const { t } = useTranslation();
 
   const userData: FormProfile = {
     username: user?.username ?? '',

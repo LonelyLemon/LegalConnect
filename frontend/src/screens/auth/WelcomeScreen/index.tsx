@@ -5,11 +5,12 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles';
 import Logo from '../../../assets/imgs/Logo.png'; // logo bạn đã có
 import { useNavigation } from '@react-navigation/native';
-import { t } from '../../../i18n';
+import { useTranslation } from 'react-i18next';
 
 export default function WelcomeScreen() {
   const { themed } = useAppTheme();
   const navigation = useNavigation<any>();
+  const { t } = useTranslation();
 
   const handleCreateAccount = () => {
     navigation.navigate('SignUp');

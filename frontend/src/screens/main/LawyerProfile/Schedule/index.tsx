@@ -23,6 +23,7 @@ import { fetchLawyerSchedule } from '../../../../stores/lawyer.slices';
 import { useAppDispatch } from '../../../../redux/hook';
 import { useSelector } from 'react-redux';
 import { LawyerState } from '../../../../types/lawyer';
+import { useTranslation } from 'react-i18next';
 
 export default function ScheduleScreen({
   route,
@@ -40,6 +41,7 @@ export default function ScheduleScreen({
   const { isLoading } = useSelector(
     (state: { lawyer: LawyerState }) => state.lawyer,
   );
+  const { t } = useTranslation();
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
@@ -118,7 +120,7 @@ export default function ScheduleScreen({
             </Text>
           </View>
           <View style={themed(styles.statusBadge)}>
-            <Text style={themed(styles.statusText)}>Available</Text>
+            <Text style={themed(styles.statusText)}>{t('schedule.available')}</Text>
           </View>
         </View>
 
@@ -129,7 +131,7 @@ export default function ScheduleScreen({
               size={moderateScale(18)}
               color={theme.colors.onSurfaceVariant}
             />
-            <Text style={themed(styles.timeLabel)}>Start:</Text>
+            <Text style={themed(styles.timeLabel)}>{t('schedule.start')}:</Text>
             <Text style={themed(styles.timeValue)}>
               {formatTime(item.start_time)}
             </Text>
@@ -145,7 +147,7 @@ export default function ScheduleScreen({
               size={moderateScale(18)}
               color={theme.colors.onSurfaceVariant}
             />
-            <Text style={themed(styles.timeLabel)}>End:</Text>
+            <Text style={themed(styles.timeLabel)}>{t('schedule.end')}:</Text>
             <Text style={themed(styles.timeValue)}>
               {formatTime(item.end_time)}
             </Text>
@@ -159,12 +161,12 @@ export default function ScheduleScreen({
             color={theme.colors.onSurfaceVariant}
           />
           <Text style={themed(styles.durationText)}>
-            Duration: {durationHours} {durationHours === 1 ? 'hour' : 'hours'}
+            {t('schedule.duration')}: {durationHours} {durationHours === 1 ? t('schedule.hour') : t('schedule.hours')}
           </Text>
         </View>
 
         <View style={themed(styles.selectButton)}>
-          <Text style={themed(styles.selectButtonText)}>Select this slot</Text>
+          <Text style={themed(styles.selectButtonText)}>{t('schedule.selectSlot')}</Text>
           <Icon
             name="chevron-forward"
             size={moderateScale(20)}
@@ -182,10 +184,9 @@ export default function ScheduleScreen({
         size={moderateScale(64)}
         color={theme.colors.onSurfaceVariant}
       />
-      <Text style={themed(styles.emptyTitle)}>No Available Slots</Text>
+      <Text style={themed(styles.emptyTitle)}>{t('schedule.noAvailableSlots')}</Text>
       <Text style={themed(styles.emptyMessage)}>
-        This lawyer has no available time slots at the moment. Please check back
-        later or contact them directly.
+        {t('schedule.noAvailableSlotsMessage')}
       </Text>
     </View>
   );
@@ -194,12 +195,12 @@ export default function ScheduleScreen({
     return (
       <SafeAreaView style={themed(styles.container)}>
         <Header
-          title={lawyerName ? `${lawyerName}'s Schedule` : 'Schedule'}
+          title={lawyerName ? t('schedule.lawyerSchedule', { lawyerName }) : t('schedule.title')}
           showBackButton={true}
         />
         <View style={themed(styles.loadingContainer)}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={themed(styles.loadingText)}>Loading schedule...</Text>
+          <Text style={themed(styles.loadingText)}>{t('schedule.loadingSchedule')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -208,17 +209,17 @@ export default function ScheduleScreen({
   return (
     <SafeAreaView style={themed(styles.container)}>
       <Header
-        title={lawyerName ? `${lawyerName}'s Schedule` : 'Available Schedule'}
+        title={lawyerName ? t('schedule.lawyerSchedule', { lawyerName }) : t('schedule.availableSchedule')}
         showBackButton={true}
       />
       <View style={themed(styles.content)}>
         {schedules.length > 0 && (
           <View style={themed(styles.headerInfo)}>
             <Text style={themed(styles.headerTitle)}>
-              Available Time Slots ({schedules.length})
+              {t('schedule.availableTimeSlots')} ({schedules.length})
             </Text>
             <Text style={themed(styles.headerSubtitle)}>
-              Select a time slot to book a consultation (Times shown in UTC)
+              {t('schedule.selectTimeSlot')}
             </Text>
           </View>
         )}

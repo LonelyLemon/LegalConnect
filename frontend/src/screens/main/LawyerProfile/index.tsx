@@ -104,7 +104,7 @@ export default function LawyerProfileScreen({
           name:
             lawyerParticipant?.user?.username ||
             lawyer?.display_name ||
-            'Lawyer',
+            t('lawyerProfile.lawyer'),
           avatar: lawyerParticipant?.user?.image_url || lawyer?.image_url || '',
         });
       }

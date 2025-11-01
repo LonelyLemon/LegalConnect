@@ -27,13 +27,14 @@ import { useAppTheme } from '../../../theme/theme.provider';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { verticalScale } from 'react-native-size-matters';
 import Header from '../../../components/layout/header';
-import { t } from '../../../i18n';
+import { useTranslation } from 'react-i18next';
 import { AuthStackNames } from '../../../navigation/routes';
 
 export default function SignUpScreen() {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const { themed, theme } = useAppTheme();
+  const { t } = useTranslation();
   const control = useForm<FormSignUp>({
     defaultValues: {
       email: 'user1@example.com',

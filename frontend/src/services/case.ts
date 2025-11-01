@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { showError } from '../types/toast';
+import { t } from '../i18n';
 
 export const getUserCase = async () => {
   try {
@@ -14,7 +15,7 @@ export const getUserCase = async () => {
       data?.error ||
       error?.message ||
       'Fetch cases failed';
-    showError('Failed to fetch cases', message);
+    showError(t('toast.fetchCasesFailed'), message);
     throw new Error(message);
   }
 };

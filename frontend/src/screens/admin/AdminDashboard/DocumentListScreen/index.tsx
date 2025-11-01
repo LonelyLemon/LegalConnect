@@ -25,6 +25,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import { formatDate } from '../../../../utils/formatDate';
 import CreateDocumentModal from '../CreateDocumentModal';
 import { Document } from '../../../../types/document';
+import { useTranslation } from 'react-i18next';
 
 const Separator = () => <View style={{ height: moderateScale(12) }} />;
 export default function DocumentListScreen() {
@@ -35,6 +36,7 @@ export default function DocumentListScreen() {
   const navigation = useNavigation<any>();
   const [showModal, setShowModal] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const { t } = useTranslation();
   const getDocuments = async () => {
     await dispatch(fetchDocuments());
     console.log('documents: ', documents);
@@ -46,12 +48,12 @@ export default function DocumentListScreen() {
 
   const handleDelete = async (id: string) => {
     Alert.alert(
-      'Delete document',
-      'Are you sure you want to delete this document?',
+      t('admin.deleteDocument'),
+      t('admin.deleteDocumentConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             await dispatch(deleteDoc({ id }) as any);
@@ -133,7 +135,7 @@ export default function DocumentListScreen() {
   );
   return (
     <SafeAreaView style={themed(styles.container)} edges={['top', 'bottom']}>
-      <Header title="Document List" />
+      <Header title={t('admin.documentList')} />
       <FlatList
         data={documents}
         renderItem={renderDocumentItem}
