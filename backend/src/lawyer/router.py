@@ -63,6 +63,7 @@ from src.lawyer.utils import (
 from src.booking.utils import calculate_lawyer_rating
 from src.user.constants import UserRole
 from src.user.models import User
+from src.user.schemas import UserResponse
 
 
 DOCUMENT_COLUMN_NAMES: tuple[str, ...] = (
@@ -98,7 +99,7 @@ async def _generate_document_urls(request: LawyerVerificationRequest) -> dict[st
     return results
 
 
-def _build_summary_response(request: LawyerVerificationRequest) -> RequestSummaryResponse:
+def _build_summary_response(request: LawyerVerificationRequest, user: User) -> RequestSummaryResponse:
 
     return RequestSummaryResponse(
         id = request.id,
@@ -111,12 +112,13 @@ def _build_summary_response(request: LawyerVerificationRequest) -> RequestSummar
         reviewed_at = request.reviewed_at,
         create_at = request.create_at,
         updated_at = request.updated_at,
+        user = UserResponse.model_validate(user),
     )
 
 
-async def _build_detail_response(request: LawyerVerificationRequest) -> RequestDetailResponse:
+async def _build_detail_response(request: LawyerVerificationRequest, user: User) -> RequestDetailResponse:
 
-    summary = _build_summary_response(request)
+    summary = _build_summary_response(request, user)
     document_urls = await _generate_document_urls(request)
 
     return RequestDetailResponse(
@@ -262,7 +264,7 @@ async def create_lawyer_verification_request(db: SessionDep,
 
     await db.refresh(new_request)
 
-    return await _build_detail_response(new_request)
+    return await _build_detail_response(new_request, current_user)
 
 
 @lawyer_route.get("/verification-requests/me",
@@ -279,7 +281,7 @@ async def list_my_lawyer_verification_requests(db: SessionDep,
 
     requests = result.scalars().all()
 
-    return [_build_summary_response(request) for request in requests]
+    return [_build_summary_response(request, current_user) for request in requests]
 
 
 @lawyer_route.get("/verification-requests", 
@@ -300,7 +302,21 @@ async def list_lawyer_verification_requests(db: SessionDep,
     result = await db.execute(stmt)
     requests = result.scalars().all()
 
-    return [_build_summary_response(request) for request in requests]
+    if not requests:
+        return []
+
+    user_ids = {request.user_id for request in requests}
+    users_result = await db.execute(select(User).where(User.id.in_(user_ids)))
+    users = {user.id: user for user in users_result.scalars().all()}
+
+    missing_user_ids = user_ids.difference(users.keys())
+    if missing_user_ids:
+        raise RequestNotFound()
+
+    return [
+        _build_summary_response(request, users[request.user_id])
+        for request in requests
+    ]
 
 
 @lawyer_route.get("/verification-requests/{request_id}",
@@ -317,7 +333,12 @@ async def get_lawyer_verification_request(request_id: UUID,
     if current_user.role != UserRole.ADMIN.value and request.user_id != current_user.id:
         raise RequestForbidden()
 
-    return await _build_detail_response(request)
+    user = await db.get(User, request.user_id)
+    if not user:
+        raise RequestNotFound()
+
+    return await _build_detail_response(request, user)
+
 
 
 @lawyer_route.patch("/verification-requests/{request_id}/approve",
@@ -364,7 +385,10 @@ async def approve_lawyer_verification_request(request_id: UUID,
     await db.commit()
     await db.refresh(request)
 
-    return await _build_detail_response(request)
+    if not user:
+        raise RequestNotFound()
+
+    return await _build_detail_response(request, user)
 
 
 @lawyer_route.patch("/verification-requests/{request_id}/reject",
@@ -392,7 +416,11 @@ async def reject_lawyer_verification_request(request_id: UUID,
     await db.commit()
     await db.refresh(request)
 
-    return await _build_detail_response(request)
+    user = await db.get(User, request.user_id)
+    if not user:
+        raise RequestNotFound()
+
+    return await _build_detail_response(request, user)
 
 
 @lawyer_route.post("/lawyers/{lawyer_id}/revoke",

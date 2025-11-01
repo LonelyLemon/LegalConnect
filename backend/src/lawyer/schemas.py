@@ -11,6 +11,7 @@ from src.lawyer.constants import (
     MAX_WEBSITE_LENGTH,
     MAX_REVOCATION_REASON_LENGTH,
 )
+from src.user.schemas import UserResponse
 
 
 class RequestSummaryResponse(BaseModel):
@@ -24,6 +25,7 @@ class RequestSummaryResponse(BaseModel):
     reviewed_at: datetime | None
     create_at: datetime
     updated_at: datetime
+    user: UserResponse
 
 
 class RequestDetailResponse(RequestSummaryResponse):
