@@ -80,8 +80,66 @@ export const getPersonalBookingRequest = async (): Promise<any> => {
       errmsg?.detail ||
       errmsg?.error ||
       error?.message ||
-      'Failed to create booking request';
-    showError(t('toast.getBookingRequestFailed'), message);
+      'Failed to get booking requests';
+    showError('Failed to get booking requests', message);
+    throw new Error(message);
+  }
+};
+
+export const getBookingRequest = async (bookingId: string): Promise<any> => {
+  try {
+    const response = await axios.get(`/booking/requests/${bookingId}`, {
+      baseURL: envConfig.baseUrl,
+    });
+    const payload = response?.data?.data ?? response?.data;
+    return payload;
+  } catch (error: any) {
+    const errmsg = error?.response?.data;
+    const message =
+      errmsg?.message ||
+      errmsg?.detail ||
+      errmsg?.error ||
+      error?.message ||
+      'Failed to get booking request';
+    showError('Failed to get booking request', message);
+    throw new Error(message);
+  }
+};
+
+export interface BookingDecisionPayload {
+  accept: boolean;
+}
+
+export const decideBookingRequest = async (
+  bookingId: string,
+  data: BookingDecisionPayload,
+): Promise<any> => {
+  try {
+    // Send request body as { "accept": true } or { "accept": false }
+    const response = await axios.post(
+      `/booking/requests/${bookingId}/decision`,
+      { accept: data.accept },
+      {
+        baseURL: envConfig.baseUrl,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+    const payload = response?.data?.data ?? response?.data;
+    showSuccess(
+      data.accept
+        ? 'Booking request accepted successfully'
+        : 'Booking request declined successfully',
+    );
+    return payload;
+  } catch (error: any) {
+    const errmsg = error?.response?.data;
+    const message =
+      errmsg?.message ||
+      errmsg?.detail ||
+      errmsg?.error ||
+      error?.message ||
+      'Failed to decide booking request';
+    showError('Failed to decide booking request', message);
     throw new Error(message);
   }
 };

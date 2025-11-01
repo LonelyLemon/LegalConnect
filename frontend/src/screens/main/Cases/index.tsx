@@ -30,9 +30,14 @@ export default function CasesScreen() {
   const pendingCases = useAppSelector(selectPendingCases);
   const cases = useAppSelector(selectCases);
 
+  // Helper function to check if item is BookingRequest
+  const isBookingRequest = (item: DisplayItem): item is BookingRequest => {
+    return 'short_description' in item && 'status' in item;
+  };
+
   const tabs = useMemo(
     () => [
-      { key: 'PENDING' as TabType, label: t('case.pending') },
+      { key: 'PENDING' as TabType, label: 'Pending' },
       { key: 'IN_PROGRESS' as TabType, label: t('cases.inProgress') },
       { key: 'COMPLETED' as TabType, label: t('cases.completed') },
       { key: 'CANCELLED' as TabType, label: t('cases.cancelled') },
@@ -43,7 +48,13 @@ export default function CasesScreen() {
   // Get data based on active tab
   const displayData = useMemo(() => {
     if (activeTab === 'PENDING') {
-      return pendingCases;
+      // Filter to show only PENDING booking requests, exclude ACCEPTED and DECLINED
+      return pendingCases.filter(item => {
+        if (isBookingRequest(item)) {
+          return item.status === 'PENDING';
+        }
+        return true; // Keep non-booking-request items (shouldn't happen in pending tab)
+      });
     }
     return cases.filter(caseItem => caseItem.state === activeTab);
   }, [activeTab, pendingCases, cases]);
@@ -53,13 +64,18 @@ export default function CasesScreen() {
     dispatch(fetchUserCases());
   }, [dispatch]);
 
-  // Helper function to check if item is BookingRequest
-  const isBookingRequest = (item: DisplayItem): item is BookingRequest => {
-    return 'short_description' in item && 'status' in item;
-  };
+  // Refresh data when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(fetchPendingCase());
+      dispatch(fetchUserCases());
+    });
+
+    return unsubscribe;
+  }, [navigation, dispatch]);
 
   const renderCaseCard = ({ item }: { item: DisplayItem }) => {
-    // Convert BookingRequest to Case format for display
+    // Convert BookingRequest to Case format for display in card
     const caseData: Case = isBookingRequest(item)
       ? {
           id: item.id,
@@ -83,7 +99,8 @@ export default function CasesScreen() {
       <CaseCard
         caseData={caseData}
         onPress={() =>
-          navigation.navigate(MainStackNames.CaseDetail, { caseData })
+          // Pass the original item (BookingRequest) so CaseDetail can detect it correctly
+          navigation.navigate(MainStackNames.CaseDetail, { caseData: item })
         }
         stylesOverride={{
           cardContainer: () => ({
