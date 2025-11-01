@@ -14,6 +14,7 @@ import { Case } from '../../../../types/case';
 import Icon from '@react-native-vector-icons/ionicons';
 import { moderateScale } from 'react-native-size-matters';
 import * as styles from './styles';
+import { t } from '../../../../i18n';
 
 type CaseDetailRouteProp = RouteProp<{ params: { caseData?: Case } }, 'params'>;
 
@@ -106,7 +107,7 @@ export const CaseDetail = () => {
 
         {/* Description Section */}
         <View style={themed(styles.section)}>
-          <Text style={themed(styles.sectionTitle)}>Description</Text>
+          <Text style={themed(styles.sectionTitle)}>{t('caseDetail.description')}</Text>
           <Text style={themed(styles.descriptionText)}>
             {displayCase.description}
           </Text>
@@ -114,7 +115,7 @@ export const CaseDetail = () => {
 
         {/* Case Information */}
         <View style={themed(styles.section)}>
-          <Text style={themed(styles.sectionTitle)}>Case Information</Text>
+          <Text style={themed(styles.sectionTitle)}>{t('caseDetail.caseInformation')}</Text>
           <View style={themed(styles.infoRow)}>
             <Icon
               name="calendar-outline"
@@ -122,7 +123,7 @@ export const CaseDetail = () => {
               color={theme.colors.onSurface}
             />
             <View style={themed(styles.infoTextContainer)}>
-              <Text style={themed(styles.infoLabel)}>Started At</Text>
+              <Text style={themed(styles.infoLabel)}>{t('caseDetail.startedAt')}</Text>
               <Text style={themed(styles.infoValue)}>
                 {formatDate(displayCase.started_at)}
               </Text>
@@ -135,7 +136,7 @@ export const CaseDetail = () => {
               color={theme.colors.onSurface}
             />
             <View style={themed(styles.infoTextContainer)}>
-              <Text style={themed(styles.infoLabel)}>Expected End</Text>
+              <Text style={themed(styles.infoLabel)}>{t('caseDetail.expectedEnd')}</Text>
               <Text style={themed(styles.infoValue)}>
                 {formatDate(displayCase.ending_time)}
               </Text>
@@ -148,7 +149,7 @@ export const CaseDetail = () => {
               color={theme.colors.onSurface}
             />
             <View style={themed(styles.infoTextContainer)}>
-              <Text style={themed(styles.infoLabel)}>Last Updated</Text>
+              <Text style={themed(styles.infoLabel)}>{t('caseDetail.lastUpdated')}</Text>
               <Text style={themed(styles.infoValue)}>
                 {formatDate(displayCase.updated_at)}
               </Text>
@@ -159,7 +160,7 @@ export const CaseDetail = () => {
         {/* Lawyer Note */}
         {displayCase.lawyer_note && (
           <View style={themed(styles.section)}>
-            <Text style={themed(styles.sectionTitle)}>Lawyer's Note</Text>
+            <Text style={themed(styles.sectionTitle)}>{t('caseDetail.lawyersNote')}</Text>
             <View style={themed(styles.noteContainer)}>
               <Text style={themed(styles.noteText)}>
                 {displayCase.lawyer_note}
@@ -171,7 +172,7 @@ export const CaseDetail = () => {
         {/* Client Note */}
         {displayCase.client_note && (
           <View style={themed(styles.section)}>
-            <Text style={themed(styles.sectionTitle)}>Your Note</Text>
+            <Text style={themed(styles.sectionTitle)}>{t('caseDetail.yourNote')}</Text>
             <View style={themed(styles.noteContainer)}>
               <Text style={themed(styles.noteText)}>
                 {displayCase.client_note}
@@ -185,7 +186,7 @@ export const CaseDetail = () => {
           displayCase.attachment_urls.length > 0 && (
             <View style={themed(styles.section)}>
               <Text style={themed(styles.sectionTitle)}>
-                Attachments ({displayCase.attachment_urls.length})
+                {t('caseDetail.attachments')} ({displayCase.attachment_urls.length})
               </Text>
               {displayCase.attachment_urls.map((url, index) => (
                 <TouchableOpacity
@@ -202,7 +203,7 @@ export const CaseDetail = () => {
                     color={theme.colors.primary}
                   />
                   <Text style={themed(styles.attachmentText)}>
-                    Attachment {index + 1}
+                    {t('caseDetail.attachmentNumber', { number: index + 1 })}
                   </Text>
                   <Icon
                     name="chevron-forward-outline"
@@ -222,7 +223,7 @@ export const CaseDetail = () => {
               size={moderateScale(20)}
               color={theme.colors.onPrimary}
             />
-            <Text style={themed(styles.primaryButtonText)}>Contact Lawyer</Text>
+            <Text style={themed(styles.primaryButtonText)}>{t('caseDetail.contactLawyer')}</Text>
           </Pressable>
 
           <Pressable style={themed(styles.secondaryButton)}>
@@ -232,7 +233,7 @@ export const CaseDetail = () => {
               color={theme.colors.primary}
             />
             <Text style={themed(styles.secondaryButtonText)}>
-              View Documents
+              {t('caseDetail.viewDocuments')}
             </Text>
           </Pressable>
         </View>

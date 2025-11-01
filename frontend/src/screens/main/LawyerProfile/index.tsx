@@ -18,6 +18,7 @@ import { moderateScale } from 'react-native-size-matters';
 import Description from './Description/index.tsx';
 import Review from './Review/index.tsx';
 import { createNewConversation } from '../../../stores/message.slice.ts';
+import { t } from '../../../i18n';
 
 type TabType = 'description' | 'review' | 'cases';
 
@@ -45,9 +46,9 @@ export default function LawyerProfileScreen({
   }, [dispatch, id]);
 
   const tabs = [
-    { key: 'description', label: 'Description' },
-    { key: 'review', label: 'Review (30)' },
-    { key: 'cases', label: 'Featured cases' },
+    { key: 'description', label: t('lawyerProfile.description') },
+    { key: 'review', label: t('lawyerProfile.review') },
+    { key: 'cases', label: t('lawyerProfile.featuredCases') },
   ];
 
   const renderTabContent = () => {
@@ -60,7 +61,7 @@ export default function LawyerProfileScreen({
         return (
           <View style={themed(styles.content)}>
             <Text style={themed(styles.placeholderText)}>
-              Featured cases will be displayed here
+              {t('lawyerProfile.featuredCasesPlaceholder')}
             </Text>
           </View>
         );
@@ -144,17 +145,17 @@ export default function LawyerProfileScreen({
                 ? `${lawyer.average_rating.toFixed(1)} ★`
                 : 'N/A'}
             </Text>
-            <Text style={themed(styles.statLabel)}>Customer reviews</Text>
+            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.customerReviews')}</Text>
           </View>
           <View style={themed(styles.statItem)}>
             <Text style={themed(styles.statValue)}>-</Text>
-            <Text style={themed(styles.statLabel)}>Successful cases</Text>
+            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.successfulCases')}</Text>
           </View>
           <View style={themed(styles.statItem)}>
             <Text style={themed(styles.statValue)}>
               {lawyer?.years_of_experience || 0}
             </Text>
-            <Text style={themed(styles.statLabel)}>Years of experience</Text>
+            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.yearsOfExperience')}</Text>
           </View>
         </View>
 
@@ -170,7 +171,7 @@ export default function LawyerProfileScreen({
               size={moderateScale(theme.fontSizes.lg)}
               color={theme.colors.onPrimary}
             />
-            <Text style={themed(styles.secondaryButtonText)}>Chat</Text>
+            <Text style={themed(styles.secondaryButtonText)}>{t('lawyerProfile.chat')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -187,7 +188,7 @@ export default function LawyerProfileScreen({
               size={moderateScale(theme.fontSizes.lg)}
               color={theme.colors.primary}
             />
-            <Text style={themed(styles.primaryButtonText)}>Book</Text>
+            <Text style={themed(styles.primaryButtonText)}>{t('lawyerProfile.book')}</Text>
           </TouchableOpacity>
         </View>
       </View>

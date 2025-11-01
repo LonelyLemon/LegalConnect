@@ -112,7 +112,7 @@ export default function BookingScreen({
     {
       id: 'short_description',
       name: 'short_description',
-      label: 'Short Description',
+      label: t('booking.shortDescription'),
       type: 'customRender',
       error: errors?.short_description?.message,
       rules: {
@@ -160,7 +160,7 @@ export default function BookingScreen({
           const selectedDate = new Date(value);
           selectedDate.setHours(0, 0, 0, 0);
           if (selectedDate < today) {
-            return t('booking.endDateInvalid');
+            return t('booking.startDateInvalid');
           }
           return true;
         },

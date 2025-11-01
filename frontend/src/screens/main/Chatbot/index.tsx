@@ -26,6 +26,7 @@ import { ChatbotMessage } from '../../../types/chatbot';
 import * as styles from './styles';
 import Header from '../../../components/layout/header';
 import dayjs from 'dayjs';
+import { t } from '../../../i18n';
 
 function MessageItemComponent({ item }: { item: ChatbotMessage }) {
   const { themed, theme } = useAppTheme();
@@ -74,7 +75,7 @@ function MessageItemComponent({ item }: { item: ChatbotMessage }) {
                 { color: getConfidenceColor(item.confidence) } as any,
               ]}
             >
-              {(item.confidence * 100).toFixed(0)}% confidence
+              {(item.confidence * 100).toFixed(0)}% {t('chatbot.confidence')}
             </Text>
           </View>
         )}
@@ -175,8 +176,7 @@ export default function ChatbotScreen() {
         color={theme.colors.onSurfaceVariant}
       />
       <Text style={themed(styles.emptyText)}>
-        Xin chào! Tôi là trợ lý AI pháp lý.{'\n'}
-        Hãy đặt câu hỏi về luật pháp Việt Nam.
+        {t('chatbot.emptyMessage')}
       </Text>
     </View>
   );
@@ -202,7 +202,7 @@ export default function ChatbotScreen() {
           justifyContent: 'space-between',
         }}
       >
-        <Header title="Legal AI Chatbot" showBackButton={true} />
+        <Header title={t('chatbot.title')} showBackButton={true} />
         {messages.length > 0 && (
           <TouchableOpacity
             style={[
@@ -245,7 +245,7 @@ export default function ChatbotScreen() {
             <View style={themed(styles.textInputContainer)}>
               <TextInput
                 style={themed(styles.textInput)}
-                placeholder="Đặt câu hỏi về luật pháp..."
+                placeholder={t('chatbot.placeholder')}
                 placeholderTextColor={theme.colors.onSurfaceVariant}
                 value={inputText}
                 onChangeText={setInputText}
