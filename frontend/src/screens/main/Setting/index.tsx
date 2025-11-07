@@ -67,7 +67,13 @@ export default function SettingScreen() {
   }, []);
 
   const user = useAppSelector(selectUser);
+  const [avatarError, setAvatarError] = React.useState(false);
   console.log('User data:', user);
+
+  // Reset avatar error when avatar URL changes
+  React.useEffect(() => {
+    setAvatarError(false);
+  }, [user?.avatar]);
 
   const handleChangeLanguage = () => {
     const newLang = lang === 'en' ? 'vi' : 'en';
@@ -191,17 +197,19 @@ export default function SettingScreen() {
         contentContainerStyle={{ paddingBottom: verticalScale(80) }}
       >
         <View style={themed(styles.profileSection)}>
-          {user?.avatar && user.avatar.trim() !== '' ? (
+          {user?.avatar && user.avatar.trim() !== '' && !avatarError ? (
             <View style={themed(styles.avatarContainer)}>
               <Image
                 source={{ uri: user.avatar }}
                 style={themed(styles.avatar)}
                 resizeMode="cover"
-                onError={e => {
-                  console.log('Avatar image error:', e);
+                onError={() => {
+                  console.log('Avatar image error, showing fallback icon');
+                  setAvatarError(true);
                 }}
                 onLoad={() => {
                   console.log('Avatar loaded successfully:', user.avatar);
+                  setAvatarError(false);
                 }}
               />
             </View>

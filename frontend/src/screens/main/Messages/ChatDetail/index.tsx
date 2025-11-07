@@ -103,7 +103,13 @@ export default function ChatDetailScreen({ route }: { route: any }) {
   const userId = useAppSelector((state: any) => state.user.user.id);
 
   const [inputText, setInputText] = useState('');
+  const [avatarError, setAvatarError] = useState(false);
   const flatListRef = React.useRef<FlatList>(null);
+
+  // Reset avatar error when avatar URL changes
+  useEffect(() => {
+    setAvatarError(false);
+  }, [avatar]);
 
   useEffect(() => {
     // Clear previous messages when entering new conversation
@@ -217,10 +223,17 @@ export default function ChatDetailScreen({ route }: { route: any }) {
             {/* <Image source={{ uri: avatar }} style={themed(styles.headerAvatar)} />
              */}
             <View style={themed(styles.avatarPlaceholder)}>
-              {avatar ? (
+              {avatar && !avatarError ? (
                 <Image
                   source={{ uri: avatar }}
                   style={themed(styles.headerAvatar)}
+                  onError={() => {
+                    console.log('Avatar image error, showing fallback icon');
+                    setAvatarError(true);
+                  }}
+                  onLoad={() => {
+                    setAvatarError(false);
+                  }}
                 />
               ) : (
                 <Ionicons

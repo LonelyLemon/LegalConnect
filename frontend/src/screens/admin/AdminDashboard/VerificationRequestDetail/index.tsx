@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
   Modal,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -39,6 +40,8 @@ export default function VerificationRequestDetail({ route }: { route: any }) {
     url: string;
     title: string;
   } | null>(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   const fetchData = async () => {
     try {
@@ -151,39 +154,32 @@ export default function VerificationRequestDetail({ route }: { route: any }) {
     );
   };
 
-  const handleReject = async () => {
-    Alert.alert(
-      t('admin.rejectRequest'),
-      t('admin.rejectRequestPrompt'),
-      [
-        { text: t('admin.cancel'), style: 'cancel' },
-        {
-          text: t('admin.reject'),
-          style: 'destructive',
-          onPress: async (reason?: string) => {
-            if (!reason || reason.trim().length === 0) {
-              showError(t('admin.error'), t('admin.rejectionReasonRequired'));
-              return;
-            }
-            try {
-              await rejectVerificationRequest(requestId, reason.trim());
-              showSuccess(
-                t('common.success'),
-                t('admin.requestRejectedSuccessfully'),
-              );
-              navigation.goBack();
-            } catch (error: any) {
-              showError(
-                t('admin.error'),
-                error?.response?.data?.message ||
-                  t('admin.failedToRejectRequest'),
-              );
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+  const handleReject = () => {
+    setRejectionReason('');
+    setShowRejectModal(true);
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectionReason || rejectionReason.trim().length === 0) {
+      showError(t('admin.error'), t('admin.rejectionReasonRequired'));
+      return;
+    }
+    try {
+      setShowRejectModal(false);
+      await rejectVerificationRequest(requestId, rejectionReason.trim());
+      showSuccess(t('common.success'), t('admin.requestRejectedSuccessfully'));
+      navigation.goBack();
+    } catch (error: any) {
+      showError(
+        t('admin.error'),
+        error?.response?.data?.message || t('admin.failedToRejectRequest'),
+      );
+    }
+  };
+
+  const handleRejectCancel = () => {
+    setShowRejectModal(false);
+    setRejectionReason('');
   };
 
   if (isLoading) {
@@ -741,6 +737,59 @@ export default function VerificationRequestDetail({ route }: { route: any }) {
               </View>
             </>
           )}
+        </View>
+      </Modal>
+
+      {/* Reject Reason Modal */}
+      <Modal
+        visible={showRejectModal}
+        transparent
+        animationType="slide"
+        onRequestClose={handleRejectCancel}
+      >
+        <View style={themed(styles.rejectModalOverlay)}>
+          <View style={themed(styles.rejectModalContent)}>
+            <Text style={themed(styles.rejectModalTitle)}>
+              {t('admin.rejectRequest')}
+            </Text>
+            <Text style={themed(styles.rejectModalSubtitle)}>
+              {t('admin.rejectRequestPrompt')}
+            </Text>
+            <TextInput
+              style={themed(styles.rejectReasonInput)}
+              placeholder={t('admin.enterRejectionReason')}
+              placeholderTextColor={theme.colors.onSurfaceVariant}
+              value={rejectionReason}
+              onChangeText={setRejectionReason}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+            <View style={themed(styles.rejectModalButtons)}>
+              <TouchableOpacity
+                style={[
+                  themed(styles.rejectModalButton),
+                  themed(styles.cancelButton),
+                ]}
+                onPress={handleRejectCancel}
+              >
+                <Text style={themed(styles.cancelButtonText)}>
+                  {t('admin.cancel')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  themed(styles.rejectModalButton),
+                  themed(styles.confirmButton),
+                ]}
+                onPress={handleRejectConfirm}
+              >
+                <Text style={themed(styles.confirmButtonText)}>
+                  {t('admin.reject')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>

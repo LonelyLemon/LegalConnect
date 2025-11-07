@@ -262,3 +262,101 @@ export const imageTitle: ThemedStyle<TextStyle> = ({
   paddingVertical: scale(spacing.sm),
   borderRadius: scale(spacing.sm),
 });
+
+// Reject Modal Styles
+export const rejectModalOverlay: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: scale(16),
+});
+
+export const rejectModalContent: ThemedStyle<ViewStyle> = ({
+  colors,
+  spacing,
+}) => ({
+  backgroundColor: colors.surface,
+  borderRadius: scale(spacing.md),
+  padding: scale(spacing.lg),
+  width: '100%',
+  maxWidth: scale(400),
+});
+
+export const rejectModalTitle: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+  spacing,
+}) => ({
+  fontSize: moderateScale(fontSizes.xl),
+  fontWeight: '700',
+  color: colors.error,
+  marginBottom: scale(spacing.xs),
+});
+
+export const rejectModalSubtitle: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+  spacing,
+}) => ({
+  fontSize: moderateScale(fontSizes.md),
+  color: colors.onSurfaceVariant,
+  marginBottom: scale(spacing.md),
+});
+
+export const rejectReasonInput: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+  spacing,
+}) => ({
+  backgroundColor: colors.surfaceVariant,
+  borderRadius: scale(spacing.sm),
+  padding: scale(spacing.md),
+  fontSize: moderateScale(fontSizes.md),
+  color: colors.onSurface,
+  minHeight: scale(100),
+  maxHeight: scale(200),
+  borderWidth: 1,
+  borderColor: colors.outline,
+  marginBottom: scale(spacing.md),
+});
+
+export const rejectModalButtons: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexDirection: 'row',
+  gap: scale(spacing.sm),
+  justifyContent: 'flex-end',
+});
+
+export const rejectModalButton: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  paddingHorizontal: scale(spacing.lg),
+  paddingVertical: scale(spacing.md),
+  borderRadius: scale(spacing.sm),
+  minWidth: scale(100),
+  alignItems: 'center',
+});
+
+export const cancelButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.surfaceVariant,
+});
+
+export const confirmButton: ThemedStyle<ViewStyle> = ({ colors }) => ({
+  backgroundColor: colors.error,
+});
+
+export const cancelButtonText: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+}) => ({
+  fontSize: moderateScale(fontSizes.md),
+  fontWeight: '600',
+  color: colors.onSurfaceVariant,
+});
+
+export const confirmButtonText: ThemedStyle<TextStyle> = ({
+  colors,
+  fontSizes,
+}) => ({
+  fontSize: moderateScale(fontSizes.md),
+  fontWeight: '600',
+  color: colors.inverseOnSurface,
+});

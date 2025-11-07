@@ -45,7 +45,7 @@ export default function CompleteProfileScreen({}) {
     email: user?.email ?? '',
     phone_number: user?.phone_number ?? '',
     address: user?.address ?? '',
-    avatar: user?.avatar ?? '',
+    avatar: null,
     gender: 'Male',
     dob: dayjs().format('YYYY-MM-DD'),
   };

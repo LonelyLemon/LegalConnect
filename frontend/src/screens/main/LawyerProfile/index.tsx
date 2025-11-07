@@ -30,12 +30,18 @@ export default function LawyerProfileScreen({
 }) {
   const { id } = route.params;
   const [lawyer, setLawyer] = useState<Lawyer | null>(null);
+  const [avatarError, setAvatarError] = useState(false);
   console.log('id: ', id);
   const { themed, theme } = useAppTheme();
   const [activeTab, setActiveTab] = useState<TabType>('description');
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<any>>();
   const userRole = useAppSelector(selectRole);
+
+  // Reset avatar error when lawyer image changes
+  useEffect(() => {
+    setAvatarError(false);
+  }, [lawyer?.image_url]);
   useEffect(() => {
     const fetchLawyer = async () => {
       const response = await dispatch(fetchLawyerById(id));
@@ -110,12 +116,19 @@ export default function LawyerProfileScreen({
     <SafeAreaView style={themed(styles.container)}>
       <Header />
       <View style={themed(styles.HeaderTitle)}>
-        {lawyer?.image_url ? (
+        {lawyer?.image_url && !avatarError ? (
           <Image
             source={{
               uri: lawyer.image_url,
             }}
             style={themed(styles.avatar)}
+            onError={() => {
+              console.log('Avatar image error, showing fallback icon');
+              setAvatarError(true);
+            }}
+            onLoad={() => {
+              setAvatarError(false);
+            }}
           />
         ) : (
           <View style={themed(styles.avatar)}>

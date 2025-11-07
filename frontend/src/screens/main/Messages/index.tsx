@@ -39,6 +39,7 @@ function ChatConversation({
 }) {
   const { theme, themed } = useAppTheme();
   const { t } = useTranslation();
+  const [avatarError, setAvatarError] = React.useState(false);
 
   // Get receiver information
   const userId = useAppSelector(state => state.user.user.id);
@@ -46,13 +47,27 @@ function ChatConversation({
     p => p.user.id !== userId,
   )?.user;
 
+  const avatarUrl = (receiver as any)?.user?.avatar_url || receiver?.avatar_url;
+
+  // Reset avatar error when avatar URL changes
+  React.useEffect(() => {
+    setAvatarError(false);
+  }, [avatarUrl]);
+
   return (
     <TouchableOpacity style={themed(styles.card)} onPress={onPress}>
       <View style={themed(styles.avatarWrapper)}>
-        {(receiver as any)?.user?.avatar_url ? (
+        {avatarUrl && !avatarError ? (
           <Image
-            source={{ uri: (receiver as any)?.user?.avatar_url }}
+            source={{ uri: avatarUrl }}
             style={themed(styles.avatar)}
+            onError={() => {
+              console.log('Avatar image error, showing fallback icon');
+              setAvatarError(true);
+            }}
+            onLoad={() => {
+              setAvatarError(false);
+            }}
           />
         ) : (
           <View style={themed(styles.avatarPlaceholder)}>
