@@ -140,13 +140,11 @@ export default function CasesScreen() {
     );
   };
 
-    const renderEmptyState = () => (
-      <View style={themed(styles.content)}>
-        <Text style={themed(styles.placeholderText)}>
-          {t(`cases.no${activeTab}Cases`)}
-        </Text>
-      </View>
-    );
+  const renderEmptyState = () => (
+    <View style={themed(styles.content)}>
+      <Text style={themed(styles.placeholderText)}>{t(`cases.noCases`)}</Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={themed(styles.container)}>

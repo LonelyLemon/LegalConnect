@@ -210,51 +210,52 @@ export default function ChatbotScreen() {
   };
 
   return (
-    <SafeAreaView style={themed(styles.container)} edges={['top', 'bottom']}>
-      <View style={themed(styles.headerContainer)}>
-        <Header title={t('chatbot.title')} showBackButton={true} />
-        {messages.length > 0 && (
-          <TouchableOpacity
-            style={[
-              themed(styles.clearButton),
-              themed(styles.clearButtonAbsolute),
-            ]}
-            onPress={handleClearChat}
-          >
-            <Ionicons
-              name="trash-outline"
-              size={moderateScale(24)}
-              color={theme.colors.onSurface}
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Messages */}
-      {messages.length === 0 ? (
-        renderEmpty()
-      ) : (
-        <FlatList
-          data={messages}
-          renderItem={({ item }) => (
-            <MessageItemComponent
-              item={item}
-              onSuggestionPress={handleSuggestionPress}
-            />
-          )}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          contentContainerStyle={themed(styles.messagesList)}
-          style={themed(styles.chatContainer)}
-          showsVerticalScrollIndicator={false}
-          ListFooterComponent={renderLoadingIndicator}
-        />
-      )}
-
-      {/* Input Area */}
+    <SafeAreaView style={themed(styles.container)} edges={['top']}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={themed(styles.keyboardAvoidingView)}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
+        <View style={themed(styles.headerContainer)}>
+          <Header title={t('chatbot.title')} showBackButton={true} />
+          {messages.length > 0 && (
+            <TouchableOpacity
+              style={[
+                themed(styles.clearButton),
+                themed(styles.clearButtonAbsolute),
+              ]}
+              onPress={handleClearChat}
+            >
+              <Ionicons
+                name="trash-outline"
+                size={moderateScale(24)}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Messages */}
+        {messages.length === 0 ? (
+          renderEmpty()
+        ) : (
+          <FlatList
+            data={messages}
+            renderItem={({ item }) => (
+              <MessageItemComponent
+                item={item}
+                onSuggestionPress={handleSuggestionPress}
+              />
+            )}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            contentContainerStyle={themed(styles.messagesList)}
+            style={themed(styles.chatContainer)}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={renderLoadingIndicator}
+          />
+        )}
+
+        {/* Input Area */}
         <View style={themed(styles.inputContainer)}>
           <View style={themed(styles.inputRow)}>
             <View style={themed(styles.textInputContainer)}>

@@ -4,7 +4,7 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useAppTheme } from '../../../theme/theme.provider';
 import * as styles from './styles.ts';
 import Header from '../../../components/layout/header/index.tsx';
-import { useAppDispatch } from '../../../redux/hook';
+import { useAppDispatch, useAppSelector } from '../../../redux/hook';
 import { fetchLawyerById } from '../../../stores/lawyer.slices.ts';
 import {
   RouteProp,
@@ -19,8 +19,9 @@ import Description from './Description/index.tsx';
 import Review from './Review/index.tsx';
 import { createNewConversation } from '../../../stores/message.slice.ts';
 import { t } from '../../../i18n';
+import { selectRole } from '../../../stores/user.slice.ts';
 
-type TabType = 'description' | 'review' | 'cases';
+type TabType = 'description' | 'review';
 
 export default function LawyerProfileScreen({
   route,
@@ -34,6 +35,7 @@ export default function LawyerProfileScreen({
   const [activeTab, setActiveTab] = useState<TabType>('description');
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<any>>();
+  const userRole = useAppSelector(selectRole);
   useEffect(() => {
     const fetchLawyer = async () => {
       const response = await dispatch(fetchLawyerById(id));
@@ -48,7 +50,6 @@ export default function LawyerProfileScreen({
   const tabs = [
     { key: 'description', label: t('lawyerProfile.description') },
     { key: 'review', label: t('lawyerProfile.review') },
-    { key: 'cases', label: t('lawyerProfile.featuredCases') },
   ];
 
   const renderTabContent = () => {
@@ -57,14 +58,6 @@ export default function LawyerProfileScreen({
         return <Description lawyer={lawyer as Lawyer} />;
       case 'review':
         return <Review lawyerId={id} />;
-      case 'cases':
-        return (
-          <View style={themed(styles.content)}>
-            <Text style={themed(styles.placeholderText)}>
-              {t('lawyerProfile.featuredCasesPlaceholder')}
-            </Text>
-          </View>
-        );
       default:
         return null;
     }
@@ -145,17 +138,23 @@ export default function LawyerProfileScreen({
                 ? `${lawyer.average_rating.toFixed(1)} ★`
                 : 'N/A'}
             </Text>
-            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.customerReviews')}</Text>
+            <Text style={themed(styles.statLabel)}>
+              {t('lawyerProfile.customerReviews')}
+            </Text>
           </View>
           <View style={themed(styles.statItem)}>
             <Text style={themed(styles.statValue)}>-</Text>
-            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.successfulCases')}</Text>
+            <Text style={themed(styles.statLabel)}>
+              {t('lawyerProfile.successfulCases')}
+            </Text>
           </View>
           <View style={themed(styles.statItem)}>
             <Text style={themed(styles.statValue)}>
               {lawyer?.years_of_experience || 0}
             </Text>
-            <Text style={themed(styles.statLabel)}>{t('lawyerProfile.yearsOfExperience')}</Text>
+            <Text style={themed(styles.statLabel)}>
+              {t('lawyerProfile.yearsOfExperience')}
+            </Text>
           </View>
         </View>
 
@@ -171,25 +170,30 @@ export default function LawyerProfileScreen({
               size={moderateScale(theme.fontSizes.lg)}
               color={theme.colors.onPrimary}
             />
-            <Text style={themed(styles.secondaryButtonText)}>{t('lawyerProfile.chat')}</Text>
+            <Text style={themed(styles.secondaryButtonText)}>
+              {t('lawyerProfile.chat')}
+            </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={themed(styles.primaryButton)}
-            onPress={() => {
-              navigation.navigate(MainStackNames.Schedule, {
-                lawyerId: id,
-                lawyerName: lawyer?.display_name,
-              });
-            }}
-          >
-            <Icon
-              name="calendar-outline"
-              size={moderateScale(theme.fontSizes.lg)}
-              color={theme.colors.primary}
-            />
-            <Text style={themed(styles.primaryButtonText)}>{t('lawyerProfile.book')}</Text>
-          </TouchableOpacity>
+          {userRole !== 'lawyer' && (
+            <TouchableOpacity
+              style={themed(styles.primaryButton)}
+              onPress={() => {
+                navigation.navigate(MainStackNames.Schedule, {
+                  lawyerId: id,
+                  lawyerName: lawyer?.display_name,
+                });
+              }}
+            >
+              <Icon
+                name="calendar-outline"
+                size={moderateScale(theme.fontSizes.lg)}
+                color={theme.colors.primary}
+              />
+              <Text style={themed(styles.primaryButtonText)}>
+                {t('lawyerProfile.book')}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

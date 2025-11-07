@@ -106,10 +106,11 @@ export const searchInputWrapper: ThemedStyle<any> = ({ colors }) => ({
   borderWidth: 1,
 });
 
-export const profileButton: ThemedStyle<any> = ({}) => ({
+export const profileButton: ThemedStyle<any> = ({ colors }) => ({
   width: moderateScale(44),
   height: moderateScale(44),
   borderRadius: moderateScale(22),
+  backgroundColor: colors.primary,
   justifyContent: 'center',
   alignItems: 'center',
 });

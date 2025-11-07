@@ -225,6 +225,7 @@ const en = {
     updated: 'Updated',
     statusPrefix: 'Status:',
     rate: 'Rate',
+    noCases: 'No cases found',
   },
   documents: {
     title: 'Documents',

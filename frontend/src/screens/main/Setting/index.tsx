@@ -25,6 +25,7 @@ import { MainStackNames } from '../../../navigation/routes';
 import i18n from 'i18next';
 import { t } from '../../../i18n';
 import { store } from '../../../redux/store';
+import { chatbotActions } from '../../../stores/chatbot.slice';
 
 function TextChild({ text }: { text: string }) {
   const { themed, theme } = useAppTheme();
@@ -82,6 +83,7 @@ export default function SettingScreen() {
   };
 
   const handleSignOut = () => {
+    dispatch(chatbotActions.clearChatHistory());
     dispatch(signOut());
   };
 
@@ -149,13 +151,13 @@ export default function SettingScreen() {
           },
         ]
       : []),
-    {
-      Father: TouchableOpacity,
-      iconName: 'lock-closed-outline',
-      title: t('setting.password'),
-      onPress: () => {},
-      hasArrow: true,
-    },
+    // {
+    //   Father: TouchableOpacity,
+    //   iconName: 'lock-closed-outline',
+    //   title: t('setting.password'),
+    //   onPress: () => {},
+    //   hasArrow: true,
+    // },
     {
       Father: TouchableOpacity,
       iconName: 'help-buoy-outline',

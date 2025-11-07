@@ -30,7 +30,6 @@ type FormProfile = {
 };
 
 export interface FormLawyer extends FormProfile {
-  display_name: string;
   website_url: string;
   office_address: string;
   speaking_languages: string[];
@@ -52,7 +51,6 @@ export default function CompleteProfileScreen({}) {
   };
   const lawyerData: FormLawyer = {
     ...userData,
-    display_name: '',
     website_url: '',
     office_address: '',
     speaking_languages: [],
@@ -238,12 +236,6 @@ export default function CompleteProfileScreen({}) {
       type: 'input',
       placeholder: t('auth.completeProfile.enterWebsiteUrl'),
       error: errors?.website_url?.message,
-      rules: {
-        required: {
-          value: true,
-          message: t('auth.completeProfile.websiteUrlRequired'),
-        },
-      },
     },
     {
       id: 'office_address',
@@ -252,12 +244,6 @@ export default function CompleteProfileScreen({}) {
       type: 'input',
       placeholder: t('auth.completeProfile.enterOfficeAddress'),
       error: errors?.office_address?.message,
-      rules: {
-        required: {
-          value: true,
-          message: t('auth.completeProfile.officeAddressRequired'),
-        },
-      },
     },
     {
       id: 'speaking_languages',

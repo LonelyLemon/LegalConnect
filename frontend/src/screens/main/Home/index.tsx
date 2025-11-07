@@ -6,8 +6,6 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  Image,
-  ImageStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LawyerCard from '../../../components/common/lawyerCard';
@@ -35,7 +33,6 @@ import { useTranslation } from 'react-i18next';
 import { fetchUserCases, selectCases } from '../../../stores/case.slice';
 import { Case } from '../../../types/case';
 import { Document } from '../../../types/document';
-import { selectUser } from '../../../stores/user.slice';
 
 // Separator component for horizontal list
 const ItemSeparator = () => <View style={{ width: moderateScale(12) }} />;
@@ -56,7 +53,7 @@ export default function HomeScreen() {
     dispatch(fetchPopularLawyers());
     dispatch(fetchUserCases());
   }, [dispatch]);
-  const user = useAppSelector(selectUser);
+  // const user = useAppSelector(selectUser);
   const refetchData = () => {
     dispatch(fetchPopularDocuments());
     dispatch(fetchPopularLawyers());
@@ -170,7 +167,7 @@ export default function HomeScreen() {
             onPress={handleProfilePress}
             style={themed(styles.profileButton)}
           >
-            {user?.avatar && user.avatar.trim() !== '' ? (
+            {/* {user?.avatar && user.avatar.trim() !== '' ? (
               <View style={themed(styles.profileImageContainer)}>
                 <Image
                   source={{ uri: user.avatar }}
@@ -184,13 +181,13 @@ export default function HomeScreen() {
                   }}
                 />
               </View>
-            ) : (
-              <Icon
-                name="person"
-                size={moderateScale(theme.fontSizes.lg)}
-                color={theme.colors.primary}
-              />
-            )}
+            ) : ( */}
+            <Icon
+              name="person"
+              size={moderateScale(theme.fontSizes.lg)}
+              color={theme.colors.onPrimary}
+            />
+            {/* )} */}
           </TouchableOpacity>
         </View>
         <View style={themed(styles.listContainer)}>

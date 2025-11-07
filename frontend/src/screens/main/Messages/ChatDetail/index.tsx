@@ -195,39 +195,44 @@ export default function ChatDetailScreen({ route }: { route: any }) {
   };
 
   return (
-    <SafeAreaView style={themed(styles.container)}>
-      {/* Header */}
-      <View style={themed(styles.header)}>
-        <TouchableOpacity
-          style={themed(styles.backButton)}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={moderateScale(24)}
-            color={theme.colors.onSurface}
-          />
-        </TouchableOpacity>
-        <View style={themed(styles.headerInfo)}>
-          {/* <Image source={{ uri: avatar }} style={themed(styles.headerAvatar)} />
-           */}
-          <View style={themed(styles.avatarPlaceholder)}>
-            {avatar ? (
-              <Image
-                source={{ uri: avatar }}
-                style={themed(styles.headerAvatar)}
-              />
-            ) : (
-              <Ionicons
-                name="person"
-                size={moderateScale(16)}
-                color={theme.colors.onSurfaceVariant}
-              />
-            )}
+    <SafeAreaView style={themed(styles.container)} edges={['top']}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={themed(styles.keyboardAvoidingView)}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+        {/* Header */}
+        <View style={themed(styles.header)}>
+          <TouchableOpacity
+            style={themed(styles.backButton)}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={moderateScale(24)}
+              color={theme.colors.onSurface}
+            />
+          </TouchableOpacity>
+          <View style={themed(styles.headerInfo)}>
+            {/* <Image source={{ uri: avatar }} style={themed(styles.headerAvatar)} />
+             */}
+            <View style={themed(styles.avatarPlaceholder)}>
+              {avatar ? (
+                <Image
+                  source={{ uri: avatar }}
+                  style={themed(styles.headerAvatar)}
+                />
+              ) : (
+                <Ionicons
+                  name="person"
+                  size={moderateScale(16)}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              )}
+            </View>
+            <Text style={themed(styles.headerName)}>{name}</Text>
           </View>
-          <Text style={themed(styles.headerName)}>{name}</Text>
-        </View>
-        {/* <View style={themed(styles.headerActions)}>
+          {/* <View style={themed(styles.headerActions)}>
           <TouchableOpacity style={themed(styles.actionButton)}>
             <Ionicons
               name="call"
@@ -243,35 +248,31 @@ export default function ChatDetailScreen({ route }: { route: any }) {
             />
           </TouchableOpacity>
         </View> */}
-      </View>
-
-      {/* Messages */}
-      {loadingMessages ? (
-        <View style={themed(styles.chatContainer)}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
-      ) : (
-        <FlatList
-          ref={flatListRef}
-          data={messageList}
-          renderItem={({ item }) => (
-            <MessageItemComponent item={item} userId={userId} />
-          )}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
-          contentContainerStyle={themed(styles.messagesList)}
-          style={themed(styles.chatContainer)}
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({ animated: false })
-          }
-        />
-      )}
 
-      {/* Input Area */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-      >
+        {/* Messages */}
+        {loadingMessages ? (
+          <View style={themed(styles.chatContainer)}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            data={messageList}
+            renderItem={({ item }) => (
+              <MessageItemComponent item={item} userId={userId} />
+            )}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
+            contentContainerStyle={themed(styles.messagesList)}
+            style={themed(styles.chatContainer)}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={() =>
+              flatListRef.current?.scrollToEnd({ animated: false })
+            }
+          />
+        )}
+
+        {/* Input Area */}
         <View style={themed(styles.inputContainer)}>
           <View style={themed(styles.inputRow)}>
             {/* <TouchableOpacity style={themed(styles.inputButton)}>

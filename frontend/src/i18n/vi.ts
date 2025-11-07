@@ -226,6 +226,7 @@ const vi: Translations = {
     updated: 'Cập nhật',
     statusPrefix: 'Trạng thái:',
     rate: 'Đánh giá',
+    noCases: 'Không có vụ án nào',
   },
   documents: {
     title: 'Tài liệu',
@@ -259,7 +260,8 @@ const vi: Translations = {
     deleteFileConfirmation: 'Bạn có chắc chắn muốn xóa tệp này?',
     select: 'Chọn',
     sessionExpired: 'Phiên đăng nhập hết hạn',
-    sessionExpiredMessage: 'Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.',
+    sessionExpiredMessage:
+      'Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.',
     appName: 'LegalConnect',
     dateFormatPlaceholder: 'YYYY-MM-DD',
     timePlaceholder: 'HH:MM',

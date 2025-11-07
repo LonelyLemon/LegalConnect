@@ -7,6 +7,10 @@ export const container: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.background,
 });
 
+export const keyboardAvoidingView: ThemedStyle<ViewStyle> = () => ({
+  flex: 1,
+});
+
 export const header: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexDirection: 'row',
   alignItems: 'center',

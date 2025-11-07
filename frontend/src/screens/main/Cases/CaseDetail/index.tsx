@@ -352,7 +352,7 @@ export const CaseDetail = () => {
         title={displayCase.title}
         showBackButton={true}
         rightIcon={
-          !isDisplayPending ? (
+          caseData.state === 'IN_PROGRESS' ? (
             <View style={themed(styles.headerActions)}>
               <TouchableOpacity onPress={handleAddFilePress}>
                 <Icon

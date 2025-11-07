@@ -116,18 +116,104 @@ export const updateUserInfo = async (data: any) => {
 };
 
 export const updateLawyerInfo = async (data: any) => {
-  console.log(data);
-  // const data = new FormData();
+  console.log('updateLawyerInfo data:', data);
+  const formData = new FormData();
+
+  // Backend chỉ expect các field sau trong LawyerProfileUpdatePayload:
+  // phone_number, website_url, office_address, speaking_languages, education, address
+  // avatar được xử lý riêng như UploadFile
+  // KHÔNG gửi: username, email, gender, dob (backend không expect)
+
+  if (
+    data.phone_number !== undefined &&
+    data.phone_number !== null &&
+    data.phone_number !== ''
+  ) {
+    formData.append('phone_number', String(data.phone_number));
+  }
+  if (
+    data.website_url !== undefined &&
+    data.website_url !== null &&
+    data.website_url !== ''
+  ) {
+    formData.append('website_url', String(data.website_url));
+  }
+  if (
+    data.office_address !== undefined &&
+    data.office_address !== null &&
+    data.office_address !== ''
+  ) {
+    formData.append('office_address', String(data.office_address));
+  }
+  if (
+    data.education !== undefined &&
+    data.education !== null &&
+    data.education !== ''
+  ) {
+    formData.append('education', String(data.education));
+  }
+  if (
+    data.address !== undefined &&
+    data.address !== null &&
+    data.address !== ''
+  ) {
+    formData.append('address', String(data.address));
+  }
+
+  // Xử lý avatar (có thể là file object hoặc string URI)
+  if (data.avatar !== undefined && data.avatar !== null) {
+    if (typeof data.avatar === 'object' && data.avatar.uri) {
+      // File object với format: { uri, type, name }
+      formData.append('avatar', {
+        uri: data.avatar.uri,
+        type: data.avatar.type || 'image/jpeg',
+        name: data.avatar.name || 'avatar.jpg',
+      } as any);
+    } else if (typeof data.avatar === 'string' && data.avatar.trim() !== '') {
+      // Nếu là string URI, tạo file object từ URI
+      // React Native FormData cần object với uri, type, name
+      formData.append('avatar', {
+        uri: data.avatar,
+        type: 'image/jpeg',
+        name: 'avatar.jpg',
+      } as any);
+    }
+  }
+
+  // Xử lý speaking_languages array - backend có thể nhận JSON string hoặc array
+  if (
+    data.speaking_languages !== undefined &&
+    data.speaking_languages !== null
+  ) {
+    if (
+      Array.isArray(data.speaking_languages) &&
+      data.speaking_languages.length > 0
+    ) {
+      // Serialize array thành JSON string (backend sẽ parse lại)
+      formData.append(
+        'speaking_languages',
+        JSON.stringify(data.speaking_languages),
+      );
+    } else if (
+      typeof data.speaking_languages === 'string' &&
+      data.speaking_languages.trim() !== ''
+    ) {
+      // Nếu đã là string, append trực tiếp
+      formData.append('speaking_languages', data.speaking_languages);
+    }
+  }
 
   try {
-    const response = await axios.patch('/lawyer/profile/me', data, {
-      headers: { 'Content-Type': 'application/json' },
+    console.log('FormData prepared, sending request...');
+    const response = await axios.patch('/lawyer/profile/me', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
       baseURL: envConfig.baseUrl,
     });
     showSuccess(t('toast.updateLawyerInfoSuccessful'));
     return response.data;
   } catch (error: any) {
     console.log('error update lawyer info: ', error);
+    console.log('error response:', error?.response?.data);
     const errmsg = error?.response?.data;
     const message =
       errmsg?.message ||
